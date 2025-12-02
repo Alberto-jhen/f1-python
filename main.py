@@ -1,6 +1,7 @@
 import seaborn as sns
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
+import utilities.utilities as ut
 
 import fastf1
 import fastf1.plotting
@@ -51,14 +52,8 @@ sns.swarmplot(data=driver_laps,
                 size=4,
                 )
 
-def sec_to_minsec(x, pos):
-    # x viene en segundos (float)
-    minutes = int(x // 60)
-    seconds = x % 60
-    # mm:ss.mmm
-    return f"{minutes:d}:{seconds:06.3f}"
 
-ax.yaxis.set_major_formatter(mtick.FuncFormatter(sec_to_minsec))
+ax.yaxis.set_major_formatter(mtick.FuncFormatter(ut.sec_to_minsec))
 
 ax.set_xlabel("Driver")
 ax.set_ylabel("Lap Time")
