@@ -72,4 +72,5 @@ def lap_time_distributions_violin_graphic(year, track, session_type, num_drivers
     sns.despine(left=True, bottom=True)
 
     plt.tight_layout()
-    plt.show()
+    
+    return fig, ax
