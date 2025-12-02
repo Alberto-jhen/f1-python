@@ -68,7 +68,7 @@ def lap_time_distributions_violin_graphic(year, track, session_type, num_drivers
 
     ax.set_xlabel("Driver")
     ax.set_ylabel("Lap Time")
-    plt.suptitle("2025 Qatar Grand Prix Lap Time Distributions")
+    plt.suptitle(f"{year} {track} Lap Time Distributions")
     sns.despine(left=True, bottom=True)
 
     plt.tight_layout()
