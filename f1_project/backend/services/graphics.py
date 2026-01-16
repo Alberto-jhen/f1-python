@@ -94,3 +94,46 @@ def get_lap_time_distributions_violin(year, track, session_type, num_drivers):
     plt.tight_layout()
     
     return fig, None
+
+# DATA LOGIC -- Returns dictionaries fro JSON --
+
+def get_driver_laps_data(year, track, session_type, driver_name):
+    try:
+        race = fastf1.get_session(year, track, session_type)
+        race.load()
+    except (InvalidSessionError, NoLapDataError) as e:
+        return None, str(e)
+
+    parts = driver_name.split()
+    base = parts[1] if len(parts) >= 2 else parts[0]
+    driver_id = base[:3].upper()
+    
+    driver_laps = ut.get_driver_laps(race, driver_id)
+    if driver_laps is None:
+        return None, "Driver not found"
+    
+    # Select only the necessary columns for the JSON.
+    df_json = driver_laps.copy()
+    df_json['LapTimeSeconds'] = df_json['LapTime'].dt.total_seconds()
+    
+    result = df_json[['LapNumber', 'LapTimeSeconds', 'Compound', 'TyreLife']].copy()
+    
+    return result.to_dict('records'), None
+
+def get_lap_distributions_data(year, track, session_type, num_drivers):
+    try:
+        race = fastf1.get_session(year, track, session_type)
+        race.load()
+    except (InvalidSessionError, NoLapDataError) as e:
+        return None, str(e)
+
+    drivers_shown = race.drivers[:num_drivers]
+    driver_laps = race.laps.pick_drivers(drivers_shown).pick_quicklaps().reset_index()
+    
+    # Convert the lap times to seconds.
+    driver_laps['LapTimeSeconds'] = driver_laps['LapTime'].dt.total_seconds()
+    
+    # Select only the necessary columns.
+    result = driver_laps[['Driver', 'LapTimeSeconds', 'Compound', 'LapNumber']].copy()
+    
+    return result.to_dict('records'), None
