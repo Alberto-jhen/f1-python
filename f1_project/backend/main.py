@@ -1,7 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.endpoints import router as api_router
+from dotenv import load_dotenv
+import os
 import core.config # Activate cache.
+
+# Load env file.
+load_dotenv();
+frontend_url = os.getenv("FRONTEND_URL")
 
 app = FastAPI(
     title="F1 Analytics API",
@@ -12,7 +18,7 @@ app = FastAPI(
 # Middleware to allor frontend conections.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[frontend_url],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

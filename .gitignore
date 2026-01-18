@@ -208,3 +208,6 @@ __marimo__/
 
 # txt file to find function outputs quicker
 help.txt
+
+# Warp generated file.
+WARP.md
