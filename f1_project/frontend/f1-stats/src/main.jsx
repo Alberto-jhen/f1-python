@@ -1,13 +1,20 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { App } from './App.jsx'
+import { Header } from './Header.jsx'
+import { Footer } from './Footer.jsx'
 
 const url = import.meta.env.VITE_API_URL
 console.log(url)
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const rootIndex = document.getElementById('root-index')
+
+rootIndex.className = "bg-gradient-to-b from-slate-950 to-slate-900 min-h-screen"
+
+ReactDOM.createRoot(rootIndex).render(
   <>
-    <h1 className="text-white bg-green-800 p-10">
-      Tailwind y React funcionando.
-    </h1>
+    <Header />
+    <App />
+    <Footer />
   </>
 )

@@ -8,9 +8,9 @@ router = APIRouter()
 
 @router.get("/plot/violin", tags=["graphics"], operation_id="violin_graphic")
 async def get_violin(
-    year: int = Query(..., example=2023),
-    track: str = Query(..., example="Monaco"),
-    session: str = Query(..., example="R"),
+    year: int = Query(..., examples=2023),
+    track: str = Query(..., examples="Monaco"),
+    session: str = Query(..., examples="R"),
     num_drivers: int = Query(5, gt=0, le=20)
 ):
     try:
@@ -23,10 +23,10 @@ async def get_violin(
 
 @router.get("/plot/scatter", tags=["graphics"], operation_id="scatterplot_graphic")
 async def get_scatter(
-    year: int = Query(..., example=2023),
-    track: str = Query(..., example="Monza"),
-    session: str = Query(..., example="R"),
-    driver: str = Query(..., example="VER")
+    year: int = Query(..., examples=2023),
+    track: str = Query(..., examples="Monza"),
+    session: str = Query(..., examples="R"),
+    driver: str = Query(..., examples="VER")
 ):
     try:
         image_buf = f1_service.get_scatter_plot_image(year, track, session, driver)
