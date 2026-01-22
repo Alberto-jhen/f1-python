@@ -1,6 +1,5 @@
 import formBg from './assets/form-bg.svg';
-import basicIcons from './assets/basicIcons.svg'
-import sprite from './assets/sprite.svg'
+import { MobileMenu } from './Header.jsx'
 
 export const Form = () => {
     return (
@@ -15,13 +14,8 @@ export const Form = () => {
             </div>
 
             <main className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 sm:p-12">
-                <div className="absolute top-8 right-8 cursor-pointer hover:opacity-80 transition-opacity">
-                    <img 
-                        src={basicIcons} 
-                        alt="Icono Menú" 
-                        className="w-10 h-10" 
-                        style={{ filter: 'brightness(0) invert(1)' }} 
-                    />
+                <div className="absolute top-8 right-8 hover:opacity-90 transition-opacity">
+                    <MobileMenu />
                 </div>
                 <div className="w-full max-w-md">
                     <h3 className="text-white text-3xl font-bold mb-2">Envía un mensaje</h3>

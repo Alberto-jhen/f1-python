@@ -1,13 +1,11 @@
 import { useState } from 'react';
 
 export const App = () => {
-    // Estados para los inputs
     const [year, setYear] = useState("2024");
     const [track, setTrack] = useState("");
     const [session, setSession] = useState("R");
-    const [numDrivers, setNumDrivers] = useState(5); // Añadido según tu backend
-    
-    // Estados para la respuesta
+    const [numDrivers, setNumDrivers] = useState(5); 
+
     const [imageSrc, setImageSrc] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -16,8 +14,6 @@ export const App = () => {
         const baseUrl = import.meta.env.VITE_API_URL;
         
         try {
-            // IMPORTANTE: La ruta en tu backend es /plot/violin
-            // Se añaden los parámetros que pide tu decorador @router.get
             const response = await fetch(
                 `${baseUrl}/plot/violin?year=${year}&track=${track}&session=${session}&num_drivers=${numDrivers}`
             );
@@ -27,7 +23,6 @@ export const App = () => {
                 throw new Error(errorData.detail || "Error en el servidor");
             }
 
-            // Tratamos la respuesta como binaria (StreamingResponse en FastAPI)
             const blob = await response.blob();
             const imageUrl = URL.createObjectURL(blob);
             setImageSrc(imageUrl);
@@ -100,7 +95,6 @@ export const App = () => {
                 </button>
             </div>
 
-            {/* Contenedor del Gráfico */}
             <div className="mt-4 flex justify-center bg-white border rounded-xl p-4 shadow-inner min-h-[400px] items-center">
                 {imageSrc ? (
                     <img src={imageSrc} alt="F1 Violin Plot" className="max-w-full h-auto rounded shadow-md" />
