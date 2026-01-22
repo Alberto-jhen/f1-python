@@ -60,6 +60,9 @@ const Link = () => {
             <li>
                 <a href="/form.html" className={aStyle}>Contacto</a>
             </li>
+            <li>
+                <a href="#" className={aStyle}>Telemetría</a>
+            </li>
         </ul>
     )
 }

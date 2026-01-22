@@ -1,10 +1,18 @@
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 import services.f1_service as f1_service 
+from pydantic import BaseModel, EmailStr
 import io
+import services.email_service as email_service
 from matplotlib import pyplot as plt
 
 router = APIRouter()
+
+# Define the data model for sending emails.
+class EmailData(BaseModel):
+    name: str
+    email: str
+    message: str
 
 @router.get("/plot/violin", tags=["graphics"], operation_id="violin_graphic")
 async def get_violin(
@@ -42,3 +50,13 @@ async def laps_json(year: int, track: str, session: str, driver: str):
     if "error" in data:
         raise HTTPException(status_code=400, detail=data["error"])
     return data
+
+@router.post("/contact", tags=["utility"])
+async def contact_form(form_data: EmailData):
+    # Call the email sending service, passing the data collected from the form in the frontend.
+    success = email_service.send_contact_email(form_data)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Error al enviar el correo")
+    
+    return {"message": "Email enviado con éxito"}
