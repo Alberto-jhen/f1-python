@@ -61,7 +61,7 @@ const Link = () => {
                 <a href="/form.html" className={aStyle}>Contacto</a>
             </li>
             <li>
-                <a href="#" className={aStyle}>Telemetría</a>
+                <a href="#" className={aStyle}>Gráficas</a>
             </li>
         </ul>
     )

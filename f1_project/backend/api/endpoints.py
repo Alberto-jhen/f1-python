@@ -44,9 +44,39 @@ async def get_scatter(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+
+@router.get("/plot/qualy_overview", tags=["graphics"], operation_id="qualifyng_result_overview")
+async def get_scatter(
+    year: int = Query(..., examples=2025),
+    track: str = Query(..., examples="Japan"),
+):
+    try:
+        image_buf = f1_service.get_qualifying_results_overview(year, track)
+        if not image_buf:
+            raise HTTPException(status_code=404, detail="Clasificación no encontrada.")
+        return StreamingResponse(image_buf, media_type="image/png")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 @router.get("/data/laps/{year}/{track}/{session}/{driver}", tags=["JSON_data"])
 async def laps_json(year: int, track: str, session: str, driver: str):
     data = f1_service.get_driver_laps_json(year, track, session, driver)
+    if "error" in data:
+        raise HTTPException(status_code=400, detail=data["error"])
+    return data
+
+# DATA LOGIC -- Returns data in JSON type for the frontend to draw the graphic --
+
+@router.get("/data/laps/{year}/{track}/{session}/{driver}", tags=["JSON_data"])
+async def laps_json(year: int, track: str, session: str, driver: str):
+    data = f1_service.get_driver_laps_json(year, track, session, driver)
+    if "error" in data:
+        raise HTTPException(status_code=400, detail=data["error"])
+    return data
+
+@router.get("/data/laps/distribution/{year}/{track}/{session}/{num_drivers}", tags=["JSON_data"])
+async def lap_distributions(year: int, track: str, session: str, num_drivers: int):
+    data = f1_service.get_violin_data_json(year, track, session, num_drivers)
     if "error" in data:
         raise HTTPException(status_code=400, detail=data["error"])
     return data
