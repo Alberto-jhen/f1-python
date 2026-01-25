@@ -211,3 +211,6 @@ help.txt
 
 # Warp generated file.
 WARP.md
+
+# Mac generated files.
+.DS_Store

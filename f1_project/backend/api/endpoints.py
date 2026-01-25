@@ -58,12 +58,6 @@ async def get_scatter(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@router.get("/data/laps/{year}/{track}/{session}/{driver}", tags=["JSON_data"])
-async def laps_json(year: int, track: str, session: str, driver: str):
-    data = f1_service.get_driver_laps_json(year, track, session, driver)
-    if "error" in data:
-        raise HTTPException(status_code=400, detail=data["error"])
-    return data
 
 # DATA LOGIC -- Returns data in JSON type for the frontend to draw the graphic --
 

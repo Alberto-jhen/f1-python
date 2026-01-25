@@ -3,7 +3,7 @@ import basicIcons from './assets/basicIcons.svg';
 
 export const Header = () => {
     return (
-        <header className="flex justify-between items-center p-10 border-b border-gray-400">
+        <header style={{ isolation: 'isolate' }} className="flex z-100 justify-between items-center p-10 border-b border-gray-400">
             <h1 className="text-red-600 font-black italic text-4xl">
                 F1 STATS
             </h1>
@@ -32,10 +32,10 @@ export const MobileMenu = () => {
                 />
             </button>
 
-            <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-100 transition-opacity duration-300 ${
+            <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-9999 transition-opacity duration-300 ${
                     isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={toggle} />
             <aside 
-                className={`fixed top-0 right-0 h-full w-full sm:w-80 bg-slate-900 border-l border-slate-800 z-110 p-10 transform transition-transform duration-500 ease-in-out ${
+                className={`fixed top-0 right-0 h-full w-full sm:w-80 bg-slate-900 border-l border-slate-800 z-10000 p-10 transform transition-transform duration-500 ease-in-out ${
                     isOpen ? 'translate-x-0' : 'translate-x-full'}`} >
                 <div className="flex justify-end mb-12">
                     <button onClick={toggle} className="text-white hover:text-red-600 transition-colors text-2xl cursor-pointer">✕</button>
@@ -61,7 +61,7 @@ const Link = () => {
                 <a href="/form.html" className={aStyle}>Contacto</a>
             </li>
             <li>
-                <a href="#" className={aStyle}>Gráficas</a>
+                <a href="/graphics.html" className={aStyle}>Gráficas</a>
             </li>
         </ul>
     )
