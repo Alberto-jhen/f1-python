@@ -4,6 +4,7 @@ import { Form } from './pages/Form.jsx'
 import { GraphicsDashboard } from "./pages/Graphics.jsx";
 import { Header } from './components/Header.jsx'
 import { Footer } from './components/Footer.jsx'
+import Drivers from './pages/Drivers.jsx'
 
 function App() {
     return (
@@ -11,6 +12,7 @@ function App() {
             <Route path="/" element={<Login />}/>
             <Route path="/form" element={<Form />}/>
             <Route path="/graphics" element={<GraphicPage />}/>
+            <Route path="/drivers" element={<Drivers />}/>
         </Routes>
     )
 }

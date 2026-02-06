@@ -26,6 +26,42 @@ export const fetchDriversLapsViolin = async (year, track, session, numDrivers) =
     }
 }
 
+export const fetchDriverProfile = async (driver_num) => {
+    try {
+        const response = await fetch(`${BASE_URL}/driver/profile/${driver_num}`);
+        if(!response.ok) throw new Error('Error en la API al hacer el fetch del JSON del perfil del piloto');
+        const data = await response.json();
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const fetchYearSchedule = async(year) => {
+    try {
+        const response = await fetch(`${BASE_URL}/data/schedule/${year}`);
+        if(!response.ok) throw new Error('Error en la API al hacer el fetch del JSON del calendario.');
+        const data = await response.json();
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const fetchDriversFullNamesByYear = async(year, event_name, session_type) => {
+    try {
+        const response = await fetch(`${BASE_URL}/data/drivers/${year}/${event_name}/${session_type}`);
+        if(!response.ok) throw new Error('Error en la API al hacer el fetch del JSON del nombre de los pilotos');
+        const data = await response.json();
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 // ----- Direct image fetchs. -----
 
 export const fetchDriverLapsImage = async (year, track, session, driver) => {

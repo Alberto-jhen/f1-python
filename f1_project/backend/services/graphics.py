@@ -168,20 +168,31 @@ def get_driver_laps_data(year, track, session_type, driver_name):
     
     return result.to_dict('records'), None
 
+# En graphics.py
 def get_lap_distributions_data(year, track, session_type, num_drivers):
     try:
         race = fastf1.get_session(year, track, session_type)
         race.load()
-    except (InvalidSessionError, NoLapDataError) as e:
+        
+        # OBTENEMOS LAS SIGLAS EN EL ORDEN CORRECTO (VER, NOR, LEC...)
+        drivers_shown_ids = race.drivers[:num_drivers]
+        finishing_order = [race.get_driver(i)["Abbreviation"] for i in drivers_shown_ids]
+        
+        # Mapa de orden REAL usando las siglas: { 'VER': 0, 'NOR': 1, ... }
+        order_map = {driver: i for i, driver in enumerate(finishing_order)}
+        
+        driver_colors = fastf1.plotting.get_driver_color_mapping(session=race)
+        driver_laps = race.laps.pick_drivers(finishing_order).pick_quicklaps().reset_index()
+        driver_laps['LapTimeSeconds'] = driver_laps['LapTime'].dt.total_seconds()
+        
+        # Inyectamos el color y el orden REAL
+        driver_laps['TeamColor'] = driver_laps['Driver'].map(driver_colors)
+        driver_laps['OfficialOrder'] = driver_laps['Driver'].map(order_map)
+        
+        # Si sigue saliendo 99 es que el Driver no coincide con la abreviatura
+        driver_laps['OfficialOrder'] = driver_laps['OfficialOrder'].astype(int)
+        
+        result = driver_laps[['Driver', 'LapTimeSeconds', 'Compound', 'TeamColor', 'OfficialOrder']].to_dict('records')
+        return result, None
+    except Exception as e:
         return None, str(e)
-
-    drivers_shown = race.drivers[:num_drivers]
-    driver_laps = race.laps.pick_drivers(drivers_shown).pick_quicklaps().reset_index()
-    
-    # Convert the lap times to seconds.
-    driver_laps['LapTimeSeconds'] = driver_laps['LapTime'].dt.total_seconds()
-    
-    # Select only the necessary columns.
-    result = driver_laps[['Driver', 'LapTimeSeconds', 'Compound', 'LapNumber']].copy()
-    
-    return result.to_dict('records'), None

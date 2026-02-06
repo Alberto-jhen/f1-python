@@ -63,6 +63,9 @@ const Link = () => {
             <li>
                 <a href="/graphics" className={aStyle}>Gráficas</a>
             </li>
+            <li>
+                <a href="/drivers" className={aStyle}>Pilotos</a>
+            </li>
         </ul>
     )
 }

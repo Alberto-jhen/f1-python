@@ -107,7 +107,6 @@ export const GraphicsDashboard = () => {
         setLoading(graphName);
         try {
             const { year, track, session, driver, num_drivers } = params;
-            // CORRECCIÓN: Enviamos el parámetro correcto según el gráfico
             const blob = await fetchFn(year, track, session, driver || num_drivers);
             
             const imageUrl = URL.createObjectURL(blob);

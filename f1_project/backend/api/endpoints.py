@@ -3,8 +3,10 @@ from fastapi.responses import StreamingResponse
 import services.f1_service as f1_service 
 from pydantic import BaseModel, EmailStr
 import io
+import fastf1
 import services.email_service as email_service
 from matplotlib import pyplot as plt
+import services.f1_drivers_service as f1_drivers_service
 
 router = APIRouter()
 
@@ -84,3 +86,30 @@ async def contact_form(form_data: EmailData):
         raise HTTPException(status_code=500, detail="Error al enviar el correo")
     
     return {"message": "Email enviado con éxito"}
+
+# Driver related API requests.
+@router.get("/driver/profile/{driver_num}", tags=["JSON_data"])
+async def get_driver_profile(driver_num: int):
+    data = f1_drivers_service.get_driver_profile(driver_num)
+    if "error" in data:
+        raise HTTPException(status_code=400, detail=data["error"])
+    return data
+
+
+# Year events JSON data.
+@router.get("/data/schedule/{year}", tags=["JSON_data", "Schedule"])
+async def get_year_schedule(year: int):
+    schedule = fastf1.get_event_schedule(year)
+    tracks = schedule['EventName'].unique().tolist()
+    return {
+        "tracks": tracks,
+        "sessions": ['R', 'Q', 'Q1', 'Q2', 'Q3', 'FP1', 'FP2', 'FP3']
+    }
+
+# Drivers in a season JSON data.
+@router.get("/data/drivers/{year}/{event_name}/{session_type}", tags=["JSON_data", "Drivers"])
+async def get_drivers_full_name_by_year(year: int, event_name: str, session_type: str):
+    data = f1_drivers_service.get_season_driver_full_names(year, event_name, session_type)
+    if "error" in data:
+        raise HTTPException(status_code=400, detail=data["error"])
+    return data
