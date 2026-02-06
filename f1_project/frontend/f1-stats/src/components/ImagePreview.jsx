@@ -7,12 +7,12 @@ export const ImagePreview = ({ isOpen, onClose, imageSrc, fileName }) => {
         <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-100 flex flex-col items-center justify-center p-4">
             <div className="max-w-5xl w-full animate-in zoom-in-95 duration-200">
                 
-                {/* Cabecera del Preview */}
+                {/* Preview header */}
                 <div className="flex justify-between items-center mb-4 text-slate-400">
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
                         <span className="text-[10px] font-mono uppercase tracking-[0.3em]">
-                            Python Matplotlib Engine // Static Output
+                            Python Matplotlib Engine Output
                         </span>
                     </div>
                     <button 
@@ -23,7 +23,7 @@ export const ImagePreview = ({ isOpen, onClose, imageSrc, fileName }) => {
                     </button>
                 </div>
 
-                {/* Contenedor de la Imagen */}
+                {/* Image container */}
                 <div className="bg-white rounded-lg p-2 shadow-2xl relative group">
                     <img 
                         src={imageSrc} 
@@ -32,7 +32,7 @@ export const ImagePreview = ({ isOpen, onClose, imageSrc, fileName }) => {
                     />
                 </div>
 
-                {/* Footer con Acción de Descarga */}
+                {/* Download action */}
                 <div className="mt-8 flex flex-col items-center gap-4">
                     <a 
                         href={imageSrc} 

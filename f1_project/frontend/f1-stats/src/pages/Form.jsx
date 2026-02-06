@@ -1,5 +1,5 @@
-import formBg from './assets/form-bg.svg';
-import { MobileMenu } from './Header.jsx'
+import formBg from '../assets/form-bg.svg';
+import { MobileMenu } from '../components/Header.jsx'
 import { useState } from 'react'
 
 export const Form = () => {

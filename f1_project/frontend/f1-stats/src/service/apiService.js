@@ -5,7 +5,7 @@ const BASE_URL = 'http://localhost:8000';
 export const fetchDriverLaps = async (year, track, session, driver) => {
     try {
         const response = await fetch(`${BASE_URL}/data/laps/${year}/${track}/${session}/${driver}`);
-        if (!response.ok) throw new Error('Error en API');
+        if (!response.ok) throw new Error('Error en la API al hacer el fetch de la función de distribución de vueltas de un piloto');
         const data = await response.json();
         
         return data;
@@ -13,6 +13,18 @@ export const fetchDriverLaps = async (year, track, session, driver) => {
         throw error;
     }
 };
+
+export const fetchDriversLapsViolin = async (year, track, session, numDrivers) => {
+    try {
+        const response = await fetch(`${BASE_URL}/data/laps/distribution/${year}/${track}/${session}/${numDrivers}`);
+        if (!response.ok) throw new Error('Error en la API al hacer el fetch del JSON de la función violin');
+        const data = await response.json()
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
 
 // ----- Direct image fetchs. -----
 
@@ -23,11 +35,24 @@ export const fetchDriverLapsImage = async (year, track, session, driver) => {
     const response = await fetch(url);
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || "Error al generar la imagen");
+        throw new Error(errorData.detail || "Error en el fetch de generación del gráfico de distribución de tiempos de piloto");
     }
 
     return await response.blob();
 };
+
+export const fetchDriversLapsViolinImage = async (year, track, session, num_drivers) => {
+    const params = new URLSearchParams({ year, track, session, num_drivers });
+    const url = `${BASE_URL}/plot/violin?${params.toString()}`;
+
+    const response = await fetch(url);
+    if(!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detal || "Error en el fetch de generación del gráfico violin");
+    }
+
+    return await response.blob();
+}
 
 export const formatLapTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return "";

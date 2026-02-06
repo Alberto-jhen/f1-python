@@ -214,3 +214,6 @@ WARP.md
 
 # Mac generated files.
 .DS_Store
+
+# Local cache directory
+cache_fastf1/

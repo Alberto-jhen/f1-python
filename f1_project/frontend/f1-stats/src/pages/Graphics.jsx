@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { ParametersFilter } from './ParametersFilter';
-import { ScatterPlotLaps } from './components/graphics/ScatterPlotLaps.jsx';
-import { fetchDriverLaps, fetchDriverLapsImage } from './service/apiService.js'
-import { ImagePreview } from './components/ImagePreview.jsx'
+import { ParametersFilter } from '../components/ParametersFilter.jsx';
+import { ScatterPlotLaps } from '../components/graphics/ScatterPlotLaps.jsx';
+import { ViolinPlotLaps } from '../components/graphics/ViolinLapDistribution.jsx';
+import { fetchDriverLaps, fetchDriverLapsImage, 
+    fetchDriversLapsViolin, fetchDriversLapsViolinImage } from '../service/apiService.js'
+import { ImagePreview } from '../components/ImagePreview.jsx'
 
 const GraphCard = ({ title, children, onSettingsClick, onGenerate, onExportPython, hasParams, loading }) => {
     return (
@@ -26,7 +28,7 @@ const GraphCard = ({ title, children, onSettingsClick, onGenerate, onExportPytho
                             <button 
                                 onClick={onGenerate}
                                 disabled={loading}
-                                className="px-3 py-1 bg-red-600 text-white text-[10px] font-bold uppercase rounded hover:bg-red-700 disabled:opacity-50 cursor-pointer transition-colors shadow-sm"
+                                className="px-3 py-1 bg-red-600 text-white text-[10px] font-bold uppercase rounded hover:bg-red-700 disabled:opacity-50 cursor-pointer transition-colors shadow-sm min-w-[100px]"
                             >
                                 {loading ? '...' : 'Generar gráfico'}
                             </button>
@@ -60,15 +62,15 @@ export const GraphicsDashboard = () => {
     const [imageShown, setImageShown] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalConfig, setModalConfig] = useState({ title: '', params: [] });
-    const [savedParams, setSavedParams] = useState(null);
+    const [savedParams, setSavedParams] = useState({});
     const [tempParams, setTempParams] = useState({});
     
-    const [lapsData, setLapsData] = useState(null); 
-    const [loading, setLoading] = useState(false);
+    const [graphsData, setGraphsData] = useState({}); 
+    const [loading, setLoading] = useState(null);
 
     const openFilters = (graphName, paramsList) => {
         setModalConfig({ title: graphName, params: paramsList });
-        setTempParams(savedParams || {}); 
+        setTempParams(savedParams[graphName] || {}); 
         setIsModalOpen(true);
     };
 
@@ -78,33 +80,35 @@ export const GraphicsDashboard = () => {
     };
 
     const handleSaveConfig = () => {
-        setSavedParams(tempParams);
+        setSavedParams(prev => ({ ...prev, [modalConfig.title]: tempParams }));
         setIsModalOpen(false);
     };
 
-    const generateGraph = async () => {
-        if (!savedParams) return;
-        setLoading(true);
+    const generateGraph = async (fetchFn, graphName) => {
+        const params = savedParams[graphName];
+        if (!params) return;
+        setLoading(graphName); 
         
         try {
-            const { year, track, session, driver } = savedParams;
-            const data = await fetchDriverLaps(year, track, session, driver);
-            setLapsData(data); 
+            const { year, track, session, driver, num_drivers } = params;
+            // Send the correct params.
+            const data = await fetchFn(year, track, session, driver || num_drivers);
+            setGraphsData(prev => ({ ...prev, [graphName]: data })); 
         } catch (error) {
             alert(error.message);
         } finally {
-            setLoading(false);
+            setLoading(null);
         }
     };
 
-    const handleExportPython = async (fetchFn) => {
-        if (!savedParams) return;
-        setLoading(true);
+    const handleExportPython = async (fetchFn, graphName) => {
+        const params = savedParams[graphName];
+        if (!params) return;
+        setLoading(graphName);
         try {
-            const { year, track, session, driver, num_drivers } = savedParams;
-            
-            // Execute only the necessary fetch function.
-            const blob = await fetchFn(year, track, session, driver, num_drivers);
+            const { year, track, session, driver, num_drivers } = params;
+            // CORRECCIÓN: Enviamos el parámetro correcto según el gráfico
+            const blob = await fetchFn(year, track, session, driver || num_drivers);
             
             const imageUrl = URL.createObjectURL(blob);
             setPythonImage(imageUrl);
@@ -112,9 +116,9 @@ export const GraphicsDashboard = () => {
         } catch (error) {
             alert("Error al generar imagen: " + error.message);
         } finally {
-            setLoading(false);
+            setLoading(null);
         }
-};
+    };
 
     return (
         <div className="min-h-screen p-6 md:p-12">
@@ -146,19 +150,38 @@ export const GraphicsDashboard = () => {
                     {activeTab === 'lapTimes' && (
                         <div className="grid grid-cols-1 gap-8">
                             <GraphCard 
-                                title="Análisis de Ritmo (Individual)"
-                                onSettingsClick={() => openFilters('Race Pace Analysis', ['year', 'track', 'session', 'driver'])}
-                                onGenerate={generateGraph} 
-                                onExportPython = {() => handleExportPython(fetchDriverLapsImage)}
-                                hasParams={!!savedParams}
-                                loading={loading}
+                                title="Análisis de ritmo (Individual)"
+                                onSettingsClick={() => openFilters('Análisis de ritmo (Individual)', ['year', 'track', 'session', 'driver'])}
+                                onGenerate={() => generateGraph(fetchDriverLaps, 'Análisis de ritmo (Individual)')} 
+                                onExportPython = {() => handleExportPython(fetchDriverLapsImage, 'Análisis de ritmo (Individual)')}
+                                hasParams={!!savedParams['Análisis de ritmo (Individual)']}
+                                loading={loading === 'Análisis de ritmo (Individual)'}
                             >
-                                {lapsData ? (
-                                    <ScatterPlotLaps data={lapsData} driverId={savedParams.driver} />
+                                {graphsData['Análisis de ritmo (Individual)'] ? (
+                                    <ScatterPlotLaps data={graphsData['Análisis de ritmo (Individual)']} driverId={savedParams['Análisis de ritmo (Individual)'].driver} />
                                 ) : (
                                     <p className="text-slate-600 text-sm italic">
-                                        {savedParams 
-                                            ? `Configuración lista para ${savedParams.driver}. Pulsa Generar.` 
+                                        {savedParams['Análisis de ritmo (Individual)'] 
+                                            ? `Configuración lista para ${savedParams['Análisis de ritmo (Individual)'].driver}. Pulsa Generar.` 
+                                            : "Configura los parámetros para empezar."}
+                                    </p>
+                                )}
+                            </GraphCard>
+
+                            <GraphCard
+                                title="Distribución de tiempos por vuelta"
+                                onSettingsClick={() => openFilters('Distribución de tiempos por vuelta', ['year', 'track', 'session', 'num_drivers'])}
+                                onGenerate={() => generateGraph(fetchDriversLapsViolin, 'Distribución de tiempos por vuelta')}
+                                onExportPython={() => handleExportPython(fetchDriversLapsViolinImage, 'Distribución de tiempos por vuelta')}
+                                hasParams={!!savedParams['Distribución de tiempos por vuelta']}
+                                loading={loading === 'Distribución de tiempos por vuelta'}
+                            >
+                                {graphsData['Distribución de tiempos por vuelta'] ? (
+                                    <ViolinPlotLaps data={graphsData['Distribución de tiempos por vuelta']} />
+                                ) : (
+                                    <p className="text-slate-600 text-sm italic">
+                                        {savedParams['Distribución de tiempos por vuelta'] 
+                                            ? "Configuración lista. Pulsa Generar." 
                                             : "Configura los parámetros para empezar."}
                                     </p>
                                 )}
@@ -181,7 +204,7 @@ export const GraphicsDashboard = () => {
                 isOpen={imageShown}
                 onClose={handleClosePreview}
                 imageSrc={pythonImage}
-                fileName={savedParams?.driver}
+                fileName="f1_stats_report"
             />
         </div>
     );

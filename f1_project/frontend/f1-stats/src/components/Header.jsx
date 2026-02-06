@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import basicIcons from './assets/basicIcons.svg';
+import basicIcons from '../assets/basicIcons.svg';
 
 export const Header = () => {
     return (
@@ -55,13 +55,13 @@ const Link = () => {
     return (
         <ul className="flex flex-col gap-6">
             <li>
-                <a href="/index.html" className={aStyle}>Inicio</a>
+                <a href="/" className={aStyle}>Inicio</a>
             </li>
             <li>
-                <a href="/form.html" className={aStyle}>Contacto</a>
+                <a href="/form" className={aStyle}>Contacto</a>
             </li>
             <li>
-                <a href="/graphics.html" className={aStyle}>Gráficas</a>
+                <a href="/graphics" className={aStyle}>Gráficas</a>
             </li>
         </ul>
     )
