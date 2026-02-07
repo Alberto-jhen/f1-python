@@ -50,14 +50,18 @@ export const fetchYearSchedule = async(year) => {
     }
 }
 
-export const fetchDriversFullNamesByYear = async(year, event_name, session_type) => {
+export const fetchDriversFullNamesByYear = async (year, event_name = "latest", session_type = "R") => {
     try {
-        const response = await fetch(`${BASE_URL}/data/drivers/${year}/${event_name}/${session_type}`);
-        if(!response.ok) throw new Error('Error en la API al hacer el fetch del JSON del nombre de los pilotos');
-        const data = await response.json();
+        const event = event_name || "latest";
+        const session = session_type || "R";
 
-        return data;
+        const response = await fetch(`${BASE_URL}/data/drivers/${year}/${event}/${session}`);
+        
+        if (!response.ok) throw new Error('Error al obtener los nombres de los pilotos');
+        
+        return await response.json();
     } catch (error) {
+        console.error("Fetch error:", error);
         throw error;
     }
 }
