@@ -1,9 +1,8 @@
 import { GenericCombobox } from "./GenericComobobox"
-import { User, Users, Calendar, Flag, Trophy, Hash } from 'lucide-react';
 import { useState, useEffect } from 'react'; 
 import { fetchDriversFullNamesByYear } from "@/service/apiService";
 
-export default function DriverInfoSelector() {
+export default function DriverInfoSelector({onSelectionChange}) {
     
     const [viewMode, setViewMode] = useState("individual");
     const [selectedYear, setSelectedYear] = useState();
@@ -29,6 +28,22 @@ export default function DriverInfoSelector() {
         {label: "2018", value: 2018},
     ]
 
+    //useEffect for communicating the father the selected info.
+    useEffect(() => {
+    if (onSelectionChange) {
+        const selectedDriverData = driverOptions.find(d => d.value === selectedDriver);
+
+        onSelectionChange({
+            ...selectedDriverData,
+            year: selectedYear,
+            driverValue: selectedDriver, 
+            driverLabel: selectedDriverData?.label, 
+            driverNumber: selectedDriverData?.number,
+            mode: viewMode
+        });
+    }
+}, [selectedYear, selectedDriver, viewMode, driverOptions]);
+
     useEffect(() => {
         const loadDrivers = async () => {
             if (selectedYear) {
@@ -36,6 +51,9 @@ export default function DriverInfoSelector() {
                 try {
                     const data = await fetchDriversFullNamesByYear(selectedYear);
                     setDriverOptions(data);
+                    if(selectedDriver) {
+                        setSelectedDriver(null);
+                    }
                 } catch (error) {
                     console.error("Error al cargar pilotos:", error);
                     setDriverOptions([]);
@@ -52,7 +70,7 @@ export default function DriverInfoSelector() {
     }, [selectedYear]);
 
     return (
-        <div className="flex flex-wrap gap-4 mb-10 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 shadow-xl">
+        <div className="flex flex-wrap gap-4 m-6 mb-10 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 shadow-xl">
             <div className="flex flex-col gap-2 flex-1 min-w-50">
                 <label className="text-slate-500 text-[10px] uppercase font-black tracking-widest">
                     Modo Visualización
