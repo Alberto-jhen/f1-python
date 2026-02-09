@@ -7,6 +7,9 @@ import fastf1
 import services.email_service as email_service
 from matplotlib import pyplot as plt
 import services.f1_drivers_service as f1_drivers_service
+import json
+import os
+from pathlib import Path
 
 router = APIRouter()
 
@@ -113,3 +116,62 @@ async def get_drivers_full_name_by_year(year: int, event_name: str, session_type
     if "error" in data:
         raise HTTPException(status_code=400, detail=data["error"])
     return data
+
+import requests
+
+# Driver standings in a season JSON data.
+@router.get("/data/drivers/{year}/{driver_number}", tags=["JSON_data", "Drivers"])
+def get_openf1_season_total(year: int, driver_number: int):
+    # Filter by year and driver number.
+    url = f"https://api.openf1.org/v1/standings?driver_number={driver_number}&year={year}"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if not data:
+            return {"position": "-", "points": 0}
+
+        # The last entry is the current or final standings from the season.
+        latest_entry = data[-1] 
+
+        return {
+            "position": latest_entry.get('position', '-'),
+            "total_points_season": latest_entry.get('points', 0),
+            "last_update": latest_entry.get('date')
+        }
+    except Exception as e:
+        print(f"Error OpenF1: {e}")
+        return {"error": "No se pudieron obtener stats"}
+
+# ----- SEASON STANDINGS WITH OWN JSON FILE -----
+
+# .parent.parent so the BASE_DIR is api => backend
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+DATA_PATH = os.path.join(BASE_DIR, "data", "season_standings.json")
+
+def load_standings():
+    try:
+        with open(DATA_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: No se encontró el archivo en {DATA_PATH}")
+        return {}
+
+STABLE_STANDINGS = load_standings()
+
+@router.get("/data/standings/{year}/{number}", tags=["JSON_data (own)", "Drivers"])
+async def get_championship_info(year: str, number: str):
+
+    year_data = STABLE_STANDINGS.get(year, {})
+    driver_stats = year_data.get(number)
+
+    if driver_stats:
+        return {
+            "position": driver_stats["pos"],
+            "points": driver_stats["pts"],
+            "year": year
+        }
+    
+    return {"position": "N/A", "points": 0}
