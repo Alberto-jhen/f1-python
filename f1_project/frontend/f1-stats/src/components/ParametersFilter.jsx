@@ -86,7 +86,7 @@ export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputC
         track: 'Monaco, Monza, Spa...',
         session: 'R, Q, FP1, FP2...',
         year: '2024',
-        num_drivers: 'Ej: 10'
+        num_drivers: 'Ej: 10 (1-20)'
     };
 
     return (
@@ -102,9 +102,26 @@ export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputC
                             <label className="text-slate-400 text-[10px] uppercase font-black tracking-widest">
                                 {param === 'year' ? 'Temporada' : 
                                 param === 'track' ? 'Circuito' : 
-                                param === 'driver' ? 'Piloto' : param}
+                                param === 'driver' ? 'Piloto' :
+                                param === 'num_drivers' ? 'Nº de Pilotos' : 
+                                param }
                             </label>
 
+                            {param === 'num_drivers' ? (
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="20"
+                                    placeholder={placeholders[param]}
+                                    value={tempParams[param] || ''}
+                                    onChange={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        if (isNaN(val)) onInputChange(param, '');
+                                        else if (val >= 0 && val <= 20) onInputChange(param, val);
+                                    }}
+                                    className="w-full bg-slate-950/50 border border-slate-800 rounded-lg px-4 py-2.5 text-white text-sm outline-none focus:border-red-600 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                />
+                            ) : (
                             <GenericCombobox 
                                 placeholder={
                                     param === 'driver' && loadingDrivers 
@@ -122,6 +139,7 @@ export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputC
                                     param === 'driver' ? !tempParams.session : !tempParams.year)
                                 }
                             />
+                            )}
                         </div>
                     ))}
                 </div>

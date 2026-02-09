@@ -1,5 +1,11 @@
-import { fetchDriverSeasonStandings } from '../service/apiService.js'
+import { fetchDriverCareerStandings, fetchDriverSeasonStandings } from '../service/apiService.js'
 import { useState, useEffect } from 'react'; 
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion"
 
 export default function DriverProfileCard({ data }) {
     const { year, driverLabel, driverNumber, team, team_color, country = "Sin dato", points } = data;
@@ -47,7 +53,7 @@ export default function DriverProfileCard({ data }) {
                     {surname}
                 </span>
             </div>
-            <div className="w-1/2 p-8 text-white font-black flex flex-col gap-4 mt-14">
+            <div className="w-1/2 p-8 text-white font-black flex flex-col gap-4">
                 <div className='flex flex-row items-center gap-4'>
                     <div className="w-fit px-3 py-1 rounded-md shadow-lg" 
                     style={{ backgroundColor: team_color ? `#${team_color}` : '#1e293b' }}>
@@ -85,7 +91,106 @@ export default function DriverProfileCard({ data }) {
                         <span className="text-2xl uppercase">{year}</span>
                     </div>
                 </div>
+                <div>
+                    <DriverHistoryAccordion teamColor={team_color} driverName={driverLabel}/>
+                </div>
             </div>
         </div>
+    );
+}
+
+
+function DriverHistoryAccordion({ teamColor, driverName }) {
+    // Function to make a hex color darker/brighter
+    const darkenColor = (hex, percent) => {
+    const num = parseInt(hex.replace("#", ""), 16),
+        amt = Math.round(2.55 * percent),
+        R = (num >> 16) - amt,
+        G = ((num >> 8) & 0x00FF) - amt,
+        B = (num & 0x0000FF) - amt;
+    return "#" + (0x1000000 + (R < 255 ? (R < 0 ? 0 : R) : 255) * 0x10000 + (G < 255 ? (G < 0 ? 0 : G) : 255) * 0x100 + (B < 255 ? (B < 0 ? 0 : B) : 255)).toString(16).slice(1);
+    };
+
+    const baseColor = teamColor ? `#${teamColor}` : '#1e293b';
+    const brighterColor = darkenColor(baseColor, -3);
+    const [driverCareerStandings, setDriverCareerStandings] = useState({
+        titles: 0,
+        wins: 0,
+        podiums: 0
+    });
+
+    useEffect(() => {
+        const loadCareerStandings = async () => {
+            try {
+                const res = await fetchDriverCareerStandings(driverName);
+                if(res) {
+                    setDriverCareerStandings({
+                        titles: res.titles,
+                        wins: res.wins,
+                        podiums: res.podiums
+                    })
+                }
+            } catch (error) {
+                console.error('Error al hacer el fetch de estadisticas de carrera en el componente');
+                setDriverCareerStandings({titles: 0, wins: 0, podiums: 0})
+            }
+        }
+
+        if(driverName) {
+            loadCareerStandings()
+        }
+    }, [driverName])
+    console.log(driverName);
+    console.log(driverCareerStandings.titles);
+
+    return (
+        <Accordion type="single" collapsible>
+            <AccordionItem value="item-1" className="border-none">
+                <div 
+                    className='mb-0 pb-0 mt-1 rounded-md shadow-lg px-4 py-0 h-auto hover:brightness-105 hover:-translate-y-1 transition duration-350' 
+                    style={{ 
+                        backgroundImage: `linear-gradient(135deg, ${baseColor} 0%, ${brighterColor} 100%)` 
+                    }}
+                >
+                    <AccordionTrigger
+                        className='py-1.5 text-lg uppercase font-black hover:no-underline items-center hover:cursor-pointer text-slate-900'
+                    >
+                        Trayectoria
+                    </AccordionTrigger>
+                </div>
+                <AccordionContent className="pt-4">
+                    <div className="mb-0 pb-0 overflow-hidden rounded-xl border border-slate-800 bg-slate-950/40">
+                        <table className="mb-0 pb-0 w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-900/80 border-b border-slate-800">
+                                    <th className="px-4 py-2 text-[10px] uppercase tracking-widest text-slate-500 font-bold">Estadística</th>
+                                    <th className="px-4 py-2 text-[10px] uppercase tracking-widest text-slate-500 font-bold text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800/50">
+                                <tr className="hover:bg-slate-800/20 transition-colors">
+                                    <td className="px-4 py-3 text-sm font-medium text-slate-300">Títulos Mundiales</td>
+                                    <td className="px-4 py-3 text-right font-black text-xl italic" style={{color: baseColor}}>
+                                        {driverCareerStandings.titles}
+                                    </td>
+                                </tr>
+                                <tr className="hover:bg-slate-800/20 transition-colors">
+                                    <td className="px-4 py-3 text-sm font-medium text-slate-300">Victorias en Grandes Premios</td>
+                                    <td className="px-4 py-3 text-right font-black text-xl italic" style={{color: baseColor}}>
+                                        {driverCareerStandings.wins}
+                                    </td>
+                                </tr>
+                                <tr className="hover:bg-slate-800/20 transition-colors">
+                                    <td className="px-4 py-3 text-sm font-medium text-slate-300">Podios Totales</td>
+                                    <td className="px-4 py-3 text-right font-black text-xl italic" style={{color: baseColor}}>
+                                        {driverCareerStandings.podiums}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
     );
 }

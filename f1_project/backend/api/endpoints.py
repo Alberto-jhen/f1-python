@@ -149,14 +149,14 @@ def get_openf1_season_total(year: int, driver_number: int):
 # .parent.parent so the BASE_DIR is api => backend
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DATA_PATH = os.path.join(BASE_DIR, "data", "season_standings.json")
+SEASON_STANDINGS_PATH = os.path.join(BASE_DIR, "data", "season_standings.json")
 
 def load_standings():
     try:
-        with open(DATA_PATH, 'r', encoding='utf-8') as f:
+        with open(SEASON_STANDINGS_PATH, 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"Error: No se encontró el archivo en {DATA_PATH}")
+        print(f"Error: No se encontró el archivo en {SEASON_STANDINGS_PATH}")
         return {}
 
 STABLE_STANDINGS = load_standings()
@@ -175,3 +175,40 @@ async def get_championship_info(year: str, number: str):
         }
     
     return {"position": "N/A", "points": 0}
+
+
+# ----- CAREER STANDINGS WITH OWN JSON FILE -----
+
+CAREER_STANDINGS_PATH = os.path.join(BASE_DIR, "data", "career_standings.json")
+
+def load_standings():
+    try:
+        with open(CAREER_STANDINGS_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get("f1_comprehensive_stats_2018_2025", data)
+    except FileNotFoundError:
+        print(f"Error: No se encontró el archivo en {CAREER_STANDINGS_PATH}")
+        return {}
+
+STABLE_CAREER_STANDINGS = load_standings()
+
+@router.get("/data/career/standings/{name}", tags=["JSON_data (own)", "Drivers"])
+async def get_championship_info(name: str):
+
+    driver_data = STABLE_CAREER_STANDINGS.get(name)
+
+    if not driver_data:
+        return {
+            "titles": 0,
+            "wins": 0,
+            "podiums": 0,
+            "error": "Driver not found"
+        }
+
+    if driver_data:
+        return {
+            "titles": driver_data.get("titulos", 0),
+            "wins": driver_data.get("victorias", 0),
+            "podiums": driver_data.get("podios", 0)
+        }
+    
