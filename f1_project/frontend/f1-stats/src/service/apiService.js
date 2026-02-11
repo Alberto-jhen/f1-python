@@ -50,6 +50,10 @@ export const fetchYearSchedule = async(year) => {
     }
 }
 
+/** 
+ * Returns not only the full name but also basic driver info like:
+ * Team, team color, points, number, country and abbreviation.
+ */
 export const fetchDriversFullNamesByYear = async (year, event_name = "latest", session_type = "R") => {
     try {
         const event = event_name || "latest";
@@ -61,7 +65,33 @@ export const fetchDriversFullNamesByYear = async (year, event_name = "latest", s
         
         return await response.json();
     } catch (error) {
-        console.error("Fetch error:", error);
+        console.error("Fetch error: ", error);
+        throw error;
+    }
+}
+
+// Driver season standings.
+export const fetchDriverSeasonStandings = async (year, driver_num) => {
+    try{
+        const response = await fetch(`${BASE_URL}/data/standings/${year}/${driver_num}`);
+        if(!response.ok) throw new Error('Error al obtener la clasificacion del piloto');
+
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error: ", error);
+        throw error;
+    }
+}
+
+// Driver career standings.
+export const fetchDriverCareerStandings = async (driver_name) => {
+    try {
+        const response = await fetch(`${BASE_URL}/data/career/standings/${encodeURIComponent(driver_name)}`);
+        if (!response.ok) throw new Error('Error al obtener las estadisticas de la carrera del piloto');
+
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error: ", error);
         throw error;
     }
 }
