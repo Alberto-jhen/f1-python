@@ -41,3 +41,9 @@ def get_violin_data_json(year, track, session, num_drivers):
     if error:
         return {"error": error}
     return data
+
+def get_qualy_overview_json(year, track):
+    data, error = grph.get_qualifying_results_data(year, track)
+    if error:
+        return {"error": error}
+    return data

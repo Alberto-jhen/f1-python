@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { ParametersFilter } from '../components/ParametersFilter.jsx';
 import { ScatterPlotLaps } from '../components/graphics/ScatterPlotLaps.jsx';
 import { ViolinPlotLaps } from '../components/graphics/ViolinLapDistribution.jsx';
+import { QualyOverview } from '@/components/graphics/QualyResultsoverview.jsx';
 import { fetchDriverLaps, fetchDriverLapsImage, 
-    fetchDriversLapsViolin, fetchDriversLapsViolinImage } from '../service/apiService.js'
+    fetchDriversLapsViolin, fetchDriversLapsViolinImage,
+    fetchQualyOverviewData, fetchQualyOverviewImage} from '../service/apiService.js'
 import { ImagePreview } from '../components/ImagePreview.jsx'
 
 const GraphCard = ({ title, children, onSettingsClick, onGenerate, onExportPython, hasParams, loading }) => {
@@ -28,7 +30,7 @@ const GraphCard = ({ title, children, onSettingsClick, onGenerate, onExportPytho
                             <button 
                                 onClick={onGenerate}
                                 disabled={loading}
-                                className="px-3 py-1 bg-red-600 text-white text-[10px] font-bold uppercase rounded hover:bg-red-700 disabled:opacity-50 cursor-pointer transition-colors shadow-sm min-w-[100px]"
+                                className="px-3 py-1 bg-red-600 text-white text-[10px] font-bold uppercase rounded hover:bg-red-700 disabled:opacity-50 cursor-pointer transition-colors shadow-sm min-w-25"
                             >
                                 {loading ? '...' : 'Generar gráfico'}
                             </button>
@@ -91,8 +93,14 @@ export const GraphicsDashboard = () => {
         
         try {
             const { year, track, session, driver, num_drivers } = params;
-            // Send the correct params.
-            const data = await fetchFn(year, track, session, driver || num_drivers);
+            
+            let data;
+            if (graphName === 'Resultados de clasificación') {
+                data = await fetchFn(year, track);
+            } else {
+                data = await fetchFn(year, track, session, driver || num_drivers);
+            }
+            
             setGraphsData(prev => ({ ...prev, [graphName]: data })); 
         } catch (error) {
             alert(error.message);
@@ -105,9 +113,16 @@ export const GraphicsDashboard = () => {
         const params = savedParams[graphName];
         if (!params) return;
         setLoading(graphName);
+        
         try {
             const { year, track, session, driver, num_drivers } = params;
-            const blob = await fetchFn(year, track, session, driver || num_drivers);
+            
+            let blob;
+            if (graphName === 'Resultados de clasificación') {
+                blob = await fetchFn(year, track);
+            } else {
+                blob = await fetchFn(year, track, session, driver || num_drivers);
+            }
             
             const imageUrl = URL.createObjectURL(blob);
             setPythonImage(imageUrl);
@@ -152,7 +167,7 @@ export const GraphicsDashboard = () => {
                                 title="Análisis de ritmo (Individual)"
                                 onSettingsClick={() => openFilters('Análisis de ritmo (Individual)', ['year', 'track', 'session', 'driver'])}
                                 onGenerate={() => generateGraph(fetchDriverLaps, 'Análisis de ritmo (Individual)')} 
-                                onExportPython = {() => handleExportPython(fetchDriverLapsImage, 'Análisis de ritmo (Individual)')}
+                                onExportPython = {() => handleExportPython(fetchQualyOverviewImage, 'Análisis de ritmo (Individual)')}
                                 hasParams={!!savedParams['Análisis de ritmo (Individual)']}
                                 loading={loading === 'Análisis de ritmo (Individual)'}
                             >
@@ -186,7 +201,32 @@ export const GraphicsDashboard = () => {
                                 )}
                             </GraphCard>
                         </div>
+                    )} {activeTab === 'resultsAnalysis' && (
+                        <div className="grid grid-cols-1 gap-8">
+                            <GraphCard 
+                                title="Resultados de clasificación"
+                                // Cambiado 'clasificiación' -> 'clasificación'
+                                onSettingsClick={() => openFilters('Resultados de clasificación', ['year', 'track'])}
+                                onGenerate={() => generateGraph(fetchQualyOverviewData, 'Resultados de clasificación')} 
+                                onExportPython={() => handleExportPython(fetchQualyOverviewImage, 'Resultados de clasificación')}
+                                hasParams={!!savedParams['Resultados de clasificación']}
+                                loading={loading === 'Resultados de clasificación'}
+                            >
+                                {graphsData['Resultados de clasificación'] ? (
+                                    <QualyOverview data={graphsData['Resultados de clasificación']} />
+                                ) : (
+                                    <p className="text-slate-600 text-sm italic">
+                                        {savedParams['Resultados de clasificación'] 
+                                            ? "Configuración lista. Pulsa Generar." 
+                                            : "Configura los parámetros (Año y Circuito) para empezar."}
+                                    </p>
+                                )}
+                            </GraphCard>
+
+                        </div>
                     )}
+
+
                 </div>
             </div>
 

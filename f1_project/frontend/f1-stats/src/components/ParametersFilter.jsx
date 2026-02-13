@@ -4,6 +4,11 @@ import { fetchYearSchedule, fetchDriversFullNamesByYear } from "@/service/apiSer
 
 export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputChange, onSave }) => {
     if (!isOpen) return null;
+
+    if (!config || !config.params) {
+        return null; 
+    }
+
     const [loadingDrivers, setLoadingDrivers] = useState(false);
 
     const [options, setOptions] = useState({
@@ -128,8 +133,8 @@ export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputC
                                         ? "Buscando en boxes..." 
                                         : placeholders[param]
                                 }
-                                options={options[param] || []} 
-                                value={tempParams[param] || ''}
+                                value={tempParams[param] || ''} 
+                                options={options[param] || []}
                                 onChange={(val) => onInputChange(param, val)}
                                 disabled={
                                     (param === 'driver' && loadingDrivers) || 

@@ -110,12 +110,24 @@ def get_quailfying_results_overview(year, track):
     list_fastest_laps = list()
     for drv in drivers:
         drvs_fastest_lap = session.laps.pick_drivers(drv).pick_fastest()
-        list_fastest_laps.append(drvs_fastest_lap)
+        # FIX: Solo añadir si el resultado NO es None
+        if drvs_fastest_lap is not None:
+            list_fastest_laps.append(drvs_fastest_lap)
+    
+    # FIX: Si la lista está vacía tras el filtrado, evitar error
+    if not list_fastest_laps:
+        return None, "No hay tiempos registrados en esta sesión"
+
     fastest_laps = Laps(list_fastest_laps) \
         .sort_values(by='LapTime') \
         .reset_index(drop=True)
     
     pole_lap = fastest_laps.pick_fastest()
+    
+    # FIX: Asegurarnos de que pole_lap existe antes de restar
+    if pole_lap is None:
+        return None, "No se pudo determinar la Pole Position"
+
     fastest_laps['LapTimeDelta'] = fastest_laps['LapTime'] - pole_lap['LapTime']
 
     team_colors = list()
@@ -123,23 +135,26 @@ def get_quailfying_results_overview(year, track):
         color = fastf1.plotting.get_team_color(lap['Team'], session=session)
         team_colors.append(color)
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10, 6)) # Un poco más ancho para que se vea bien en el modal
     ax.barh(fastest_laps.index, fastest_laps['LapTimeDelta'],
             color=team_colors, edgecolor='grey')
     ax.set_yticks(fastest_laps.index)
     ax.set_yticklabels(fastest_laps['Driver'])
 
-    # show fastest at the top
     ax.invert_yaxis()
-
-    # draw vertical lines behind the bars
     ax.set_axisbelow(True)
-    ax.xaxis.grid(True, which='major', linestyle='--', color='black', zorder=-1000)
+    ax.xaxis.grid(True, which='major', linestyle='--', color='white', alpha=0.2, zorder=-1000)
+
+    # Mejoramos el estilo para el modo oscuro de tu web
+    fig.patch.set_facecolor('#0f172a') # bg-slate-900
+    ax.set_facecolor('#0f172a')
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
 
     lap_time_string = strftimedelta(pole_lap['LapTime'], '%m:%s.%ms')
-
     plt.suptitle(f"{session.event['EventName']} {session.event.year} Qualifying\n"
-            f"Fastest Lap: {lap_time_string} ({pole_lap['Driver']})")
+            f"Fastest Lap: {lap_time_string} ({pole_lap['Driver']})", color='white')
 
     return fig, None
 
@@ -168,31 +183,67 @@ def get_driver_laps_data(year, track, session_type, driver_name):
     
     return result.to_dict('records'), None
 
-# En graphics.py
 def get_lap_distributions_data(year, track, session_type, num_drivers):
     try:
         race = fastf1.get_session(year, track, session_type)
         race.load()
         
-        # OBTENEMOS LAS SIGLAS EN EL ORDEN CORRECTO (VER, NOR, LEC...)
         drivers_shown_ids = race.drivers[:num_drivers]
         finishing_order = [race.get_driver(i)["Abbreviation"] for i in drivers_shown_ids]
         
-        # Mapa de orden REAL usando las siglas: { 'VER': 0, 'NOR': 1, ... }
         order_map = {driver: i for i, driver in enumerate(finishing_order)}
         
         driver_colors = fastf1.plotting.get_driver_color_mapping(session=race)
         driver_laps = race.laps.pick_drivers(finishing_order).pick_quicklaps().reset_index()
         driver_laps['LapTimeSeconds'] = driver_laps['LapTime'].dt.total_seconds()
         
-        # Inyectamos el color y el orden REAL
         driver_laps['TeamColor'] = driver_laps['Driver'].map(driver_colors)
         driver_laps['OfficialOrder'] = driver_laps['Driver'].map(order_map)
         
-        # Si sigue saliendo 99 es que el Driver no coincide con la abreviatura
         driver_laps['OfficialOrder'] = driver_laps['OfficialOrder'].astype(int)
         
         result = driver_laps[['Driver', 'LapTimeSeconds', 'Compound', 'TeamColor', 'OfficialOrder']].to_dict('records')
         return result, None
+    except Exception as e:
+        return None, str(e)
+    
+
+def get_qualifying_results_data(year, track):
+    try:
+        session = fastf1.get_session(year, track, 'Q')
+        session.load()
+        
+        # Obtain every driver.
+        drivers = pd.unique(session.laps['Driver'])
+        list_fastest_laps = list()
+        
+        for drv in drivers:
+            drvs_fastest_lap = session.laps.pick_drivers(drv).pick_fastest()
+            if drvs_fastest_lap is not None:
+                list_fastest_laps.append(drvs_fastest_lap)
+        
+        # Convert to laps and sort values so the fastest is at the top.
+        fastest_laps = Laps(list_fastest_laps).sort_values(by='LapTime').reset_index(drop=True)
+        
+        # Pole lap is the first one after sort.
+        pole_lap = fastest_laps.pick_fastest()
+        pole_time = pole_lap['LapTime'].total_seconds()
+        
+        results = []
+        for _, lap in fastest_laps.iterlaps():
+            driver_code = lap['Driver']
+            team_name = lap['Team']
+            current_lap_time = lap['LapTime'].total_seconds()
+            
+            results.append({
+                'Driver': driver_code,
+                'Team': team_name,
+                'LapTime': current_lap_time,
+                'Delta': current_lap_time - pole_time, 
+                'TeamColor': fastf1.plotting.get_team_color(team_name, session=session),
+                'IsPole': driver_code == pole_lap['Driver']
+            })
+            
+        return results, None
     except Exception as e:
         return None, str(e)

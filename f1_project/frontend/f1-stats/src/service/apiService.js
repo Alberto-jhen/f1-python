@@ -26,6 +26,20 @@ export const fetchDriversLapsViolin = async (year, track, session, numDrivers) =
     }
 }
 
+export const fetchQualyOverviewData = async (year, track) => {
+    try {
+        const response = await fetch(`${BASE_URL}/data/qualy/overview/${year}/${track}`);
+        if (!response.ok) throw new Error('Error en la API al hacer el fetch del JSON de la función de resultados de la qualy');
+        const data = await response.json();
+
+        return data
+    }catch (error) {
+        console.error("Fetch error: ", error);
+        throw error;
+    }
+}
+    
+
 export const fetchDriverProfile = async (driver_num) => {
     try {
         const response = await fetch(`${BASE_URL}/driver/profile/${driver_num}`);
@@ -118,11 +132,25 @@ export const fetchDriversLapsViolinImage = async (year, track, session, num_driv
     const response = await fetch(url);
     if(!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detal || "Error en el fetch de generación del gráfico violin");
+        throw new Error(errorData.detail || "Error en el fetch de generación del gráfico violin");
     }
 
     return await response.blob();
 }
+
+export const fetchQualyOverviewImage = async (year, track) => {
+    const params = new URLSearchParams({ year, track});
+    const url = `${BASE_URL}/plot/qualy_overview?${params.toString()}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+        const errorData = await  response.json();
+        throw new Error(errorData.detail || "Error en el fetch de generación del gráfico de resultados de la qualy.");
+    }
+    return await response.blob();
+}
+
+// ----- Utilites -----
 
 export const formatLapTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return "";

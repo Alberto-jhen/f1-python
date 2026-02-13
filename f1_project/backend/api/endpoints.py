@@ -80,6 +80,13 @@ async def lap_distributions(year: int, track: str, session: str, num_drivers: in
         raise HTTPException(status_code=400, detail=data["error"])
     return data
 
+@router.get("/data/qualy/overview/{year}/{track}", tags=["JSON_data"])
+async def get_qualy_overview_data(year: int, track: str):
+    data = f1_service.get_qualy_overview_json(year, track)
+    if "error" in data:
+        raise HTTPException(status_code=400, detail=data["error"])
+    return data
+
 @router.post("/contact", tags=["utility"])
 async def contact_form(form_data: EmailData):
     # Call the email sending service, passing the data collected from the form in the frontend.
