@@ -1,10 +1,10 @@
 import { Header } from './Header.jsx';
 import { Footer } from './Footer.jsx';
 
-export const Layout = ({ children }) => {
+export const Layout = ({ children, headerVariant }) => {
     return (
         <div className="flex flex-col min-h-screen">
-            <Header />
+            <Header variant={headerVariant}/>
             
             <main className="grow">
                 {children}

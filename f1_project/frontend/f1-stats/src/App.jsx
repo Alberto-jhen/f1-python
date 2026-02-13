@@ -8,7 +8,7 @@ import { Layout } from './components/Layout.jsx'
 function App() {
     return (
         <Routes>
-            <Route path="/" element={<Layout> <Login /> </Layout>}/>
+            <Route path="/" element={<Layout headerVariant="dynamic"> <Login /> </Layout>}/>
             <Route path="/form" element={<Form />}/>
             <Route path="/graphics" element={<Layout> <GraphicsDashboard /> </Layout>}/>
             <Route path="/drivers" element={<Layout> <Drivers /> </Layout>}/>
