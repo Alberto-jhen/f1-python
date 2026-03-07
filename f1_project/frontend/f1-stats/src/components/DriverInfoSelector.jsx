@@ -1,9 +1,9 @@
 import { GenericCombobox } from "./GenericComobobox"
-import { useState, useEffect } from 'react'; 
+import { useState, useEffect } from 'react';
 import { fetchDriversFullNamesByYear } from "@/service/apiService";
 
-export default function DriverInfoSelector({onSelectionChange}) {
-    
+export default function DriverInfoSelector({ onSelectionChange }) {
+
     const [viewMode, setViewMode] = useState("individual");
     const [selectedYear, setSelectedYear] = useState();
     const [selectedDriver, setSelectedDriver] = useState();
@@ -17,32 +17,33 @@ export default function DriverInfoSelector({onSelectionChange}) {
     ];
 
     const selectableYears = [
-        {label: "2026", value: 2026},
-        {label: "2025", value: 2025},
-        {label: "2024", value: 2024},
-        {label: "2023", value: 2023},
-        {label: "2022", value: 2022},
-        {label: "2021", value: 2021},
-        {label: "2020", value: 2020},
-        {label: "2019", value: 2019},
-        {label: "2018", value: 2018},
+        { label: "2026", value: 2026 },
+        { label: "2025", value: 2025 },
+        { label: "2024", value: 2024 },
+        { label: "2023", value: 2023 },
+        { label: "2022", value: 2022 },
+        { label: "2021", value: 2021 },
+        { label: "2020", value: 2020 },
+        { label: "2019", value: 2019 },
+        { label: "2018", value: 2018 },
     ]
 
     //useEffect for communicating the father the selected info.
     useEffect(() => {
-    if (onSelectionChange) {
-        const selectedDriverData = driverOptions.find(d => d.value === selectedDriver);
+        if (onSelectionChange) {
+            const selectedDriverData = driverOptions.find(d => d.value === selectedDriver);
 
-        onSelectionChange({
-            ...selectedDriverData,
-            year: selectedYear,
-            driverValue: selectedDriver, 
-            driverLabel: selectedDriverData?.label, 
-            driverNumber: selectedDriverData?.number,
-            mode: viewMode
-        });
-    }
-}, [selectedYear, selectedDriver, viewMode, driverOptions]);
+            onSelectionChange({
+                ...selectedDriverData,
+                selection: viewMode,
+                year: selectedYear,
+                driverValue: selectedDriver,
+                driverLabel: selectedDriverData?.label,
+                driverNumber: selectedDriverData?.number,
+                mode: viewMode
+            });
+        }
+    }, [selectedYear, selectedDriver, viewMode, driverOptions]);
 
     useEffect(() => {
         const loadDrivers = async () => {
@@ -51,7 +52,7 @@ export default function DriverInfoSelector({onSelectionChange}) {
                 try {
                     const data = await fetchDriversFullNamesByYear(selectedYear);
                     setDriverOptions(data);
-                    if(selectedDriver) {
+                    if (selectedDriver) {
                         setSelectedDriver(null);
                     }
                 } catch (error) {
@@ -78,9 +79,9 @@ export default function DriverInfoSelector({onSelectionChange}) {
                 <GenericCombobox
                     placeholder="Seleccionar modo"
                     options={visualizationOptions}
-                    value={viewMode}  
-                    onChange={setViewMode} 
-                    disabled={false}      
+                    value={viewMode}
+                    onChange={setViewMode}
+                    disabled={false}
                 />
             </div>
 
