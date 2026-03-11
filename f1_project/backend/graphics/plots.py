@@ -1,7 +1,6 @@
 import seaborn as sns
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
-import io
 import pandas as pd
 import fastf1
 import fastf1.plotting
@@ -9,9 +8,10 @@ from fastf1.core import InvalidSessionError, NoLapDataError
 from fastf1.core import Laps
 from timple.timedelta import strftimedelta
 
-import services.utilities.utilities as ut
+import utils.formatters as ut
 
 fastf1.plotting.setup_mpl(mpl_timedelta_support=True, color_scheme='fastf1')
+
 
 def get_laps_driver_scatterplot(year, track, session_type, driver_name):
     try:
@@ -20,7 +20,6 @@ def get_laps_driver_scatterplot(year, track, session_type, driver_name):
     except (InvalidSessionError, NoLapDataError) as e:
         return None, str(e)
 
-    # Driver name processing.
     parts = driver_name.split()
     base = parts[1] if len(parts) >= 2 else parts[0]
     driver_id = base[:3].upper()
@@ -51,6 +50,7 @@ def get_laps_driver_scatterplot(year, track, session_type, driver_name):
     plt.tight_layout()
     
     return fig, None
+
 
 def get_lap_time_distributions_violin(year, track, session_type, num_drivers):
     try:
@@ -98,7 +98,8 @@ def get_lap_time_distributions_violin(year, track, session_type, num_drivers):
     
     return fig, None
 
-def get_quailfying_results_overview(year, track):
+
+def get_qualifying_results_overview(year, track):
     try:
         session = fastf1.get_session(year, track, 'Q')
         session.load()
@@ -110,11 +111,9 @@ def get_quailfying_results_overview(year, track):
     list_fastest_laps = list()
     for drv in drivers:
         drvs_fastest_lap = session.laps.pick_drivers(drv).pick_fastest()
-        # FIX: Solo añadir si el resultado NO es None
         if drvs_fastest_lap is not None:
             list_fastest_laps.append(drvs_fastest_lap)
     
-    # FIX: Si la lista está vacía tras el filtrado, evitar error
     if not list_fastest_laps:
         return None, "No hay tiempos registrados en esta sesión"
 
@@ -124,7 +123,6 @@ def get_quailfying_results_overview(year, track):
     
     pole_lap = fastest_laps.pick_fastest()
     
-    # FIX: Asegurarnos de que pole_lap existe antes de restar
     if pole_lap is None:
         return None, "No se pudo determinar la Pole Position"
 
@@ -135,7 +133,7 @@ def get_quailfying_results_overview(year, track):
         color = fastf1.plotting.get_team_color(lap['Team'], session=session)
         team_colors.append(color)
 
-    fig, ax = plt.subplots(figsize=(10, 6)) # Un poco más ancho para que se vea bien en el modal
+    fig, ax = plt.subplots(figsize=(10, 6))
     ax.barh(fastest_laps.index, fastest_laps['LapTimeDelta'],
             color=team_colors, edgecolor='grey')
     ax.set_yticks(fastest_laps.index)
@@ -145,8 +143,7 @@ def get_quailfying_results_overview(year, track):
     ax.set_axisbelow(True)
     ax.xaxis.grid(True, which='major', linestyle='--', color='white', alpha=0.2, zorder=-1000)
 
-    # Mejoramos el estilo para el modo oscuro de tu web
-    fig.patch.set_facecolor('#0f172a') # bg-slate-900
+    fig.patch.set_facecolor('#0f172a')
     ax.set_facecolor('#0f172a')
     ax.tick_params(colors='white')
     ax.xaxis.label.set_color('white')
@@ -157,6 +154,7 @@ def get_quailfying_results_overview(year, track):
             f"Fastest Lap: {lap_time_string} ({pole_lap['Driver']})", color='white')
 
     return fig, None
+
 
 # DATA LOGIC -- Returns dictionaries for JSON --
 
@@ -175,13 +173,13 @@ def get_driver_laps_data(year, track, session_type, driver_name):
     if driver_laps is None:
         return None, "Driver not found"
     
-    # Select only the necessary columns for the JSON.
     df_json = driver_laps.copy()
     df_json['LapTimeSeconds'] = df_json['LapTime'].dt.total_seconds()
     
     result = df_json[['LapNumber', 'LapTimeSeconds', 'Compound', 'TyreLife']].copy()
     
     return result.to_dict('records'), None
+
 
 def get_lap_distributions_data(year, track, session_type, num_drivers):
     try:
@@ -213,7 +211,6 @@ def get_qualifying_results_data(year, track):
         session = fastf1.get_session(year, track, 'Q')
         session.load()
         
-        # Obtain every driver.
         drivers = pd.unique(session.laps['Driver'])
         list_fastest_laps = list()
         
@@ -222,10 +219,8 @@ def get_qualifying_results_data(year, track):
             if drvs_fastest_lap is not None:
                 list_fastest_laps.append(drvs_fastest_lap)
         
-        # Convert to laps and sort values so the fastest is at the top.
         fastest_laps = Laps(list_fastest_laps).sort_values(by='LapTime').reset_index(drop=True)
         
-        # Pole lap is the first one after sort.
         pole_lap = fastest_laps.pick_fastest()
         pole_time = pole_lap['LapTime'].total_seconds()
         

@@ -1,27 +1,24 @@
 import requests
 import fastf1
 import os
-from datetime import datetime
 
 openF1_url = os.getenv("OPENF1_URL")
+
 
 def get_driver_profile(driver_number: int):
     base_url = openF1_url or "https://api.openf1.org/v1"
     url = f"{base_url}/drivers?driver_number={driver_number}"
 
     try:
-        # Open the url and wait 5 seconds max to get a response.
         response = requests.get(url, timeout=5)
         data = response.json()
 
         if data:
-            # Sort the list to have the newest entry first.
             records = list(reversed(data))
             
-            # Search first entry with the country_code with a valid value and an image without "fallback".
             best_record = next(
                 (r for r in records if r.get('country_code') and "fallback" not in r.get('headshot_url', '')),
-                records[0] # In case the condition isnt fullfilled, get the latest entry.
+                records[0]
             )
             
             return {
@@ -39,7 +36,6 @@ def get_driver_profile(driver_number: int):
     
 
 def get_season_driver_full_names(year: int, event_name: str, session_type: str):
-    # Diccionario exclusivo para la parrilla de 2025
     COUNTRY_FIX_2025 = {
         'VER': 'NED', 'PER': 'MEX',  
         'HAM': 'GBR', 'LEC': 'MON', 

@@ -1,10 +1,13 @@
 from fastapi import FastAPI
-import fastf1
 from fastapi.middleware.cors import CORSMiddleware
-from api.endpoints import router as api_router
+from fastapi.middleware.gzip import GZipMiddleware
 from dotenv import load_dotenv
 import os
-import core.config # Activate cache.
+
+import core.config  # Activate cache.
+from api.router import router as api_router
+from database.database import client, get_db
+
 
 # Load env file.
 load_dotenv();
@@ -15,6 +18,22 @@ app = FastAPI(
     description="Backend para visualización de datos de F1",
     version="1.0.0"
 )
+
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+
+@app.on_event("startup")
+async def startup_db_client():
+    try:
+        db = get_db()
+        print("✅ Conexión exitosa")
+    except Exception as e:
+        print(f"❌ Seguimos bloqueados: {e}")
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
+    print("MongoDB Atlas: Conexión cerrada.")
 
 # Middleware to allor frontend conections.
 app.add_middleware(
