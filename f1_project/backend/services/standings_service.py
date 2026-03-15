@@ -22,7 +22,33 @@ def _load_season_standings():
 SEASON_STANDINGS = _load_season_standings()
 
 
+def _fetch_ergast_driver_standing(year: str, number: str):
+    """Fetch a single driver's standings from Ergast for the given year."""
+    url = f"https://api.jolpi.ca/ergast/f1/{year}/driverStandings.json"
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        standings_lists = data.get('MRData', {}).get('StandingsTable', {}).get('StandingsLists', [])
+        if not standings_lists:
+            return None
+
+        for item in standings_lists[0].get('DriverStandings', []):
+            driver = item.get('Driver', {})
+            if driver.get('permanentNumber') == number:
+                return {
+                    "position": item.get('position', 'N/A'),
+                    "points": float(item.get('points', 0)),
+                    "year": year
+                }
+    except Exception as e:
+        print(f"Error fetching Ergast standings for {year}/{number}: {e}")
+    return None
+
+
 def get_season_championship(year: str, number: str):
+    # Try local JSON first
     year_data = SEASON_STANDINGS.get(year, {})
     driver_stats = year_data.get(number)
 
@@ -33,6 +59,11 @@ def get_season_championship(year: str, number: str):
             "year": year
         }
     
+    # Fallback to Ergast API for years not in local JSON
+    ergast_result = _fetch_ergast_driver_standing(year, number)
+    if ergast_result:
+        return ergast_result
+
     return {"position": "N/A", "points": 0}
 
 
@@ -99,31 +130,80 @@ def get_openf1_season_standings(year: int, driver_number: int):
 # ----- Global current standings (Ergast/jolpi.ca) -----
 
 def get_global_standings():
-    url = "https://api.jolpi.ca/ergast/f1/2025/driverStandings.json"
-    
+    from datetime import datetime
+    year = datetime.now().year
+    url = f"https://api.jolpi.ca/ergast/f1/{year}/driverStandings.json"
+
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
-        
+
         data = response.json()
-        
-        standings_lists = data['MRData']['StandingsTable']['StandingsLists']
+
+        standings_lists = data.get('MRData', {}).get('StandingsTable', {}).get('StandingsLists', [])
         if not standings_lists:
             return {"message": "La temporada aún no tiene datos de clasificación", "results": []}
 
-        standings_list = standings_lists[0]['DriverStandings']
-        
+        standings_list = standings_lists[0].get('DriverStandings', [])
+
         results = []
         for item in standings_list:
+            driver = item.get('Driver', {})
+            constructors = item.get('Constructors', [{}])
             results.append({
-                "posicion": item['position'],
-                "puntos": item['points'],
-                "victorias": item['wins'],
-                "piloto": f"{item['Driver']['givenName']} {item['Driver']['familyName']}",
-                "constructor": item['Constructors'][0]['name']
+                "posicion": item.get('position', '?'),
+                "puntos": item.get('points', '0'),
+                "victorias": item.get('wins', '0'),
+                "piloto": f"{driver.get('givenName', '')} {driver.get('familyName', '')}".strip(),
+                "constructor": constructors[0].get('name', '') if constructors else ''
             })
         return results
-    
+
     except Exception as e:
         print(f"Error detallado: {type(e).__name__}: {e}")
         return None
+
+
+# ----- Standings by round (Ergast/jolpi.ca) -----
+
+def get_standings_by_round(year: int, round_num: int):
+    """Get driver standings up to (and including) a specific round."""
+    import time
+    url = f"https://api.jolpi.ca/ergast/f1/{year}/{round_num}/driverStandings.json"
+
+    for attempt in range(2):
+        try:
+            response = requests.get(url, timeout=10)
+
+            if response.status_code == 429:
+                time.sleep(1)
+                continue
+
+            response.raise_for_status()
+            data = response.json()
+
+            standings_lists = data.get('MRData', {}).get('StandingsTable', {}).get('StandingsLists', [])
+            if not standings_lists:
+                return []
+
+            standings_list = standings_lists[0].get('DriverStandings', [])
+
+            results = []
+            for item in standings_list:
+                driver = item.get('Driver', {})
+                constructors = item.get('Constructors', [{}])
+                results.append({
+                    "posicion": item.get('position', '?'),
+                    "puntos": item.get('points', '0'),
+                    "victorias": item.get('wins', '0'),
+                    "piloto": f"{driver.get('givenName', '')} {driver.get('familyName', '')}".strip(),
+                    "constructor": constructors[0].get('name', '') if constructors else ''
+                })
+            return results
+
+        except Exception as e:
+            print(f"Error standings by round (attempt {attempt+1}): {type(e).__name__}: {e}")
+            if attempt == 0:
+                time.sleep(0.5)
+
+    return None

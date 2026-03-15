@@ -1,8 +1,24 @@
 import requests
 import fastf1
 import os
+from datetime import datetime
 
 openF1_url = os.getenv("OPENF1_URL")
+
+
+def _resolve_latest_event(year: int):
+    """Find the most recent completed race event for a given year."""
+    try:
+        schedule = fastf1.get_event_schedule(year, include_testing=False)
+        now = datetime.now()
+        # Iterate in reverse to find the last event whose session date has passed
+        for _, event in schedule.iloc[::-1].iterrows():
+            event_date = event.get('Session5DateUtc') or event.get('Session4DateUtc')
+            if event_date is not None and event_date.replace(tzinfo=None) < now:
+                return event['EventName']
+    except Exception as e:
+        print(f"Error resolviendo último evento para {year}: {e}")
+    return None
 
 
 def get_driver_profile(driver_number: int):
@@ -36,7 +52,7 @@ def get_driver_profile(driver_number: int):
     
 
 def get_season_driver_full_names(year: int, event_name: str, session_type: str):
-    COUNTRY_FIX_2025 = {
+    COUNTRY_FIX = {
         'VER': 'NED', 'PER': 'MEX',  
         'HAM': 'GBR', 'LEC': 'MON', 
         'NOR': 'GBR', 'PIA': 'AUS',  
@@ -48,11 +64,19 @@ def get_season_driver_full_names(year: int, event_name: str, session_type: str):
         'TSU': 'JPN', 'HAD': 'FRA',
         'OCO': 'FRA', 'BOR': 'BRA', 
         'BOT': 'FIN', 'ZHO': 'CHN',  
-        'COL': 'ARG', 'LAW': 'NZL'  
+        'COL': 'ARG', 'LAW': 'NZL',
+        'LIN': 'GBR',
     }
 
     try:
-        session = fastf1.get_session(year, event_name, session_type)
+        # Resolve "latest" manually if fastf1 can't handle it
+        resolved_event = event_name
+        if event_name.lower() == "latest":
+            resolved = _resolve_latest_event(year)
+            if resolved:
+                resolved_event = resolved
+
+        session = fastf1.get_session(year, resolved_event, session_type)
         session.load(telemetry=False, weather=False, messages=False)
 
         results = session.results[[
@@ -66,7 +90,7 @@ def get_season_driver_full_names(year: int, event_name: str, session_type: str):
             raw_country = row['CountryCode']
 
             if not raw_country or str(raw_country).strip() == "" or str(raw_country).lower() == 'nan':
-                country = COUNTRY_FIX_2025.get(abbr, 'N/A')
+                country = COUNTRY_FIX.get(abbr, 'N/A')
             else:
                 country = raw_country
 

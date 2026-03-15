@@ -28,3 +28,11 @@ def get_current_standings():
     if data is None:
         raise HTTPException(status_code=500, detail="Error al conectar con el proveedor de datos de F1")
     return data
+
+
+@router.get("/standings/{year}/{round_num}", tags=["Standings"])
+def get_standings_by_round(year: int, round_num: int):
+    data = standings_service.get_standings_by_round(year, round_num)
+    if data is None:
+        raise HTTPException(status_code=500, detail="Error al obtener standings por ronda")
+    return data
