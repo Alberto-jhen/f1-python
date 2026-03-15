@@ -44,6 +44,7 @@ export default function LeaderBoard() {
 
     const [raceCalendar, setRaceCalendar] = useState([]);
     const [raceDates, setRaceDates] = useState({});
+    const [sprintEvents, setSprintEvents] = useState(new Set());
 
     // Standings state
     const [standings, setStandings] = useState([]);          // cumulative up to selected round
@@ -64,6 +65,9 @@ export default function LeaderBoard() {
                             value: track,
                         }));
                     setRaceCalendar(formattedTracks);
+                }
+                if (scheduleData?.sprint_events) {
+                    setSprintEvents(new Set(scheduleData.sprint_events));
                 }
 
                 const dateResults = await Promise.all(
@@ -277,6 +281,7 @@ export default function LeaderBoard() {
                     raceCalendar={raceCalendar}
                     raceDates={raceDates}
                     lastCompletedIndex={lastCompletedIndex}
+                    sprintEvents={sprintEvents}
                 />
             )}
         </div>
