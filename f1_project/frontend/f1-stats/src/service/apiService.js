@@ -1,6 +1,6 @@
 const BASE_URL = 'http://localhost:8000';
 
-// ----- JSON related function fetchs. -----
+// ----- JSON related function fetchs for graphics. -----
 
 export const fetchDriverLaps = async (year, track, session, driver) => {
     try {
@@ -52,6 +52,20 @@ export const fetchDriverProfile = async (driver_num) => {
     }
 }
 
+/** 
+ *  ----- YEAR SCHEDULE -----
+ *  Data estructure:
+ *  "tracks": [
+ *      ...
+ *      ...
+ *      ...
+ *  ],
+ *  "sessions" [
+ *      ...
+ *      ...
+ *  ]
+ */
+
 export const fetchYearSchedule = async(year) => {
     try {
         const response = await fetch(`${BASE_URL}/data/schedule/${year}`);
@@ -66,7 +80,7 @@ export const fetchYearSchedule = async(year) => {
 
 /** 
  * Returns not only the full name but also basic driver info like:
- * Team, team color, points, number, country and abbreviation.
+ * Team, team color, points (from a concrete event), number, country and abbreviation.
  */
 export const fetchDriversFullNamesByYear = async (year, event_name = "latest", session_type = "R") => {
     try {
@@ -150,6 +164,44 @@ export const fetchQualyOverviewImage = async (year, track) => {
     return await response.blob();
 }
 
+// ----- Standings -----
+
+export const fetchGlobalStandings = async () => {
+    try {
+        const response = await fetch(`${BASE_URL}/standings/global/`);
+        if (!response.ok) throw new Error('Error al obtener la clasificación global');
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error: ", error);
+        return [];
+    }
+}
+
+export const fetchStandingsByRound = async (year, round) => {
+    try {
+        const response = await fetch(`${BASE_URL}/standings/${year}/${round}`);
+        if (!response.ok) throw new Error('Error al obtener standings por ronda');
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error: ", error);
+        return [];
+    }
+}
+
+// ----- Events -----
+
+export const fetchEventRaceDate = async (year, eventName) => {
+    try {
+        const params = new URLSearchParams({ year, event_name: eventName });
+        const response = await fetch(`${BASE_URL}/events/date?${params.toString()}`);
+        if (!response.ok) throw new Error('Error al obtener la fecha del evento');
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error: ", error);
+        return null;
+    }
+}
+
 // ----- Utilites -----
 
 export const formatLapTime = (seconds) => {
@@ -162,3 +214,17 @@ export const formatLapTime = (seconds) => {
     // Format F1 = M:SS.mmm
     return `${mins}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
 };
+
+
+// ---------- REPLAY SERVICE ----------
+export const deployReplayService = async (year, track) => {
+    try {
+        const response = await fetch(`${BASE_URL}/service/replay/${year}/${track}`);
+        if(!response.ok) throw new Error('Error al obtener los datos de replay');
+
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error: ", error);
+        throw error;
+    }
+}

@@ -1,11 +1,37 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import loginVideo from '../assets/login-video3.mp4';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
+import useNextRace from '@/hooks/useNextRace';
 
 export default function Login() {
     const rollingRef = useRef(null);
-    
+    const { nextRace } = useNextRace();
+    const [countdown, setCountdown] = useState({ days: '--', hours: '--', mins: '--', secs: '--' });
+
+    // Live countdown to the next race
+    useEffect(() => {
+        if (!nextRace?.date) return;
+
+        const tick = () => {
+            const diff = nextRace.date - new Date();
+            if (diff <= 0) {
+                setCountdown({ days: '0', hours: '0', mins: '0', secs: '0' });
+                return;
+            }
+            setCountdown({
+                days: String(Math.floor(diff / 86400000)),
+                hours: String(Math.floor((diff % 86400000) / 3600000)),
+                mins: String(Math.floor((diff % 3600000) / 60000)),
+                secs: String(Math.floor((diff % 60000) / 1000)).padStart(2, '0'),
+            });
+        };
+
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+    }, [nextRace]);
+
     const drivers = [
         { name: "Norris", team: "McLaren", color: "border-orange-500" },
         { name: "Verstappen", team: "Red Bull", color: "border-blue-600" },
@@ -174,19 +200,46 @@ export default function Login() {
                         <span className="text-[150px] font-black italic leading-none text-white">GP</span>
                     </div>
                     <span className="bg-red-600 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full mb-6 inline-block text-white">Next Race</span>
-                    <h2 className="text-5xl font-black italic uppercase tracking-tighter text-white mb-2">Abu Dhabi</h2>
-                    <p className="text-zinc-400 font-medium mb-8 uppercase tracking-widest">Yas Marina Circuit • Dec 5-7</p>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-black/50 p-4 rounded-xl border border-zinc-800">
-                            <span className="text-[10px] text-zinc-500 uppercase block font-bold mb-1">Distance</span>
-                            <span className="text-xl font-bold text-white italic uppercase">306.18 km</span>
-                        </div>
-                        <div className="bg-black/50 p-4 rounded-xl border border-zinc-800">
-                            <span className="text-[10px] text-zinc-500 uppercase block font-bold mb-1">Laps</span>
-                            <span className="text-xl font-bold text-white italic uppercase">58</span>
-                        </div>
-                    </div>
+
+                    {nextRace ? (
+                        <>
+                            <h2 className="text-5xl font-black italic uppercase tracking-tighter text-white mb-2">
+                                {nextRace.name}
+                            </h2>
+                            <p className="text-zinc-400 font-medium mb-8 uppercase tracking-widest text-sm">
+                                Round {nextRace.round} • {nextRace.date.toLocaleString(undefined, {
+                                    weekday: 'short', day: 'numeric', month: 'short',
+                                    hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
+                                })}
+                            </p>
+
+                            <div className="grid grid-cols-4 gap-3">
+                                {[
+                                    { label: 'Days', val: countdown.days },
+                                    { label: 'Hours', val: countdown.hours },
+                                    { label: 'Mins', val: countdown.mins },
+                                    { label: 'Secs', val: countdown.secs },
+                                ].map((item, i) => (
+                                    <div key={i} className="bg-black/50 p-4 rounded-xl border border-zinc-800 text-center">
+                                        <span className="text-2xl font-black italic text-white block">{item.val}</span>
+                                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">{item.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="h-8 w-64 bg-zinc-800 rounded animate-pulse mb-4"></div>
+                            <div className="h-4 w-48 bg-zinc-800 rounded animate-pulse mb-8"></div>
+                            <div className="grid grid-cols-4 gap-3">
+                                {[...Array(4)].map((_, i) => (
+                                    <div key={i} className="bg-black/50 p-4 rounded-xl border border-zinc-800">
+                                        <div className="h-8 w-8 mx-auto bg-zinc-800 rounded animate-pulse"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </motion.div>
 
                 <motion.div 

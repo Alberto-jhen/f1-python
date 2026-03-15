@@ -107,6 +107,18 @@ const Link = () => {
                     <a href="/drivers" className={aStyle}>Pilotos</a>
                 </div>
             </li>
+            <li className='group'>
+                <div className='flex flex-row gap-1 items-center align-baseline'>
+                    <div className='w-0 h-1 bg-red-600 rounded-md opacity-0 transition-all duration-500 ease-in-out group-hover:w-8 group-hover:opacity-100'></div>
+                    <a href="/replays" className={aStyle}>Repeticiones</a>
+                </div>
+            </li>
+            <li className='group'>
+                <div className='flex flex-row gap-1 items-center align-baseline'>
+                    <div className='w-0 h-1 bg-red-600 rounded-md opacity-0 transition-all duration-500 ease-in-out group-hover:w-8 group-hover:opacity-100'></div>
+                    <a href="/leaderboard" className={aStyle}>Clasificación</a>
+                </div>
+            </li>
         </ul>
     )
 }

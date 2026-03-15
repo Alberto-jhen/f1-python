@@ -71,7 +71,7 @@ export default function DriverInfoSelector({ onSelectionChange }) {
     }, [selectedYear]);
 
     return (
-        <div className="flex flex-wrap gap-4 m-6 mb-10 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 shadow-xl">
+        <div className="flex flex-wrap gap-4 mb-10 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 shadow-xl">
             <div className="flex flex-col gap-2 flex-1 min-w-50">
                 <label className="text-slate-500 text-[10px] uppercase font-black tracking-widest">
                     Modo Visualización

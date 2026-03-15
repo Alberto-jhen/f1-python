@@ -3,12 +3,6 @@ import { useState, useEffect} from 'react'
 import { fetchYearSchedule, fetchDriversFullNamesByYear } from "@/service/apiService";
 
 export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputChange, onSave }) => {
-    if (!isOpen) return null;
-
-    if (!config || !config.params) {
-        return null; 
-    }
-
     const [loadingDrivers, setLoadingDrivers] = useState(false);
 
     const [options, setOptions] = useState({
@@ -85,6 +79,12 @@ export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputC
         loadData();
         // Add the parameters that need to be checked
     }, [tempParams.year, tempParams.track, tempParams.session]);
+
+    if (!isOpen) return null;
+
+    if (!config || !config.params) {
+        return null; 
+    }
     
     const placeholders = {
         driver: 'Verstappen, Hamilton, Alonso...',

@@ -7,14 +7,36 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion"
 
+const IMAGE_FALLBACK_YEARS = [2025, 2024];
+
+function buildImageUrl(year, surname) {
+    return `https://media.formula1.com/content/dam/fom-website/drivers/${year}Drivers/${surname}.jpg`;
+}
+
 export default function DriverProfileCard({ data }) {
     const { year, driverLabel, driverNumber, team, team_color, country = "Sin dato", points } = data;
     const [standings, setStandings] = useState({ position: '-', points: 0 });
     const [loadingStats, setLoadingStats] = useState(true);
 
-    const imageUrl = `https://media.formula1.com/content/dam/fom-website/drivers/${year}Drivers/${driverLabel.split(' ').pop().toLowerCase()}.jpg`;
     const nameParts = driverLabel.split(' ');
     const surname = nameParts[nameParts.length - 1];
+    const surnameNorm = surname.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+    const [imageUrl, setImageUrl] = useState(buildImageUrl(year, surnameNorm));
+    const [fallbackIdx, setFallbackIdx] = useState(0);
+
+    // Reset image state when driver changes
+    useEffect(() => {
+        setImageUrl(buildImageUrl(year, surnameNorm));
+        setFallbackIdx(0);
+    }, [year, surnameNorm]);
+
+    const handleImageError = () => {
+        if (fallbackIdx < IMAGE_FALLBACK_YEARS.length) {
+            setImageUrl(buildImageUrl(IMAGE_FALLBACK_YEARS[fallbackIdx], surnameNorm));
+            setFallbackIdx(prev => prev + 1);
+        }
+    };
 
     useEffect(() => {
         async function getStats() {
@@ -47,6 +69,7 @@ export default function DriverProfileCard({ data }) {
                 <img 
                     src={imageUrl} 
                     alt={driverLabel}
+                    onError={handleImageError}
                     className="w-full h-full object-cover mask-[linear-gradient(to_right,black_65%,transparent)]"
                 />
                 <span className="absolute bottom-0 left-4 text-8xl font-black italic uppercase text-white opacity-40 pointer-events-none select-none">
@@ -67,7 +90,7 @@ export default function DriverProfileCard({ data }) {
                     <h2 className="text-5xl">{driverLabel}</h2>
                     <span className='italic text-4xl' style={{color: team_color ? `#${team_color}` : '#1e293b'}}>#{driverNumber}</span>
                 </div>
-                <div className='grid grid-cols-2 grid-rows-2 gap-5 mt-9'>
+                <div className='grid grid-cols-2 grid-rows-2 gap-5 mt-3'>
                     <div className='bg-slate-950/50 border rounded-xl border-slate-800 p-4 h-24 flex flex-col justify-center'>
                         <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Nacionalidad</span>
                         <span className="text-2xl uppercase">{country || 'N/A'}</span>
