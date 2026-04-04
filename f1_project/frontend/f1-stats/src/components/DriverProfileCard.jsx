@@ -14,7 +14,7 @@ function buildImageUrl(year, surname) {
 }
 
 export default function DriverProfileCard({ data }) {
-    const { year, driverLabel, driverNumber, team, team_color, country = "Sin dato", points } = data;
+    const { year, driverLabel, driverNumber, team, team_color, country = "Sin dato", points, value: driverCode } = data;
     const [standings, setStandings] = useState({ position: '-', points: 0 });
     const [loadingStats, setLoadingStats] = useState(true);
 
@@ -42,7 +42,7 @@ export default function DriverProfileCard({ data }) {
         async function getStats() {
             setLoadingStats(true);
             try {
-                const res = await fetchDriverSeasonStandings(year, driverNumber);
+                const res = await fetchDriverSeasonStandings(year, driverNumber, driverCode);
                 if (res) {
                     setStandings({
                         position: res.position, 

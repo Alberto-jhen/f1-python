@@ -99,9 +99,11 @@ export const fetchDriversFullNamesByYear = async (year, event_name = "latest", s
 }
 
 // Driver season standings.
-export const fetchDriverSeasonStandings = async (year, driver_num) => {
+export const fetchDriverSeasonStandings = async (year, driver_num, code = null) => {
     try{
-        const response = await fetch(`${BASE_URL}/data/standings/${year}/${driver_num}`);
+        let url = `${BASE_URL}/data/standings/${year}/${driver_num}`;
+        if (code) url += `?code=${encodeURIComponent(code)}`;
+        const response = await fetch(url);
         if(!response.ok) throw new Error('Error al obtener la clasificacion del piloto');
 
         return await response.json();

@@ -1,43 +1,56 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
-const F1_IMAGE_YEARS = [2025, 2024];
-
-function driverSurname(fullName) {
-    return fullName
-        .trim()
-        .split(/\s+/)
-        .pop()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase();
+/** Normalize a string: strip diacritics and lowercase. */
+function norm(str) {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
-function DriverAvatar({ name }) {
-    const surname = driverSurname(name);
-    const [yearIdx, setYearIdx] = useState(0);
-    const [failed, setFailed] = useState(false);
+/**
+ * Map Ergast/Jolpi constructor names → F1 CDN team slugs.
+ * Update when new teams appear or names change.
+ */
+const TEAM_SLUG = {
+    'mclaren': 'mclaren',
+    'red bull': 'redbullracing',
+    'ferrari': 'ferrari',
+    'mercedes': 'mercedes',
+    'aston martin': 'astonmartin',
+    'williams': 'williams',
+    'alpine f1 team': 'alpine',
+    'haas f1 team': 'haas',
+    'rb f1 team': 'racingbulls',
+    'audi': 'audi',
+    'sauber': 'audi',
+    'cadillac f1 team': 'cadillac',
+};
 
-    const handleError = () => {
-        if (yearIdx + 1 < F1_IMAGE_YEARS.length) {
-            setYearIdx(prev => prev + 1);
-        } else {
-            setFailed(true);
-        }
-    };
+function teamSlug(constructor) {
+    return TEAM_SLUG[constructor?.toLowerCase()] || constructor?.toLowerCase().replace(/\s+/g, '') || '';
+}
 
-    if (failed) {
-        return (
-            <span className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-500 uppercase shrink-0">
-                {name.charAt(0)}
-            </span>
-        );
-    }
+/** Build the F1 CDN driver code: first 3 chars of first name + first 3 of last name + "01". */
+function driverCode(fullName) {
+    const parts = fullName.trim().split(/\s+/);
+    const first = norm(parts[0]).slice(0, 3);
+    const last = norm(parts[parts.length - 1]).slice(0, 3);
+    return `${first}${last}01`;
+}
+
+const YEAR = new Date().getFullYear();
+
+function buildF1ImageUrl(fullName, constructor) {
+    const team = teamSlug(constructor);
+    const code = driverCode(fullName);
+    return `https://media.formula1.com/image/upload/c_lfill,w_64/q_auto/d_common:f1:${YEAR}:fallback:driver:${YEAR}fallbackdriverright.webp/v1740000000/common/f1/${YEAR}/${team}/${code}/${YEAR}${team}${code}right.webp`;
+}
+
+function DriverAvatar({ name, constructor }) {
+    const src = useMemo(() => buildF1ImageUrl(name, constructor), [name, constructor]);
 
     return (
         <img
-            src={`https://media.formula1.com/content/dam/fom-website/drivers/${F1_IMAGE_YEARS[yearIdx]}Drivers/${surname}.jpg`}
+            src={src}
             alt={name}
-            onError={handleError}
             className="w-7 h-7 rounded-full object-cover object-top shrink-0 bg-zinc-800"
         />
     );
@@ -103,7 +116,7 @@ export default function StandingsTable({ standings = [], loading = false, showDi
                             {/* Driver */}
                             <td className="py-3 px-3">
                                 <div className="flex items-center gap-2.5">
-                                    <DriverAvatar name={entry.driver} />
+                                    <DriverAvatar name={entry.driver} constructor={entry.constructor} />
                                     <span className="text-white font-bold text-sm uppercase tracking-tight group-hover:text-red-500 transition-colors">
                                         {entry.driver}
                                     </span>

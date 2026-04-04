@@ -5,8 +5,8 @@ router = APIRouter()
 
 
 @router.get("/data/standings/{year}/{number}", tags=["JSON_data (own)", "Drivers"])
-async def get_season_standings(year: str, number: str):
-    return standings_service.get_season_championship(year, number)
+async def get_season_standings(year: str, number: str, code: str = None):
+    return standings_service.get_season_championship(year, number, code=code)
 
 
 @router.get("/data/career/standings/{name}", tags=["JSON_data (own)", "Drivers"])

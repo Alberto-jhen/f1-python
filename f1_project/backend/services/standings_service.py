@@ -22,8 +22,9 @@ def _load_season_standings():
 SEASON_STANDINGS = _load_season_standings()
 
 
-def _fetch_ergast_driver_standing(year: str, number: str):
-    """Fetch a single driver's standings from Ergast for the given year."""
+def _fetch_ergast_driver_standing(year: str, number: str, code: str = None):
+    """Fetch a single driver's standings from Ergast for the given year.
+    Matches by permanentNumber first, then by driver code as fallback."""
     url = f"https://api.jolpi.ca/ergast/f1/{year}/driverStandings.json"
     try:
         response = requests.get(url, timeout=10)
@@ -34,20 +35,33 @@ def _fetch_ergast_driver_standing(year: str, number: str):
         if not standings_lists:
             return None
 
-        for item in standings_lists[0].get('DriverStandings', []):
-            driver = item.get('Driver', {})
-            if driver.get('permanentNumber') == number:
-                return {
-                    "position": item.get('position', 'N/A'),
-                    "points": float(item.get('points', 0)),
-                    "year": year
-                }
+        def _make_result(item):
+            return {
+                "position": item.get('position', 'N/A'),
+                "points": float(item.get('points', 0)),
+                "year": year
+            }
+
+        standings = standings_lists[0].get('DriverStandings', [])
+
+        # Try matching by permanentNumber
+        for item in standings:
+            if item.get('Driver', {}).get('permanentNumber') == number:
+                return _make_result(item)
+
+        # Fallback: match by driver code (handles champion #1 vs permanent number)
+        if code:
+            code_upper = code.upper()
+            for item in standings:
+                if item.get('Driver', {}).get('code') == code_upper:
+                    return _make_result(item)
+
     except Exception as e:
         print(f"Error fetching Ergast standings for {year}/{number}: {e}")
     return None
 
 
-def get_season_championship(year: str, number: str):
+def get_season_championship(year: str, number: str, code: str = None):
     # Try local JSON first
     year_data = SEASON_STANDINGS.get(year, {})
     driver_stats = year_data.get(number)
@@ -60,7 +74,7 @@ def get_season_championship(year: str, number: str):
         }
     
     # Fallback to Ergast API for years not in local JSON
-    ergast_result = _fetch_ergast_driver_standing(year, number)
+    ergast_result = _fetch_ergast_driver_standing(year, number, code=code)
     if ergast_result:
         return ergast_result
 
