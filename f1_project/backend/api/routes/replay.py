@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from database.database import get_db
+from database.database import get_supabase
 
 router = APIRouter()
 
@@ -7,19 +7,19 @@ router = APIRouter()
 @router.get("/service/replay/{year}/{track}/{driver_id}", tags=["Replay service"])
 def get_driver_telemetry(year: int, track: str, driver_id: str):
     try:
-        db = get_db()
-        replays_col = db['race_replays']
+        supabase = get_supabase()
         session_id = f"{year}_{track}_R"
         
-        query = {
-            "session_id": session_id,
-            "driver": driver_id
-        }
+        response = (
+            supabase.table("race_replays")
+            .select("*")
+            .eq("session_id", session_id)
+            .eq("driver", driver_id)
+            .order("timestamp", desc=False)
+            .execute()
+        )
         
-        data = list(replays_col.find(
-            query, 
-            {"_id": 0}
-        ).sort("timestamp", 1))
+        data = response.data
         
         if not data:
             raise HTTPException(

@@ -1,22 +1,14 @@
 import os
-from pymongo import MongoClient
+from supabase import create_client, Client
 from dotenv import load_dotenv
-import certifi
 
 load_dotenv()
 
-ca = certifi.where()
+supabase_url = os.getenv("SUPABASE_URL")
+supabase_key = os.getenv("SUPABASE_ANON_KEY")
 
-client = MongoClient(
-    os.getenv("MONGO_URI"),
-    tls=True,
-    tlsCAFile=ca,
-    tlsAllowInvalidCertificates=True,
-    serverSelectionTimeoutMS=5000
-)
-
-db = client['f1_insights']
+supabase: Client = create_client(supabase_url, supabase_key)
 
 
-def get_db():
-    return db
+def get_supabase() -> Client:
+    return supabase

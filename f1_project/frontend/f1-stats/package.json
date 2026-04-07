@@ -16,6 +16,7 @@
     "@gsap/react": "^2.1.2",
     "@midudev/tailwind-animations": "^1.0.1",
     "@sgratzl/chartjs-chart-boxplot": "^4.4.5",
+    "@supabase/supabase-js": "^2.101.1",
     "@tailwindcss/vite": "^4.1.18",
     "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.1",

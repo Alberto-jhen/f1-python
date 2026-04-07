@@ -6,7 +6,7 @@ import os
 
 import core.config  # Activate cache.
 from api.router import router as api_router
-from database.database import client, get_db
+from database.database import get_supabase
 
 
 # Load env file.
@@ -25,15 +25,10 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 @app.on_event("startup")
 async def startup_db_client():
     try:
-        db = get_db()
-        print("✅ Conexión exitosa")
+        sb = get_supabase()
+        print("✅ Conexión a Supabase exitosa")
     except Exception as e:
-        print(f"❌ Seguimos bloqueados: {e}")
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
-    print("MongoDB Atlas: Conexión cerrada.")
+        print(f"❌ Error conectando a Supabase: {e}")
 
 # Middleware to allor frontend conections.
 app.add_middleware(
