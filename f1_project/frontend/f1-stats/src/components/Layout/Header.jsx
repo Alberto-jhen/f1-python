@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import basicIcons from '../assets/basicIcons.svg'; 
+import basicIcons from '../../assets/basicIcons.svg'; 
 
 export const Header = ({ variant = "solid" }) => {
     const [isScrolled, setIsScrolled] = useState(false);
