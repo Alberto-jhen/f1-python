@@ -3,7 +3,7 @@ import Login from './pages/Login.jsx'
 import { Form } from './pages/Form.jsx'
 import { GraphicsDashboard } from "./pages/Graphics.jsx";
 import Drivers from './pages/Drivers.jsx'
-import { Layout } from './components/Layout.jsx'
+import { Layout } from './components/Layout/Layout.jsx'
 import Replays from './pages/Replays.jsx'
 import LeaderBoard from "./pages/LeaderBoard.jsx";
 

@@ -218,6 +218,18 @@ export const formatLapTime = (seconds) => {
 };
 
 
+// ---------- H2H SERVICE ----------
+export const fetchH2HData = async (year, driver1, driver2) => {
+    try {
+        const response = await fetch(`${BASE_URL}/data/h2h/${year}/${driver1}/${driver2}`);
+        if (!response.ok) throw new Error('Error al obtener los datos H2H');
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error: ", error);
+        throw error;
+    }
+}
+
 // ---------- REPLAY SERVICE ----------
 export const deployReplayService = async (year, track) => {
     try {
