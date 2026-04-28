@@ -1,8 +1,6 @@
 import fastf1
 import pandas as pd
-from database.database import get_supabase
-
-supabase = get_supabase()
+from repositories.replay_repository import replay_repo
 
 BATCH_SIZE = 500
 
@@ -13,10 +11,9 @@ def set_race_telemetry(year, track):
         
         session_id = f"{year}_{track}_R"
         
-        # 1. Limpieza preventiva
-        existing = supabase.table("race_replays").select("session_id").eq("session_id", session_id).limit(1).execute()
-        if existing.data:
-            return {"message": "Los datos ya existen"}
+        # 1. Check if data already exists
+        if replay_repo.session_exists(session_id):
+            return {"message": "Data already exists"}
 
         all_telemetry = []
         drivers = session.drivers 
@@ -46,13 +43,13 @@ def set_race_telemetry(year, track):
                     "drs": int(row.get('DRS', 0))
                 })
 
-        # 2. Inserción masiva por lotes
+        # 2. Batch insert
         if all_telemetry:
-            print(f"🚀 Intentando insertar {len(all_telemetry)} registros...")
+            print(f"🚀 Attempting to insert {len(all_telemetry)} records...")
             for i in range(0, len(all_telemetry), BATCH_SIZE):
                 batch = all_telemetry[i:i + BATCH_SIZE]
-                supabase.table("race_replays").insert(batch).execute()
-            print("✅ Inserción completada con éxito")
+                replay_repo.insert_batch(batch)
+            print("✅ Insert completed successfully")
 
         return {"status": "success", "count": len(all_telemetry)}
 

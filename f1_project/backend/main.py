@@ -19,6 +19,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# CORS must be added before other middleware so headers are always present.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[frontend_url or "http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
@@ -29,15 +38,6 @@ async def startup_db_client():
         print("✅ Conexión a Supabase exitosa")
     except Exception as e:
         print(f"❌ Error conectando a Supabase: {e}")
-
-# Middleware to allor frontend conections.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Include the routes from endpoints.py
 app.include_router(api_router)

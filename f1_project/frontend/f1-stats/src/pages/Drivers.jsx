@@ -7,8 +7,13 @@ export default function Drivers() {
     const [driverProfileInput, setDriverProfileInput] = useState({ selection: null, year: "2025", driver: null, number: null })
     return (
         <>
-            <div className="flex flex-col m-6 mb-10 gap-6">
+            <div className="flex flex-col p-6 md:p-12 mb-10 gap-6 relative">
+                <div className="absolute top-0 right-0 w-80 h-80 rounded-full pointer-events-none" />
+
                 <div className="border-l-4 border-red-600 pl-4">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-red-600">Driver Hub</span>
+                    </div>
                     <h1 className="text-3xl font-black uppercase tracking-tighter text-white italic">
                         Elige tu piloto
                     </h1>

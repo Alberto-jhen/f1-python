@@ -92,35 +92,41 @@ def get_h2h_data(year: int, driver1: str, driver2: str):
             if any(v is not None for k, v in entry.items() if k.startswith('driver')):
                 results.append(entry)
 
-        # Season points from local JSON
+        # Season points: try local JSON first, fallback to FastF1 cumulative
         year_data = SEASON_STANDINGS.get(str(year), {})
         d1_num = None
         d2_num = None
-        # Find driver numbers from the first race results
-        for ev_entry in results:
-            if d1_num and d2_num:
-                break
-        # Get numbers from any loaded session
-        try:
-            sample_session = fastf1.get_session(year, results[0]["event"] if results else 1, 'R')
-            sample_session.load(telemetry=False, weather=False, messages=False)
-            for _, row in sample_session.results.iterrows():
-                if row['Abbreviation'] == driver1:
-                    d1_num = str(int(row['DriverNumber']))
-                elif row['Abbreviation'] == driver2:
-                    d2_num = str(int(row['DriverNumber']))
-        except Exception:
-            pass
+        d1_points_fastf1 = 0.0
+        d2_points_fastf1 = 0.0
 
-        d1_standings = year_data.get(d1_num, {})
-        d2_standings = year_data.get(d2_num, {})
+        # Accumulate per-race points from FastF1 across all events
+        for ev_entry in results:
+            try:
+                race_session = fastf1.get_session(year, ev_entry["event"], 'R')
+                race_session.load(telemetry=False, weather=False, messages=False)
+                for _, row in race_session.results.iterrows():
+                    abbr = row['Abbreviation']
+                    pts = float(row.get('Points', 0) or 0)
+                    if abbr == driver1:
+                        d1_points_fastf1 += pts
+                        if d1_num is None:
+                            d1_num = str(int(row['DriverNumber']))
+                    elif abbr == driver2:
+                        d2_points_fastf1 += pts
+                        if d2_num is None:
+                            d2_num = str(int(row['DriverNumber']))
+            except Exception:
+                pass
+
+        d1_json_pts = year_data.get(d1_num, {}).get("pts", 0) if d1_num else 0
+        d2_json_pts = year_data.get(d2_num, {}).get("pts", 0) if d2_num else 0
 
         return {
             "year": year,
             "driver1": driver1,
             "driver2": driver2,
-            "driver1_season_points": d1_standings.get("pts", 0),
-            "driver2_season_points": d2_standings.get("pts", 0),
+            "driver1_season_points": d1_json_pts if d1_json_pts > 0 else d1_points_fastf1,
+            "driver2_season_points": d2_json_pts if d2_json_pts > 0 else d2_points_fastf1,
             "events": results,
         }
 

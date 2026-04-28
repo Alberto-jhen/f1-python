@@ -63,7 +63,7 @@ export default function DriverProfileCard({ data }) {
     }, [driverNumber, year]);
 
     return (
-        <div className="flex bg-slate-900 rounded-3xl overflow-hidden border m-6 animate-fade-in-up"
+        <div className="flex bg-slate-900 rounded-3xl overflow-hidden border m-6 animate-fade-in-up min-h-[700px]"
         style={{ borderColor: team_color ? `#${team_color}` : '#1e293b' }}>
             <div className="w-1/2 relative">
                 <img 

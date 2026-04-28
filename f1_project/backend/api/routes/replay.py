@@ -1,40 +1,30 @@
 from fastapi import APIRouter, HTTPException
-from database.database import get_supabase
+from repositories.replay_repository import replay_repo
+from core.schemas import ReplayResponse
 
 router = APIRouter()
 
 
-@router.get("/service/replay/{year}/{track}/{driver_id}", tags=["Replay service"])
+@router.get("/service/replay/{year}/{track}/{driver_id}", tags=["Replay service"], response_model=ReplayResponse)
 def get_driver_telemetry(year: int, track: str, driver_id: str):
     try:
-        supabase = get_supabase()
         session_id = f"{year}_{track}_R"
-        
-        response = (
-            supabase.table("race_replays")
-            .select("*")
-            .eq("session_id", session_id)
-            .eq("driver", driver_id)
-            .order("timestamp", desc=False)
-            .execute()
-        )
-        
-        data = response.data
-        
+        data = replay_repo.find_by_session_and_driver(session_id, driver_id)
+
         if not data:
             raise HTTPException(
-                status_code=404, 
-                detail=f"No hay datos para el piloto {driver_id} en esta carrera"
+                status_code=404,
+                detail=f"No telemetry data found for driver {driver_id} in this race"
             )
-            
+
         return {
             "session_id": session_id,
             "driver": driver_id,
             "count": len(data),
-            "data": data
+            "data": data,
         }
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error recuperando telemetría de {driver_id}: {e}")
-        raise HTTPException(status_code=500, detail="Error interno al recuperar telemetría")
+        print(f"Error retrieving telemetry for {driver_id}: {e}")
+        raise HTTPException(status_code=500, detail="Internal error retrieving telemetry")

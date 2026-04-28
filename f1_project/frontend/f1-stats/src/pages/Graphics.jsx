@@ -79,6 +79,7 @@ export const GraphicsDashboard = () => {
     const handleClosePreview = () => {
         setImageShown(false);
         if (pythonImage) URL.revokeObjectURL(pythonImage);
+        setPythonImage(null);
     };
 
     const handleSaveConfig = () => {
@@ -135,12 +136,23 @@ export const GraphicsDashboard = () => {
     };
 
     return (
-        <div className="min-h-screen p-6 md:p-12">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen p-6 md:p-12 relative">
+            {/* Decorative background */}
+            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'rgba(220, 38, 38, 0.06)' }} />
+            <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'rgba(100, 116, 139, 0.08)' }} />
+
+            <div className="max-w-7xl mx-auto relative">
                 <div className="mb-10">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                        <span className="text-red-600 text-[10px] font-bold uppercase tracking-[0.3em]">Telemetría en vivo</span>
+                    </div>
                     <h2 className="text-white text-4xl font-black italic uppercase tracking-tighter">
                         Análisis de <span className="text-red-600">Datos</span>
                     </h2>
+                    <p className="text-slate-500 text-sm mt-2 max-w-lg">
+                        Genera gráficos interactivos o exporta reportes oficiales en Python con datos reales de FastF1.
+                    </p>
                 </div>
 
                 <div className="flex border-b border-slate-800 mb-10 gap-8">
@@ -167,7 +179,7 @@ export const GraphicsDashboard = () => {
                                 title="Análisis de ritmo (Individual)"
                                 onSettingsClick={() => openFilters('Análisis de ritmo (Individual)', ['year', 'track', 'session', 'driver'])}
                                 onGenerate={() => generateGraph(fetchDriverLaps, 'Análisis de ritmo (Individual)')} 
-                                onExportPython = {() => handleExportPython(fetchQualyOverviewImage, 'Análisis de ritmo (Individual)')}
+                                onExportPython = {() => handleExportPython(fetchDriverLapsImage, 'Análisis de ritmo (Individual)')}
                                 hasParams={!!savedParams['Análisis de ritmo (Individual)']}
                                 loading={loading === 'Análisis de ritmo (Individual)'}
                             >

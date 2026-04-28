@@ -14,16 +14,16 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 /**
  * Normalize raw standings array from API into our internal format.
- * API shape: { posicion, puntos, victorias, piloto, constructor }
+ * API shape: { position, points, wins, driver, constructor }
  */
 function normalizeStandings(raw) {
     if (!Array.isArray(raw)) return [];
     return raw.map((s, i) => ({
-        position: Number(s.posicion ?? i + 1),
-        driver: s.piloto,
+        position: Number(s.position ?? i + 1),
+        driver: s.driver,
         constructor: s.constructor,
-        points: Number(s.puntos),
-        wins: Number(s.victorias ?? 0),
+        points: Number(s.points),
+        wins: Number(s.wins ?? 0),
     }));
 }
 
@@ -186,7 +186,9 @@ export default function LeaderBoard() {
     ];
 
     return (
-        <div className="p-6 w-full max-w-7xl mx-auto font-sans">
+        <div className="p-6 md:p-12 w-full max-w-7xl mx-auto font-sans relative">
+            {/* Decorative background */}
+            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" />
 
             {/* Next race subtle banner */}
             {nextRace && (
