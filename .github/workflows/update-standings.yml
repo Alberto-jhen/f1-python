@@ -1,0 +1,46 @@
+name: Update Standings
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC (after Sunday races)
+    - cron: "0 6 * * 1"
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: f1_project/backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run standings updater
+        run: python scripts/update_standings.py
+
+      - name: Commit and push if changed
+        run: |
+          cd ../..
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add f1_project/backend/data/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: auto-update standings data [skip ci]"
+            git push
+          fi
