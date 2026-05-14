@@ -16,17 +16,28 @@ Can be automated with cron, GitHub Actions, etc.
 
 import argparse
 import json
+import os
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
 
 import requests
+from dotenv import load_dotenv
+
+# Load .env from backend directory
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 ERGAST_BASE = "https://api.jolpi.ca/ergast/f1"
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 SEASON_PATH = DATA_DIR / "season_standings.json"
 CAREER_PATH = DATA_DIR / "career_standings.json"
+
+from supabase import create_client
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+# Use service_role key to bypass RLS (this is an admin script, not user-facing)
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANON_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL else None
 
 
 # ─── Helpers ───────────────────────────────────────────────
@@ -97,7 +108,7 @@ def fetch_season_standings(year: int) -> dict | None:
 
 
 def update_season(year: int, dry_run: bool = False) -> bool:
-    """Update season_standings.json for the given year."""
+    """Update season standings for the given year."""
     print(f"\n📊 Fetching season standings for {year}...")
     new_standings = fetch_season_standings(year)
     if not new_standings:
@@ -112,9 +123,20 @@ def update_season(year: int, dry_run: bool = False) -> bool:
         print("  (dry run, not saving)")
         return True
 
+    # --- Local JSON (remove when fully migrated to Supabase) ---
     all_seasons = load_json(SEASON_PATH)
     all_seasons[str(year)] = new_standings
     save_json(SEASON_PATH, all_seasons)
+
+    # --- SUPABASE update ---
+    if supabase:
+        rows = [
+            {"year": year, "driver_id": num, "position": s["pos"], "points": s["pts"]}
+            for num, s in new_standings.items()
+        ]
+        supabase.table("season_standings").upsert(rows, on_conflict="year,driver_id").execute()
+        print("  ✅ Supabase season_standings updated")
+
     return True
 
 
@@ -144,7 +166,7 @@ def fetch_latest_race_results(year: int) -> list[dict] | None:
 
 
 def update_career(year: int, dry_run: bool = False) -> bool:
-    """Incrementally update career_standings.json from latest race results."""
+    """Incrementally update career standings from latest race results."""
     print(f"\n🏆 Fetching latest race results for {year}...")
     results = fetch_latest_race_results(year)
     if not results:
@@ -182,8 +204,19 @@ def update_career(year: int, dry_run: bool = False) -> bool:
         print("  (dry run, not saving)")
         return True
 
+    # --- Local JSON (remove when fully migrated to Supabase) ---
     career_data["f1_comprehensive_stats_2018_2025"] = stats
     save_json(CAREER_PATH, career_data)
+
+    # --- SUPABASE update ---
+    if supabase:
+        rows = [
+            {"driver_name": name, "titulos": s["titulos"], "victorias": s["victorias"], "podios": s["podios"]}
+            for name, s in stats.items()
+        ]
+        supabase.table("career_standings").upsert(rows, on_conflict="driver_name").execute()
+        print("  ✅ Supabase career_standings updated")
+
     return True
 
 
