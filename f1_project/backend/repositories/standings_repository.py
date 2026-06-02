@@ -38,7 +38,7 @@ class StandingsRepository:
             result = source.fetch_season(year, driver_number, code)
             if result:
                 return result
-        return {"position": "N/A", "points": 0}
+        return None
 
     # ── OpenF1 season total (separate schema) ──────────────────────
 
@@ -46,7 +46,7 @@ class StandingsRepository:
         result = self._openf1.fetch_season(str(year), str(driver_number))
         if result:
             return result
-        return {"position": "-", "total_points_season": 0, "last_update": None}
+        return None
 
     # ── Global current standings (full grid) ───────────────────────
 
@@ -73,7 +73,7 @@ class StandingsRepository:
         result = self._local.fetch_career(driver_name)
         if result:
             return result
-        return {"titles": 0, "wins": 0, "podiums": 0}
+        return None
 
 
 # Module-level singleton

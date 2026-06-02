@@ -44,7 +44,10 @@ app.include_router(api_router)
 
 @app.get("/")
 async def root():
-    return {"message": "API de F1 funcionando correctamente. Ve a /docs para probarla."}
+    return {
+        "message": "F1 Insights API funcionando correctamente", 
+        "status": "ok"
+    }
 
 if __name__ == "__main__":
     import uvicorn

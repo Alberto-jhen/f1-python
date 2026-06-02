@@ -12,7 +12,10 @@ async def get_season_standings(year: str, number: str, code: str = None):
 
 @router.get("/data/career/standings/{name}", tags=["Standings"], response_model=DriverCareerStats)
 async def get_career_standings(name: str):
-    return standings_service.get_career_championship(name)
+    stats = standings_service.get_career_championship(name)
+    if not stats:
+        raise HTTPException(status_code=404, detail=f"Piloto '{name}' no encontrado en la base de datos")
+    return stats
 
 
 @router.get("/data/drivers/{year}/{driver_number}", tags=["Standings"], response_model=OpenF1Standing)
