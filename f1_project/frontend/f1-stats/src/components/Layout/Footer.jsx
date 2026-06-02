@@ -1,6 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter, faInstagram, faYoutube, faGithub } from '@fortawesome/free-brands-svg-icons';
+import { Link } from 'react-router-dom';
 
 export const Footer = () => {
     return (
@@ -20,22 +21,21 @@ export const Footer = () => {
                         </p>
                     </div>
 
-                    {/* Links - Usamos un hover en Cyan o Amber para el contraste */}
-                    <div>
-                        <h4 className="text-white font-bold uppercase text-xs tracking-widest mb-6">Temporadas</h4>
-                        <ul className="space-y-4 text-sm">
-                            <li><a href="#" className="hover:text-cyan-400 transition-colors">Clasificación 2025</a></li>
-                            <li><a href="#" className="hover:text-cyan-400 transition-colors">Archivo Histórico</a></li>
-                            <li><a href="#" className="hover:text-cyan-400 transition-colors">Comparador</a></li>
-                        </ul>
-                    </div>
-
                     <div>
                         <h4 className="text-white font-bold uppercase text-xs tracking-widest mb-6">Legal</h4>
                         <ul className="space-y-4 text-sm">
                             <li><a href="#" className="hover:text-cyan-400 transition-colors">Privacidad</a></li>
                             <li><a href="#" className="hover:text-cyan-400 transition-colors">Términos</a></li>
                             <li><a href="#" className="hover:text-cyan-400 transition-colors">Cookies</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 className="text-white font-bold uppercase text-xs tracking-widest mb-6">Soporte</h4>
+                        <ul className="space-y-4 text-sm">
+                            <Link to="/form">
+                                <li><p className="hover:text-cyan-400 transition-colors">Formulario de contacto</p></li>
+                            </Link>
                         </ul>
                     </div>
 

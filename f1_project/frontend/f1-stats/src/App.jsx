@@ -11,7 +11,7 @@ function App() {
     return (
         <Routes>
             <Route path="/" element={<Layout headerVariant="dynamic"> <Login /> </Layout>}/>
-            <Route path="/form" element={<Form />}/>
+            <Route path="/form" element={<Layout> <Form /> </Layout>}/>
             <Route path="/graphics" element={<Layout> <GraphicsDashboard /> </Layout>}/>
             <Route path="/drivers" element={<Layout> <Drivers /> </Layout>}/>
             <Route path="/replays" element={<Layout> <Replays /> </Layout>} />

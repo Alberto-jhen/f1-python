@@ -1,5 +1,4 @@
 import formBg from '../assets/form-bg.svg';
-import { MobileMenu } from '../components/Layout/Header.jsx'
 import { useState } from 'react'
 
 export const Form = () => {
@@ -15,9 +14,6 @@ export const Form = () => {
             </div>
 
             <main className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 sm:p-12">
-                <div className="absolute top-8 right-8 hover:opacity-90 transition-opacity">
-                    <MobileMenu />
-                </div>
                 <div className="w-full max-w-md">
                     <h3 className="text-white text-3xl font-bold mb-2">Envía un mensaje</h3>
                     <p className="text-slate-400 mb-8">¿Tienes alguna consulta sobre el proyecto o relacionado? <br/>Escríbeme.</p>
