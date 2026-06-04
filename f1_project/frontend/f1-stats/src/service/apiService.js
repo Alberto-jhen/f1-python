@@ -231,14 +231,67 @@ export const fetchH2HData = async (year, driver1, driver2) => {
 }
 
 // ---------- REPLAY SERVICE ----------
-export const deployReplayService = async (year, track) => {
+export const triggerDataIngestion = async (year, track) => {
     try {
-        const response = await fetch(`${BASE_URL}/service/replay/${year}/${track}`);
-        if(!response.ok) throw new Error('Error al obtener los datos de replay');
+        const response = await fetch(`${BASE_URL}/service/replay/ingest`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ year: parseInt(year), track })
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error en la ingesta de telemetría');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error en triggerDataIngestion: ", error);
+        throw error;
+    }
+};
+
+export const getReplayBounds = async (year, track) => {
+    try {
+        const response = await fetch(`${BASE_URL}/service/replay/${year}/${track}/bounds`);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al obtener límites de la telemetría');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error en getReplayBounds: ", error);
+        throw error;
+    }
+};
+
+export const deployReplayService = async (year, track, startTime = 0, endTime = 300, driverId = null) => {
+    try {
+        // 1. Preparamos los parámetros de búsqueda (query parameters)
+        const params = new URLSearchParams({
+            start_time: startTime,
+            end_time: endTime
+        });
+        
+        // 2. Si nos piden un piloto en concreto, lo añadimos. Si no, lo omitimos (trae todos)
+        if (driverId) {
+            params.append('driver_id', driverId);
+        }
+
+        // 3. Montamos la URL final
+        const endpointUrl = `${BASE_URL}/service/replay/${year}/${track}?${params.toString()}`;
+        
+        const response = await fetch(endpointUrl);
+        
+        if(!response.ok) {
+            // Es buena práctica capturar el mensaje de error del backend si existe
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al obtener los datos de replay');
+        }
 
         return await response.json();
     } catch (error) {
-        console.error("Fetch error: ", error);
+        console.error("Fetch error en deployReplayService: ", error);
         throw error;
     }
 }
