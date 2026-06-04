@@ -3,13 +3,6 @@ import { GenericCombobox } from "@/components/GenericComobobox";
 import { RaceMap2D } from "../components/RaceMap2D"; 
 import { fetchYearSchedule } from "@/service/apiService";
 
-const BackgroundGlow = () => (
-    <>
-        <div className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'rgba(220, 38, 38, 0.06)' }} />
-        <div className="absolute bottom-20 left-10 w-64 h-64 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'rgba(100, 116, 139, 0.08)' }} />
-    </>
-);
-
 const PageHeader = () => (
     <div className="mb-10 border-l-4 border-red-600 pl-4">
         <div className="flex items-center gap-2 mb-2">
@@ -85,7 +78,6 @@ export const Replays = () => {
 
     return (
         <div className="p-6 md:p-12 w-full mx-auto max-w-7xl relative min-h-[80vh]">
-            <BackgroundGlow />
             <PageHeader />
 
             <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-800 backdrop-blur-sm relative z-10">

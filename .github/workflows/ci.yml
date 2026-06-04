@@ -27,14 +27,7 @@ jobs:
         run: pip install -r ../../requirements.txt
 
       - name: Check syntax (compile all .py files)
-        run: python -m py_compile main.py && python -c "
-          import py_compile, pathlib, sys;
-          errors = [];
-          [errors.append(str(e)) for f in pathlib.Path('.').rglob('*.py')
-           if f.name != '__pycache__'
-           for e in [None] if not (lambda p: py_compile.compile(str(p), doraise=True))(f) or False];
-          " 2>&1 || true
-        # Simplified: just verify all files parse without SyntaxError
+        run: python -m compileall -q .
       
       - name: Verify all imports resolve
         run: |
