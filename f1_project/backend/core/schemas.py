@@ -125,6 +125,21 @@ class ReplayResponse(BaseModel):
 
 
 # ──────────────────────────────────────────────
+# Circuits info
+# ──────────────────────────────────────────────
+
+class CircuitInfo(BaseModel):
+    season_year: int
+    name: str
+    round: int
+    race_date: str
+    description: str
+    length_km: float
+    lap_record: str
+    total_laps: int
+    poster_url: Optional[str] = None
+
+# ──────────────────────────────────────────────
 # Generic
 # ──────────────────────────────────────────────
 

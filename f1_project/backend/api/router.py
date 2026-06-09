@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from api.routes import graphics, laps, drivers, standings, schedule, contact, replay, h2h
+from api.routes import graphics, laps, drivers, standings, schedule, contact, replay, h2h, circuits
 
 router = APIRouter()
 
@@ -12,3 +12,4 @@ router.include_router(schedule.router)
 router.include_router(contact.router)
 router.include_router(replay.router)
 router.include_router(h2h.router)
+router.include_router(circuits.router)

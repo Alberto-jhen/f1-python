@@ -295,3 +295,17 @@ export const deployReplayService = async (year, track, startTime = 0, endTime = 
         throw error;
     }
 }
+
+// ---------- CIRCUITS SERVICE ----------
+export const getCircuitVisualInfo = async (seasonYear, roundNum) => {
+    try {
+        const response = await fetch(`${BASE_URL}/circuits/${seasonYear}/${roundNum}`);
+        if (!response.ok) {
+            throw new Error('Circuit details not found');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching circuit visuals:", error);
+        return null;
+    }
+};

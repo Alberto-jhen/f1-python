@@ -51,4 +51,4 @@ with open('data/season_standings.json') as f:
             
     supabase.table('season_standings').upsert(records).execute()
 
-print("¡Base de datos poblada con éxito!")
+print("Conexión exitosa con la base de datos")
