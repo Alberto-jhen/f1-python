@@ -202,7 +202,7 @@ export const RaceMap2D = ({ year, track }) => {
                 previousStandings.current = rawSorted;
             } else {
                 // THRESHOLD: Minimum distance advantage (in meters) required to confirm an overtake
-                const THRESHOLD = 15; 
+                const THRESHOLD = 25; 
                 
                 let currentOrder = [...previousStandings.current];
 

@@ -52,7 +52,7 @@ export const Footer = () => {
                     <div className="lg:col-span-1">
                         <h4 className="text-white font-bold uppercase text-xs tracking-widest mb-6">Sobre mí</h4>
                         <ul className="space-y-4 text-sm">
-                            <li><a href="#" className="hover:text-cyan-400 transition-colors">Privacidad</a></li>
+                            <li><a href="#" className="hover:text-cyan-400 transition-colors">Trayectoria</a></li>
                         </ul>
                     </div>
 

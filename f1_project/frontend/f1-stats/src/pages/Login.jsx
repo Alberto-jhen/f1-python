@@ -70,7 +70,7 @@ export default function Login() {
         { name: "Alpine", drivers: "Gasly - Colapinto", gradient: "from-pink-500/20", border: "border-pink-500", short: "ALP", logo: "/logos/alpine.png" },
         { name: "Haas", drivers: "Ocon - Bearman", gradient: "from-gray-500/20", border: "border-gray-500", short: "HAA", logo: "/logos/haas.png" },
         { name: "Racing Bulls", drivers: "Lawson - Lindblad", gradient: "from-blue-500/20", border: "border-blue-500", short: "VCARB", logo: "/logos/vcarb.png" },
-        { name: "Kick Sauber", drivers: "Hülkenberg - Bortoleto", gradient: "from-green-400/20", border: "border-green-400", short: "SAU", logo: "/logos/sauber.png" },
+        { name: "Audi", drivers: "Hülkenberg - Bortoleto", gradient: "from-slate-400/20", border: "border-slate-400", short: "AUD", logo: "/logos/audi.svg" },
         { name: "Cadillac", drivers: "Bottas - Pérez", gradient: "from-yellow-500/20", border: "border-yellow-500", short: "CAD", logo: "/logos/cadillac.png" },
     ];
 

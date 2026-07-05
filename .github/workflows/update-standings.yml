@@ -23,7 +23,7 @@ jobs:
           python-version: "3.12"
           cache: pip
           # Le indicamos la ruta exacta desde la raíz para la caché
-          cache-dependency-path: f1_project/backend/requirements.txt
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
         # Ahora sí, instala TODO lo que hay en tu requirements.txt
