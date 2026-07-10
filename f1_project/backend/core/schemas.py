@@ -140,6 +140,20 @@ class CircuitInfo(BaseModel):
     poster_url: Optional[str] = None
 
 # ──────────────────────────────────────────────
+# ML / Degradación de neumáticos
+# ──────────────────────────────────────────────
+
+class DegradationPoint(BaseModel):
+    x: int  # TyreLife (vuelta dentro del stint)
+    y: float  # LapTime en segundos
+
+
+class DegradationPredictionResponse(BaseModel):
+    real: list[DegradationPoint]
+    predicted: list[DegradationPoint]
+
+
+# ──────────────────────────────────────────────
 # Generic
 # ──────────────────────────────────────────────
 

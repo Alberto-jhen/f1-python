@@ -309,3 +309,20 @@ export const getCircuitVisualInfo = async (seasonYear, roundNum) => {
         return null;
     }
 };
+
+// ---------- ML / DEGRADATION ----------
+export const fetchDegradationPrediction = async (year, track, driver) => {
+    try {
+        const response = await fetch(
+            `${BASE_URL}/predict/degradation/${year}/${encodeURIComponent(track)}/${driver}`
+        );
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al obtener la predicción de degradación');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error en fetchDegradationPrediction:", error);
+        throw error;
+    }
+};

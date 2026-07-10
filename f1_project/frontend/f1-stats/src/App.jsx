@@ -6,6 +6,7 @@ import Drivers from './pages/Drivers.jsx'
 import { Layout } from './components/Layout/Layout.jsx'
 import { Replays } from './pages/Replays.jsx'
 import LeaderBoard from "./pages/LeaderBoard.jsx";
+import { DegradationTest } from './pages/DegradationTest.jsx';
 
 function App() {
     return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="/drivers" element={<Layout> <Drivers /> </Layout>}/>
             <Route path="/replays" element={<Layout> <Replays /> </Layout>} />
             <Route path="/leaderboard" element={<Layout> <LeaderBoard /> </Layout>}/>
+            <Route path="/degradation-test" element={<Layout> <DegradationTest /> </Layout>}/>
         </Routes>
     )
 }

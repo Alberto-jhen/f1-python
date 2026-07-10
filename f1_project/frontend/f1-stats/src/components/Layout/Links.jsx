@@ -25,6 +25,11 @@ export const Links = () => {
                     Clasificación
                 </Link>
             </li>
+            <li>
+                <Link to="/degradation-test" className={linkStyle}>
+                    Degradación
+                </Link>
+            </li>
         </ul>
     );
 };
