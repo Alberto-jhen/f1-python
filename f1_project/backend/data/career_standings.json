@@ -8,7 +8,7 @@
     "Max Verstappen": {
       "titulos": 4,
       "victorias": 71,
-      "podios": 121
+      "podios": 122
     },
     "Sebastian Vettel": {
       "titulos": 4,
@@ -43,7 +43,7 @@
     "Charles Leclerc": {
       "titulos": 0,
       "victorias": 10,
-      "podios": 44
+      "podios": 45
     },
     "Sergio Pérez": {
       "titulos": 0,
@@ -222,8 +222,8 @@
     },
     "Andrea Kimi Antonelli": {
       "titulos": 0,
-      "victorias": 0,
-      "podios": 1
+      "victorias": 1,
+      "podios": 2
     },
     "Arvid Lindblad": {
       "titulos": 0,
