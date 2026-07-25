@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { deployReplayService, triggerDataIngestion, getReplayBounds } from '@/service/apiService';
+import { TelemetryCharts } from './TelemetryCharts';
 
 const lerp = (start, end, t) => start + (end - start) * t;
 
@@ -23,28 +24,37 @@ export const RaceMap2D = ({ year, track }) => {
     const [selectedDriver, setSelectedDriver] = useState('ALL');
     const [replayTime, setReplayTime] = useState(0); 
     const [trackBounds, setTrackBounds] = useState(null);
+    const [isUsingCachedData, setIsUsingCachedData] = useState(false);
 
     const [loadedUntil, setLoadedUntil] = useState(0);
     const [isFetchingBackground, setIsFetchingBackground] = useState(false);
     const CHUNK_SIZE = 300; 
-    const BUFFER_THRESHOLD = 60; 
+    const BUFFER_THRESHOLD = 70; 
 
     const loadInitialData = async () => {
         setIsLoading(true);
+        setIsUsingCachedData(false);
         try {
-            // Step 1: Trigger dynamic data ingestion for FastF1/Supabase
-            console.log(`🚀 Requesting backend ingestion for ${track} (${year})...`);
-            await triggerDataIngestion(year, track);
+            // Step 1: Check if telemetry already exists in the database.
+            let boundsRes = await getReplayBounds(year, track);
+            const hasCachedData = boundsRes.end_time > 0 && boundsRes.end_time > boundsRes.start_time;
 
-            // Step 2: Retrieve the real start and end timestamps from Supabase
-            console.log(`📊 Fetching telemetry bounds for ${track} (${year})...`);
-            const boundsRes = await getReplayBounds(year, track);
+            if (!hasCachedData) {
+                // No cached data: trigger ingestion from FastF1.
+                console.log(`🚀 No cached data found. Triggering ingestion for ${track} (${year})...`);
+                await triggerDataIngestion(year, track);
+                boundsRes = await getReplayBounds(year, track);
+            } else {
+                console.log(`📦 Using cached telemetry for ${track} (${year}).`);
+                setIsUsingCachedData(true);
+            }
+
             const START_TIME = boundsRes.start_time;
             const END_TIME = START_TIME + CHUNK_SIZE;
 
             console.log(`⏱️ Bounds retrieved. Real start: ${START_TIME}s. Initial end: ${END_TIME}s.`);
 
-            // Step 3: Load the first telemetry chunk
+            // Step 2: Load the first telemetry chunk.
             const response = await deployReplayService(year, track, START_TIME, END_TIME);
             const data = response.data;
             
@@ -65,7 +75,7 @@ export const RaceMap2D = ({ year, track }) => {
                 setTrackBounds({ minX, maxX, minY, maxY });
             }
 
-            // Step 4: Synchronize playback clock to real START_TIME
+            // Step 3: Synchronize playback clock to real START_TIME.
             setReplayTime(START_TIME);
             setLoadedUntil(END_TIME); 
         } catch (error) {
@@ -202,7 +212,7 @@ export const RaceMap2D = ({ year, track }) => {
                 previousStandings.current = rawSorted;
             } else {
                 // THRESHOLD: Minimum distance advantage (in meters) required to confirm an overtake
-                const THRESHOLD = 25; 
+                const THRESHOLD = 40; 
                 
                 let currentOrder = [...previousStandings.current];
 
@@ -290,8 +300,14 @@ export const RaceMap2D = ({ year, track }) => {
                         disabled={isLoading}
                         className="px-4 py-2 bg-zinc-800 text-white text-sm rounded-md hover:bg-zinc-700 font-bold transition-colors"
                     >
-                        {isLoading ? "CARGANDO..." : "1. DESCARGAR TELEMETRÍA"}
+                        {isLoading ? "CARGANDO..." : "1. CARGAR TELEMETRÍA"}
                     </button>
+                    {isUsingCachedData && telemetryData.length > 0 && (
+                        <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            Datos en caché
+                        </span>
+                    )}
                     <div className="h-6 w-px bg-zinc-700 mx-2"></div>
                     <button 
                         onClick={() => setIsPlaying(!isPlaying)}
@@ -393,6 +409,15 @@ export const RaceMap2D = ({ year, track }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Live telemetry charts for the selected driver. */}
+            {selectedDriver !== 'ALL' && (
+                <TelemetryCharts
+                    telemetryData={telemetryData}
+                    driver={selectedDriver}
+                    currentTime={replayTime}
+                />
+            )}
         </div>
     );
 };

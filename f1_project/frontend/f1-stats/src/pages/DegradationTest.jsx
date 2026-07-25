@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     LineChart,
     Line,
@@ -9,7 +9,8 @@ import {
     Legend,
     ResponsiveContainer,
 } from 'recharts';
-import { fetchDegradationPrediction } from '../service/apiService.js';
+import { GenericCombobox } from '@/components/GenericComobobox';
+import { fetchDegradationPrediction, fetchYearSchedule, fetchDriversFullNamesByYear } from '../service/apiService.js';
 
 const formatLapTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return '';
@@ -21,11 +22,75 @@ const formatLapTime = (seconds) => {
 
 export const DegradationTest = () => {
     const [year, setYear] = useState(2025);
-    const [track, setTrack] = useState('Monza');
-    const [driver, setDriver] = useState('VER');
+    const [track, setTrack] = useState('');
+    const [driver, setDriver] = useState('');
     const [chartData, setChartData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const [trackOptions, setTrackOptions] = useState([]);
+    const [driverOptions, setDriverOptions] = useState([]);
+    const [isLoadingTracks, setIsLoadingTracks] = useState(false);
+    const [isLoadingDrivers, setIsLoadingDrivers] = useState(false);
+
+    const yearOptions = [
+        { label: '2026', value: 2026 },
+        { label: '2025', value: 2025 },
+        { label: '2024', value: 2024 },
+        { label: '2023', value: 2023 },
+        { label: '2022', value: 2022 },
+        { label: '2021', value: 2021 },
+        { label: '2020', value: 2020 },
+        { label: '2019', value: 2019 },
+        { label: '2018', value: 2018 },
+    ];
+
+    // Load the race calendar for the selected year, then reset the dependent fields.
+    useEffect(() => {
+        const loadTracks = async () => {
+            if (year) {
+                setIsLoadingTracks(true);
+                try {
+                    const schedule = await fetchYearSchedule(year);
+                    setTrackOptions(schedule.tracks.map((trackName) => ({ label: trackName, value: trackName })));
+                } catch (err) {
+                    console.error('Error loading tracks:', err);
+                    setTrackOptions([]);
+                } finally {
+                    setIsLoadingTracks(false);
+                }
+            } else {
+                setTrackOptions([]);
+            }
+            setTrack('');
+            setDriver('');
+        };
+
+        loadTracks();
+    }, [year]);
+
+    // Load the race entry list for the selected year and track, then reset the driver.
+    useEffect(() => {
+        const loadDrivers = async () => {
+            if (year && track) {
+                setIsLoadingDrivers(true);
+                try {
+                    const data = await fetchDriversFullNamesByYear(year, track, 'R');
+                    setDriverOptions(data);
+                } catch (err) {
+                    console.error('Error loading drivers:', err);
+                    setDriverOptions([]);
+                } finally {
+                    setIsLoadingDrivers(false);
+                }
+            } else {
+                setDriverOptions([]);
+            }
+            setDriver('');
+        };
+
+        loadDrivers();
+    }, [year, track]);
 
     const handleLoad = async () => {
         setLoading(true);
@@ -65,35 +130,51 @@ export const DegradationTest = () => {
                     </p>
                 </div>
 
-                <div className="flex flex-wrap gap-4 mb-6">
-                    <input
-                        type="number"
-                        value={year}
-                        onChange={(e) => setYear(Number(e.target.value))}
-                        placeholder="Año"
-                        className="bg-slate-900 border border-slate-800 rounded-lg px-4 py-2.5 text-white text-sm outline-none focus:border-red-600 transition-colors"
-                    />
-                    <input
-                        type="text"
-                        value={track}
-                        onChange={(e) => setTrack(e.target.value)}
-                        placeholder="Circuito (ej. Monza)"
-                        className="bg-slate-900 border border-slate-800 rounded-lg px-4 py-2.5 text-white text-sm outline-none focus:border-red-600 transition-colors"
-                    />
-                    <input
-                        type="text"
-                        value={driver}
-                        onChange={(e) => setDriver(e.target.value.toUpperCase())}
-                        placeholder="Piloto (ej. VER)"
-                        className="bg-slate-900 border border-slate-800 rounded-lg px-4 py-2.5 text-white text-sm outline-none focus:border-red-600 transition-colors uppercase"
-                    />
-                    <button
-                        onClick={handleLoad}
-                        disabled={loading}
-                        className="px-5 py-2.5 bg-red-600 text-white text-sm font-bold uppercase rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer"
-                    >
-                        {loading ? 'Cargando...' : 'Cargar stint'}
-                    </button>
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="w-full md:w-1/4">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5 block">
+                            Temporada
+                        </label>
+                        <GenericCombobox
+                            options={yearOptions}
+                            value={year}
+                            onChange={setYear}
+                            placeholder="Selecciona año"
+                        />
+                    </div>
+                    <div className="w-full md:w-1/3">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5 block">
+                            Circuito
+                        </label>
+                        <GenericCombobox
+                            options={trackOptions}
+                            value={track}
+                            onChange={setTrack}
+                            placeholder={isLoadingTracks ? 'Cargando circuitos...' : 'Selecciona circuito'}
+                            disabled={!year || isLoadingTracks}
+                        />
+                    </div>
+                    <div className="w-full md:w-1/3">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5 block">
+                            Piloto
+                        </label>
+                        <GenericCombobox
+                            options={driverOptions}
+                            value={driver}
+                            onChange={setDriver}
+                            placeholder={isLoadingDrivers ? 'Cargando pilotos...' : 'Selecciona piloto'}
+                            disabled={!track || isLoadingDrivers}
+                        />
+                    </div>
+                    <div className="flex items-end">
+                        <button
+                            onClick={handleLoad}
+                            disabled={loading || !year || !track || !driver}
+                            className="px-5 py-2.5 bg-red-600 text-white text-sm font-bold uppercase rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer"
+                        >
+                            {loading ? 'Cargando...' : 'Cargar stint'}
+                        </button>
+                    </div>
                 </div>
 
                 {error && (
