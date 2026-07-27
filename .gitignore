@@ -221,3 +221,4 @@ cache_fastf1/
 *.sqlite
 cache_fastf1/
 f1_project/backend/cache_fastf1/
+*.pkl
