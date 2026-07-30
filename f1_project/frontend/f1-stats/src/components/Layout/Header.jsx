@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'; 
 import { Links } from './Links';
+import { DropdownMenuAvatar } from '@/components/custom/DropdownMenuAvatar';
 
 export const Header = ({ variant = "solid" }) => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -35,8 +36,14 @@ export const Header = ({ variant = "solid" }) => {
             <nav className="absolute left-1/2 transform -translate-x-1/2 hidden md:block">
                 <Links />
             </nav>
-            
-            <div className="w-30 z-10">
+            <div className='z-10 flex items-center justify-end gap-4 shrink-0'>
+                <Link
+                    to='/register'
+                    className='text-zinc-400 text-xs font-semibold uppercase tracking-widest hover:text-white transition-colors duration-300 px-3 py-2 border border-zinc-700 rounded-md hover:border-zinc-500 hover:bg-zinc-800/50'
+                >
+                    Register
+                </Link>
+                <DropdownMenuAvatar />
             </div>
         </header>
     );

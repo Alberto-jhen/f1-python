@@ -7,6 +7,8 @@ import { Layout } from './components/Layout/Layout.jsx'
 import { Replays } from './pages/Replays.jsx'
 import LeaderBoard from "./pages/LeaderBoard.jsx";
 import { DegradationTest } from './pages/DegradationTest.jsx';
+import { GlobeCalendar } from './pages/GlobeCalendar.jsx';
+import { Register } from './pages/Register.jsx';
 
 function App() {
     return (
@@ -18,6 +20,8 @@ function App() {
             <Route path="/replays" element={<Layout> <Replays /> </Layout>} />
             <Route path="/leaderboard" element={<Layout> <LeaderBoard /> </Layout>}/>
             <Route path="/degradation-test" element={<Layout> <DegradationTest /> </Layout>}/>
+            <Route path="/globe-calendar" element={<Layout> <GlobeCalendar /> </Layout>}/>
+            <Route path="/register" element={ <Register /> }/>
         </Routes>
     )
 }
