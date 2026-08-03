@@ -4,7 +4,7 @@ import {
   CreditCardIcon,
   LogOutIcon,
 } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,10 +15,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { supabase } from '@/lib/supabase.js';
 
 export function DropdownMenuAvatar() {
+  const navigate = useNavigate();
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='size-12 rounded-full cursor-pointer'>
           <Avatar size='lg' className='size-11'>
@@ -31,21 +33,29 @@ export function DropdownMenuAvatar() {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <BadgeCheckIcon />
-            Account
+            Cuenta
           </DropdownMenuItem>
           <DropdownMenuItem>
             <CreditCardIcon />
-            Billing
+            Facturación
           </DropdownMenuItem>
           <DropdownMenuItem>
             <BellIcon />
-            Notifications
+            Notificaciones
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem
+          className='cursor-pointer'
+          onClick={async () => {
+            const { error } = await supabase.auth.signOut();
+            navigate('/'); 
+            if (error) {
+              console.error('Error al cerrar sesión:', error);
+            }
+          }}>
           <LogOutIcon />
-          Sign Out
+          Cerrar sesión
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

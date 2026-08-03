@@ -29,6 +29,18 @@ const Toaster = ({
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
+          "--success-bg": "#22c55e",
+          "--success-text": "#ffffff",
+          "--success-border": "#16a34a",
+          "--error-bg": "#ef4444",
+          "--error-text": "#ffffff",
+          "--error-border": "#dc2626",
+          "--warning-bg": "#f59e0b",
+          "--warning-text": "#ffffff",
+          "--warning-border": "#d97706",
+          "--info-bg": "#3b82f6",
+          "--info-text": "#ffffff",
+          "--info-border": "#2563eb",
           "--border-radius": "var(--radius)"
         }
       }

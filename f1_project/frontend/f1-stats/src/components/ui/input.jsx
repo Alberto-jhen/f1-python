@@ -1,6 +1,7 @@
 "use client";;
 import * as React from "react";
 import { cn } from "@/lib/utils";
+// eslint-disable-next-line no-unused-vars
 import { useMotionTemplate, useMotionValue, motion } from "motion/react";
 
 const Input = React.forwardRef(({ className, type, ...props }, ref) => {

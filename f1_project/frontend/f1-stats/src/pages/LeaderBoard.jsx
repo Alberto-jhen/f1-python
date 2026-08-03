@@ -253,7 +253,7 @@ export default function LeaderBoard() {
                         <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400 mb-1">
                             Clasificación de pilotos
                         </h3>
-                        <p className="text-[11px] text-zinc-600">
+                        <p className="text-[13px] text-zinc-600">
                             Temporada {CURRENT_YEAR}
                             {selectedRaceIndex >= 0 && raceCalendar[selectedRaceIndex]
                                 ? ` — Acumulado hasta ${raceCalendar[selectedRaceIndex].value} (R${selectedRaceIndex + 1})`
@@ -262,7 +262,7 @@ export default function LeaderBoard() {
 
                         <div className="flex items-start gap-2 mt-3 mb-1 bg-yellow-500/5 border border-yellow-600/20 rounded-lg px-3 py-2">
                             <span className="text-yellow-500 text-xs mt-0.5">⚠</span>
-                            <p className="text-[11px] text-yellow-600/80 leading-relaxed">
+                            <p className="text-[13px] text-yellow-600/80 leading-relaxed">
                                 Los puntos de las carreras sprint se actualizan junto con los resultados de la carrera principal del Gran Premio.
                             </p>
                         </div>

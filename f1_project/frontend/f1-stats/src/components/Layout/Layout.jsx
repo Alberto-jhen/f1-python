@@ -1,6 +1,5 @@
 import { Header } from './Header.jsx';
 import { Footer } from './Footer.jsx';
-import { Toaster } from '@/components/ui/sonner.jsx'
 
 export const Layout = ({ children, headerVariant }) => {
     return (
@@ -12,7 +11,6 @@ export const Layout = ({ children, headerVariant }) => {
             </main>
 
             <Footer />
-            <Toaster />
         </div>
     );
 };

@@ -1,8 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { Header } from './components/Layout/Header.jsx'
-import { Footer } from './components/Layout/Footer.jsx'
-import { GraphicsDashboard } from './pages/Graphics.jsx'
 import App from './App.jsx'
 import { BrowserRouter } from "react-router-dom";
 

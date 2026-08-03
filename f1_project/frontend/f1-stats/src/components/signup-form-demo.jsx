@@ -1,94 +1,179 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import {
-  IconBrandGithub,
-  IconBrandGoogle,
-  IconBrandOnlyfans,
-} from "@tabler/icons-react";
+import { cn, emailValidator, passwordCompare, usernameValidator } from "@/lib/utils";
+import { toast } from "sonner";
+import { IconBrandGoogle, IconInfoCircle } from "@tabler/icons-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export default function SignupFormDemo() {
+export default function SignupFormDemo({ onSubmit, mode = 'signup' }) {
+  const isLogin = mode === 'login';
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const inputClasses = (field) =>
+    errors[field] ? "ring-1 ring-red-500" : ""; 
+
+  const clearError = (field) => {
+    setErrors((prev) => ({ ...prev, [field]: false }));
+  };
+
+  const validate = () => {
+    const nextErrors = {};
+
+    if (!isLogin) {
+      if (!username) nextErrors.username = true;
+      else if (!usernameValidator(username)) nextErrors.username = true;
+    }
+
+    if (!email) nextErrors.email = true;
+    else if (!emailValidator(email)) nextErrors.email = true;
+
+    if (!password) nextErrors.password = true;
+    else if (!isLogin && password.length < 8) nextErrors.password = true;
+
+    if (!isLogin && !confirmPassword) nextErrors.confirmPassword = true;
+    else if (!isLogin && !passwordCompare(password, confirmPassword)) nextErrors.confirmPassword = true;
+
+    return nextErrors;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted");
+
+    const nextErrors = validate();
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+
+      if (!email || !password || (!isLogin && (!username || !confirmPassword))) {
+        toast.error("Por favor, completa todos los campos");
+      } else if (!isLogin && !usernameValidator(username)) {
+        toast.error("El nombre de usuario solo puede contener letras, números, guiones y guiones bajos (3-30 caracteres)");
+      } else if (!emailValidator(email)) {
+        toast.error("Introduce un correo electrónico válido");
+      } else if (!isLogin && !passwordCompare(password, confirmPassword)) {
+        toast.error("Las contraseñas no coinciden");
+      } else if (!isLogin && password.length < 8) {
+        toast.error("La contraseña debe tener al menos 8 caracteres");
+      }
+
+      return;
+    }
+
+    setErrors({});
+    if (onSubmit) {
+      if (isLogin) {
+        onSubmit({ email, password });
+      } else {
+        onSubmit({ username, email, password });
+      }
+    }
   };
+
+  const handleGoogleAuth = () => {
+    toast.info(isLogin ? 'Inicio de sesión con Google próximamente' : 'Registro con Google próximamente');
+  };
+
   return (
     <div
-      className="shadow-input mx-auto w-full max-w-md rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
-      <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
-        Welcome to Aceternity
-      </h2>
-      <p className="mt-2 max-w-sm text-sm text-neutral-600 dark:text-neutral-300">
-        Login to aceternity if you can because we don&apos;t have a login flow
-        yet
-      </p>
-      <form className="my-8" onSubmit={handleSubmit}>
-        <div
-          className="mb-4 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+      className="shadow-input mx-auto w-full max-w-md rounded-2xl bg-white p-4 md:p-8 dark:bg-black">
+      <TooltipProvider>
+        <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+          {!isLogin && (
+            <LabelInputContainer>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="username">Nombre de usuario</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                      <IconInfoCircle className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Entre 3 y 30 caracteres. Solo letras, números, guiones y guiones bajos.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Input id="username" placeholder="tu_usuario" type="text" value={username} onChange={(e) => { setUsername(e.target.value); clearError('username'); }} className={inputClasses('username')} />
+            </LabelInputContainer>
+          )}
           <LabelInputContainer>
-            <Label htmlFor="firstname">First name</Label>
-            <Input id="firstname" placeholder="Tyler" type="text" />
+            <div className="flex items-center gap-2">
+              <Label htmlFor="email">Correo electrónico</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                    <IconInfoCircle className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Usarás este correo para iniciar sesión.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <Input id="email" placeholder="piloto@f1insights.com" type="email" value={email} onChange={(e) => { setEmail(e.target.value); clearError('email'); }} className={inputClasses('email')} />
           </LabelInputContainer>
           <LabelInputContainer>
-            <Label htmlFor="lastname">Last name</Label>
-            <Input id="lastname" placeholder="Durden" type="text" />
+            <div className="flex items-center gap-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                    <IconInfoCircle className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Mínimo 8 caracteres. Recomendado: mezcla de letras, números y símbolos.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <Input id="password" placeholder="••••••••" type="password" value={password} onChange={(e) => { setPassword(e.target.value); clearError('password'); }} className={inputClasses('password')} />
           </LabelInputContainer>
-        </div>
-        <LabelInputContainer className="mb-4">
-          <Label htmlFor="email">Email Address</Label>
-          <Input id="email" placeholder="projectmayhem@fc.com" type="email" />
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-4">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" placeholder="••••••••" type="password" />
-        </LabelInputContainer>
-        <LabelInputContainer className="mb-8">
-          <Label htmlFor="twitterpassword">Your twitter password</Label>
-          <Input id="twitterpassword" placeholder="••••••••" type="twitterpassword" />
-        </LabelInputContainer>
+          {!isLogin && (
+            <LabelInputContainer>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+                      <IconInfoCircle className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Repite la contraseña para verificar que no hay errores.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Input id="confirmPassword" placeholder="••••••••" type="password" value={confirmPassword} onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword'); }} className={inputClasses('confirmPassword')} />
+            </LabelInputContainer>
+          )}
 
-        <button
-          className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
-          type="submit">
-          Sign up &rarr;
-          <BottomGradient />
-        </button>
-
-        <div
-          className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
-
-        <div className="flex flex-col space-y-4">
           <button
-            className="group/btn shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
+            className="group/btn cursor-pointer relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
             type="submit">
-            <IconBrandGithub className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-sm text-neutral-700 dark:text-neutral-300">
-              GitHub
-            </span>
+            {isLogin ? 'Iniciar sesión' : 'Crear cuenta'} &rarr;
             <BottomGradient />
           </button>
+
+          <div
+            className="h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
+
           <button
-            className="group/btn shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
-            type="submit">
+            className="group/btn cursor-pointer shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
+            type="button"
+            onClick={handleGoogleAuth}>
             <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
             <span className="text-sm text-neutral-700 dark:text-neutral-300">
-              Google
+              {isLogin ? 'Iniciar sesión con Google' : 'Registrarse con Google'}
             </span>
             <BottomGradient />
           </button>
-          <button
-            className="group/btn shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
-            type="submit">
-            <IconBrandOnlyfans className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-            <span className="text-sm text-neutral-700 dark:text-neutral-300">
-              OnlyFans
-            </span>
-            <BottomGradient />
-          </button>
-        </div>
-      </form>
+        </form>
+      </TooltipProvider>
     </div>
   );
 }
