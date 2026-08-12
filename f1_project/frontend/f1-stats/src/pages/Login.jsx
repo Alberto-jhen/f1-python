@@ -23,7 +23,6 @@ export function Login() {
     }
 
     toast.success('Inicio de sesión correcto');
-    console.log('Usuario logueado:', data);
 
     setTimeout(() => {
       navigate('/');

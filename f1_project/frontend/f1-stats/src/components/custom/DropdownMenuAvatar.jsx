@@ -16,15 +16,20 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/lib/supabase.js';
+import { Link } from 'react-router-dom';
+import { getCacheBusterUrl } from '@/lib/cacheBuster';
 
-export function DropdownMenuAvatar() {
+export function DropdownMenuAvatar({ avatar }) {
+  // Update the avatar URL with a cache buster to ensure the latest image is fetched.
+  // This prevents retrieving a cached (previous) version of the user's avatar with the same URL.
+  avatar = getCacheBusterUrl(avatar);
   const navigate = useNavigate();
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='size-12 rounded-full cursor-pointer'>
           <Avatar size='lg' className='size-11'>
-            <AvatarImage src='https://github.com/shadcn.png' alt='shadcn' />
+            <AvatarImage src={avatar} alt='shadcn' />
             <AvatarFallback>LR</AvatarFallback>
           </Avatar>
         </Button>
@@ -33,7 +38,9 @@ export function DropdownMenuAvatar() {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <BadgeCheckIcon />
-            Cuenta
+            <Link to='/profile' className='w-full h-full'>
+              Perfil
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <CreditCardIcon />

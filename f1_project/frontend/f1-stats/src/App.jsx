@@ -11,6 +11,7 @@ import { GlobeCalendar } from './pages/GlobeCalendar.jsx';
 import { Register } from './pages/Register.jsx';
 import { Toaster } from '@/components/ui/sonner.jsx';
 import { Login } from '@/pages/Login.jsx';
+import { Profile } from '@/pages/Profile.jsx';
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/globe-calendar" element={<Layout> <GlobeCalendar /> </Layout>}/>
             <Route path="/login" element={<Login />}/>
             <Route path="/register" element={ <Register /> }/>
+            <Route path="/profile" element={ <Layout> <Profile /> </Layout> }/>
         </Routes>
         <Toaster />
         </>

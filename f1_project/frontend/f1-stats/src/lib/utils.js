@@ -18,3 +18,17 @@ export function usernameValidator(name) {
 export function passwordCompare(password, passwordConfirm) {
   return password === passwordConfirm;
 }
+
+
+export function formatDateToProfile(dateString) {
+    if (!dateString) return '';
+
+    const date = new Date(dateString.replace(' ', 'T'));
+    
+    const formattedDate = date.toLocaleDateString('es-ES', { 
+        month: 'long', 
+        year: 'numeric' 
+    });
+
+    return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+};

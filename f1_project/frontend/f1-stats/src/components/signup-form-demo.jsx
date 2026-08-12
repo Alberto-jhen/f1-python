@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn, emailValidator, passwordCompare, usernameValidator } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { IconBrandGoogle, IconInfoCircle } from "@tabler/icons-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -14,6 +15,7 @@ export default function SignupFormDemo({ onSubmit, mode = 'signup' }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const inputClasses = (field) =>
     errors[field] ? "ring-1 ring-red-500" : ""; 
@@ -74,8 +76,24 @@ export default function SignupFormDemo({ onSubmit, mode = 'signup' }) {
     }
   };
 
-  const handleGoogleAuth = () => {
-    toast.info(isLogin ? 'Inicio de sesión con Google próximamente' : 'Registro con Google próximamente');
+  const handleGoogleAuth = async () => {
+    setGoogleLoading(true);
+
+    try {
+      const redirectTo = `${window.location.origin}/form`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo },
+      });
+
+      if (error) {
+        toast.error(error.message || 'No se pudo iniciar sesión con Google');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Error inesperado con Google');
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -163,12 +181,15 @@ export default function SignupFormDemo({ onSubmit, mode = 'signup' }) {
             className="h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
 
           <button
-            className="group/btn cursor-pointer shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
+            className="group/btn cursor-pointer shadow-input relative flex h-10 w-full items-center justify-start space-x-2 rounded-md bg-gray-50 px-4 font-medium text-black disabled:opacity-60 disabled:cursor-not-allowed dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_#262626]"
             type="button"
+            disabled={googleLoading}
             onClick={handleGoogleAuth}>
             <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
             <span className="text-sm text-neutral-700 dark:text-neutral-300">
-              {isLogin ? 'Iniciar sesión con Google' : 'Registrarse con Google'}
+              {googleLoading
+                ? 'Redirigiendo a Google...'
+                : (isLogin ? 'Iniciar sesión con Google' : 'Registrarse con Google')}
             </span>
             <BottomGradient />
           </button>
