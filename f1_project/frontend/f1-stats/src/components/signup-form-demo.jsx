@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { IconBrandGoogle, IconInfoCircle } from "@tabler/icons-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export default function SignupFormDemo({ onSubmit, mode = 'signup' }) {
+export function SignupFormDemo({ onSubmit, mode = 'signup' }) {
   const isLogin = mode === 'login';
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");

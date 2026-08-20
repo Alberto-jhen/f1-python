@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { Links } from './Links';
 import { DropdownMenuAvatar } from '@/components/custom/DropdownMenuAvatar';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchProfileById } from '@/service/supabaseService';
 
 export const Header = ({ variant = "solid" }) => {
     const [isScrolled, setIsScrolled] = useState(false);
+    const [profile, setProfile] = useState(null);
     const { user, loading, isLoggedIn } = useAuth();
-    console.log('Header user:', user);
 
     useEffect(() => {
         if (variant !== "dynamic") return;
@@ -15,6 +16,11 @@ export const Header = ({ variant = "solid" }) => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [variant]);
+
+    useEffect(() => {
+        if (!user?.id) return;
+        fetchProfileById(user.id).then(setProfile);
+    }, [user?.id]);
 
     const headerStyles = variant === "dynamic"
         ? `fixed top-0 left-0 w-screen min-w-full ${isScrolled 
@@ -36,14 +42,14 @@ export const Header = ({ variant = "solid" }) => {
             </div>
 
             <nav className="absolute left-1/2 transform -translate-x-1/2 hidden md:block">
-                <Links />
+                <Links user={user}/>
             </nav>
             
             <div className='z-10 flex items-center justify-end gap-4 shrink-0 min-w-[150px]'>
                 {loading ? (
                     <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse" />
                 ) : isLoggedIn ? (
-                    <DropdownMenuAvatar />
+                    <DropdownMenuAvatar avatar={profile?.avatar_url} />
                 ) : (
                     <>
                         <Link

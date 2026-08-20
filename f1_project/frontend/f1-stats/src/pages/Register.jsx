@@ -1,4 +1,4 @@
-import SignupFormDemo from '@/components/signup-form-demo';
+import { SignupFormDemo } from '@/components/signup-form-demo';
 import { WavyBackground } from '@/components/ui/wavy-background';
 import { Link } from 'react-router-dom';
 import { Header } from '@/components/Layout/Header.jsx';
@@ -35,7 +35,7 @@ export function Register() {
 
     setTimeout(() => {
       navigate('/');
-    }, 1500);
+    }, 750);
   };
 
   return (

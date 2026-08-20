@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export const Links = () => {
+export const Links = ( {user} ) => {
     const linkStyle = "text-zinc-400 text-xs font-medium uppercase tracking-widest hover:text-white transition-colors duration-300 py-2";
     
     return (
@@ -30,6 +30,14 @@ export const Links = () => {
                     Degradación
                 </Link>
             </li>
+            { user && (
+                <li>
+                    <Link to="/ratings" className={linkStyle}>
+                        Valoraciones
+                    </Link>
+                </li>
+            )}
+            
         </ul>
     );
 };

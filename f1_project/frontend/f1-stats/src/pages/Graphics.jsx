@@ -138,8 +138,8 @@ export const GraphicsDashboard = () => {
     return (
         <div className="min-h-screen p-6 md:p-12 relative">
             {/* Decorative background */}
-            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'rgba(220, 38, 38, 0.06)' }} />
-            <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'rgba(100, 116, 139, 0.08)' }} />
+            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" />
 
             <div className="max-w-7xl mx-auto relative">
                 <div className="mb-10">

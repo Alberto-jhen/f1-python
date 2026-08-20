@@ -2,13 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import {
     fetchYearSchedule,
     fetchEventRaceDate,
-    fetchGlobalStandings,
     fetchStandingsByRound,
     fetchDriversFullNamesByYear,
 } from '@/service/apiService';
 import RaceTimeline from '@/components/leaderboard/RaceTimeline';
 import StandingsTable from '@/components/leaderboard/StandingsTable';
 import PredictionMode from '@/components/leaderboard/PredictionMode';
+import { ClockAlert } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -250,22 +251,48 @@ export default function LeaderBoard() {
                     />
 
                     <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800 p-6 md:p-8">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400 mb-1">
-                            Clasificación de pilotos
-                        </h3>
-                        <p className="text-[13px] text-zinc-600">
+                        
+                        <TooltipProvider delayDuration={200}>
+                            <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400 mb-1">
+                                    Clasificación de pilotos
+                                </h3>
+                                
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <button 
+                                            type="button" 
+                                            className="text-yellow-500 hover:text-white transition-all duration-300 focus:outline-none mb-0.5 cursor-help"
+                                        >
+                                            <ClockAlert className="size-4" />
+                                        </button>
+                                    </TooltipTrigger>
+                                    
+                                    <TooltipContent 
+                                        side="top" 
+                                        sideOffset={10}
+                                        className="bg-zinc-950/95 backdrop-blur-xl border border-red-900/30 text-zinc-300 max-w-[280px] p-4 shadow-2xl rounded-xl z-50"
+                                    >
+                                        <div className="flex flex-col gap-2.5">
+                                            <div className="flex items-center gap-2 text-white font-bold uppercase tracking-widest text-[13px]">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+                                                Aviso sobre Sprints
+                                            </div>
+                                            <p className="text-[14px] leading-relaxed text-zinc-400">
+                                                Los puntos de las <span className="text-zinc-200 font-semibold">carreras sprint</span> se actualizan junto con los resultados de la carrera principal del fin de semana.
+                                            </p>
+                                        </div>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </div>
+                        </TooltipProvider>
+
+                        <p className="text-[13px] text-zinc-600 mb-6">
                             Temporada {CURRENT_YEAR}
                             {selectedRaceIndex >= 0 && raceCalendar[selectedRaceIndex]
                                 ? ` — Acumulado hasta ${raceCalendar[selectedRaceIndex].value} (R${selectedRaceIndex + 1})`
                                 : ''}
                         </p>
-
-                        <div className="flex items-start gap-2 mt-3 mb-1 bg-yellow-500/5 border border-yellow-600/20 rounded-lg px-3 py-2">
-                            <span className="text-yellow-500 text-xs mt-0.5">⚠</span>
-                            <p className="text-[13px] text-yellow-600/80 leading-relaxed">
-                                Los puntos de las carreras sprint se actualizan junto con los resultados de la carrera principal del Gran Premio.
-                            </p>
-                        </div>
 
                         <StandingsTable
                             standings={standingsWithRacePoints}

@@ -29,7 +29,7 @@ export function DropdownMenuAvatar({ avatar }) {
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='size-12 rounded-full cursor-pointer'>
           <Avatar size='lg' className='size-11'>
-            <AvatarImage src={avatar} alt='shadcn' />
+            <AvatarImage src={avatar} alt='avatar' fetchPriority='high' loading='eager' />
             <AvatarFallback>LR</AvatarFallback>
           </Avatar>
         </Button>
