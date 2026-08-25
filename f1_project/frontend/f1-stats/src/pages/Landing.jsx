@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import loginVideo from '../assets/login-video3.mp4';
 import fallbackPoster from '../assets/m_naco_japanese_ink_20260604_024047.png';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import useNextRace from '@/hooks/useNextRace';

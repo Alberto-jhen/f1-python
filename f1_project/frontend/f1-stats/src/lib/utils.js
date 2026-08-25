@@ -32,3 +32,25 @@ export function formatDateToProfile(dateString) {
 
     return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 };
+
+export function getInitials(fullName) {
+    if (!fullName) return '';
+    return fullName
+        .trim()
+        .split(/\s+/)
+        .map((p) => p[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+}
+
+export function getDriverCode(fullName) {
+    if (!fullName) return '';
+    const parts = fullName.trim().split(/\s+/);
+    const surname = parts[parts.length - 1];
+    return surname
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .slice(0, 3)
+        .toUpperCase();
+}
