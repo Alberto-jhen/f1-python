@@ -69,7 +69,7 @@ export const uploadFullNameToSupabase = async (fullName, userId) => {
 
         
     } catch (error) {
-        console.error("[uploadFullNameToSupabase] Error trying to update: ", error.messge);
-        throw updateError;
+        console.error("[uploadFullNameToSupabase] Error trying to update: ", error.message);
+        throw error;
     }
 }

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import loginVideo from '../assets/login-video3.mp4';
-// Maintain
 import fallbackPoster from '../assets/m_naco_japanese_ink_20260604_024047.png';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';

@@ -3,27 +3,15 @@ const BASE_URL = 'http://localhost:8000';
 // ----- JSON related function fetchs for graphics. -----
 
 export const fetchDriverLaps = async (year, track, session, driver) => {
-    try {
-        const response = await fetch(`${BASE_URL}/data/laps/${year}/${track}/${session}/${driver}`);
-        if (!response.ok) throw new Error('Error en la API al hacer el fetch de la función de distribución de vueltas de un piloto');
-        const data = await response.json();
-        
-        return data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await fetch(`${BASE_URL}/data/laps/${year}/${track}/${session}/${driver}`);
+    if (!response.ok) throw new Error('Error en la API al hacer el fetch de la función de distribución de vueltas de un piloto');
+    return await response.json();
 };
 
 export const fetchDriversLapsViolin = async (year, track, session, numDrivers) => {
-    try {
-        const response = await fetch(`${BASE_URL}/data/laps/distribution/${year}/${track}/${session}/${numDrivers}`);
-        if (!response.ok) throw new Error('Error en la API al hacer el fetch del JSON de la función violin');
-        const data = await response.json()
-
-        return data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await fetch(`${BASE_URL}/data/laps/distribution/${year}/${track}/${session}/${numDrivers}`);
+    if (!response.ok) throw new Error('Error en la API al hacer el fetch del JSON de la función violin');
+    return await response.json();
 }
 
 export const fetchQualyOverviewData = async (year, track) => {
@@ -41,15 +29,9 @@ export const fetchQualyOverviewData = async (year, track) => {
     
 
 export const fetchDriverProfile = async (driver_num) => {
-    try {
-        const response = await fetch(`${BASE_URL}/driver/profile/${driver_num}`);
-        if(!response.ok) throw new Error('Error en la API al hacer el fetch del JSON del perfil del piloto');
-        const data = await response.json();
-
-        return data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await fetch(`${BASE_URL}/driver/profile/${driver_num}`);
+    if(!response.ok) throw new Error('Error en la API al hacer el fetch del JSON del perfil del piloto');
+    return await response.json();
 }
 
 /** 
@@ -67,15 +49,9 @@ export const fetchDriverProfile = async (driver_num) => {
  */
 
 export const fetchYearSchedule = async(year) => {
-    try {
-        const response = await fetch(`${BASE_URL}/data/schedule/${year}`);
-        if(!response.ok) throw new Error('Error en la API al hacer el fetch del JSON del calendario.');
-        const data = await response.json();
-
-        return data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await fetch(`${BASE_URL}/data/schedule/${year}`);
+    if(!response.ok) throw new Error('Error en la API al hacer el fetch del JSON del calendario.');
+    return await response.json();
 }
 
 /** 

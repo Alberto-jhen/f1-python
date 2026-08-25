@@ -1,7 +1,7 @@
 // src/components/PosterCard.jsx
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom'; // Añadimos esta importación
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 export default function PosterCard({ posterSrc, altText = "Collector Poster" }) {
     const [isPosterOpen, setIsPosterOpen] = useState(false);
@@ -9,7 +9,8 @@ export default function PosterCard({ posterSrc, altText = "Collector Poster" }) 
 
     // Evita errores de hidratación asegurando que estamos en el cliente
     useEffect(() => {
-        setMounted(true);
+        const id = setTimeout(() => setMounted(true), 0);
+        return () => clearTimeout(id);
     }, []);
 
     // Controlar el scroll del body cuando el modal se abre
@@ -26,7 +27,7 @@ export default function PosterCard({ posterSrc, altText = "Collector Poster" }) 
     return (
         <>
             {/* TARJETA BENTO DEL PÓSTER */}
-            <motion.div 
+            <Motion.div
                 whileInView={{ opacity: 1, y: 0 }}
                 initial={{ opacity: 0, y: 20 }}
                 transition={{ delay: 0.2 }}
@@ -57,13 +58,13 @@ export default function PosterCard({ posterSrc, altText = "Collector Poster" }) 
                     alt={altText}
                     className="absolute inset-0 w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transform group-hover:scale-105 transition-all duration-700 z-0"
                 />
-            </motion.div>
+            </Motion.div>
 
             {/* MODAL DEL PÓSTER AMPLIADO (TELETRANSPORTADO AL BODY) */}
             {mounted && createPortal(
                 <AnimatePresence>
                     {isPosterOpen && (
-                        <motion.div 
+                        <Motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -74,19 +75,19 @@ export default function PosterCard({ posterSrc, altText = "Collector Poster" }) 
                                 <span>Close</span>
                                 <div className="w-8 h-px bg-current"></div>
                             </button>
-                            <motion.img 
+                            <Motion.img
                                 initial={{ scale: 0.9, y: 20 }}
                                 animate={{ scale: 1, y: 0 }}
                                 exit={{ scale: 0.9, y: 20 }}
                                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                                src={posterSrc} 
+                                src={posterSrc}
                                 alt={`${altText} Full`}
                                 className="max-h-full max-w-full object-contain rounded-xl shadow-[0_0_50px_rgba(220,38,38,0.15)] border border-zinc-800 relative z-40"
                             />
-                        </motion.div>
+                        </Motion.div>
                     )}
                 </AnimatePresence>,
-                document.body // Aquí indicamos que lo renderice en el <body>
+                document.body
             )}
         </>
     );

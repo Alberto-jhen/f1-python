@@ -3,7 +3,6 @@ import Cropper from 'react-easy-crop';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { getCroppedImg } from '@/service/cropImage';
-import { toast } from 'sonner';
 
 export function ImageCropModal({ image, open, onClose, onConfirm }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });

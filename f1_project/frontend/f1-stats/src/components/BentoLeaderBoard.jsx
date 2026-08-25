@@ -1,6 +1,6 @@
 // src/components/Leaderboard.jsx
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { fetchGlobalStandings } from '@/service/apiService';
 import { Link } from 'react-router-dom';
 
@@ -69,7 +69,7 @@ export default function BentoLeaderboard() {
                             const teamStyle = getTeamStyles(driver.constructor || driver.team);
                             
                             return (
-                                <motion.div 
+                                <Motion.div
                                     key={i}
                                     whileHover={{ y: -5 }}
                                     className={`bg-gradient-to-br ${teamStyle.color} bg-zinc-900/50 p-6 rounded-2xl border ${teamStyle.border} backdrop-blur-sm relative overflow-hidden group`}
@@ -94,7 +94,7 @@ export default function BentoLeaderboard() {
                                             <span className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Puntos</span>
                                         </div>
                                     </div>
-                                </motion.div>
+                                </Motion.div>
                             );
                         })}
                     </div>

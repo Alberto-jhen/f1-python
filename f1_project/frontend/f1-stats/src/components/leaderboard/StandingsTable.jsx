@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 
 /** Normalize a string: strip diacritics and lowercase. */
 function norm(str) {

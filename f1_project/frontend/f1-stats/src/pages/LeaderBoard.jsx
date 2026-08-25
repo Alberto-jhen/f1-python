@@ -104,7 +104,7 @@ export default function LeaderBoard() {
         if (selectedRaceIndex === -1 && lastCompletedIndex >= 0) {
             setSelectedRaceIndex(lastCompletedIndex);
         }
-    }, [lastCompletedIndex]);
+    }, [lastCompletedIndex, selectedRaceIndex]);
 
     // ---- Fetch standings when selectedRaceIndex changes ----
     useEffect(() => {

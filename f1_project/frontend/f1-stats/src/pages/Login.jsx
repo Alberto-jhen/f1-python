@@ -12,7 +12,7 @@ export function Login() {
   const handleSubmit = async (formData) => {
     const { email, password } = formData;
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });

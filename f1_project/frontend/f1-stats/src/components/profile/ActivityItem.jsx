@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 
-export function ActivityItem({ icon: Icon, title, description, date, type = 'neutral' }) {
+export function ActivityItem({ icon, title, description, date, type = 'neutral' }) {
+  const Icon = icon;
   const typeClasses = {
     neutral: 'bg-zinc-800 text-zinc-400',
     red: 'bg-red-600/20 text-red-500',

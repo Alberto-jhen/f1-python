@@ -63,7 +63,7 @@ const ActualForm = () => {
             } else {
                 throw new Error('Error en el servidor');
             }
-        } catch (error) {
+        } catch {
             setStatus({ loading: false, success: false });
             alert("Hubo un error al enviar el mensaje.");
         }

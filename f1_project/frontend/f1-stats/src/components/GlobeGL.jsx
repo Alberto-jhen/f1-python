@@ -19,7 +19,7 @@ export function GlobeGL({ markers, onMarkerClick, config }) {
 
     const rect = containerRef.current.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) {
-      setStatus('timeout');
+      setTimeout(() => setStatus('timeout'), 0);
       return;
     }
 
@@ -68,7 +68,7 @@ export function GlobeGL({ markers, onMarkerClick, config }) {
       };
     } catch (error) {
       console.error('GlobeGL init error:', error);
-      setStatus('error');
+      setTimeout(() => setStatus('error'), 0);
     }
 
     return () => {

@@ -50,7 +50,7 @@ export function GenericCombobox({ options = [], value, onChange, placeholder, di
                     <CommandItem
                     key={opt.value}
                     value={opt.value}
-                    onSelect={(currentValue) => {
+                    onSelect={() => {
                         onChange(opt.value)
                         setOpen(false)
                     }}

@@ -12,7 +12,6 @@ const RING_PROPAGATION_SPEED = 3;
 const aspect = 1.2;
 const cameraZ = 300;
 
-let numbersOfRings = [0];
 
 export function Globe({
   globeConfig,
@@ -46,7 +45,7 @@ export function Globe({
     if (!globeRef.current && groupRef.current) {
       globeRef.current = new ThreeGlobe();
       (groupRef.current).add(globeRef.current);
-      setIsInitialized(true);
+      setTimeout(() => setIsInitialized(true), 0);
     }
   }, []);
 
@@ -75,7 +74,6 @@ export function Globe({
     let points = [];
     for (let i = 0; i < arcs.length; i++) {
       const arc = arcs[i];
-      const rgb = hexToRgb(arc.color);
       points.push({
         size: defaultProps.pointSize,
         order: arc.order,
@@ -202,7 +200,7 @@ export function WebGLRendererConfig() {
     gl.setPixelRatio(window.devicePixelRatio);
     gl.setSize(size.width, size.height);
     gl.setClearColor(0xffaaff, 0);
-  }, []);
+  }, [gl, size]);
 
   return null;
 }
@@ -239,23 +237,7 @@ export function World(props) {
   );
 }
 
-export function hexToRgb(hex) {
-  var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-  hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-    return r + r + g + g + b + b;
-  });
-
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : null;
-}
-
-export function genRandomNumbers(min, max, count) {
+function genRandomNumbers(min, max, count) {
   const arr = [];
   while (arr.length < count) {
     const r = Math.floor(Math.random() * (max - min)) + min;
