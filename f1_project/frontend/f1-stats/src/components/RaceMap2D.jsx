@@ -285,10 +285,12 @@ export const RaceMap2D = ({ year, track }) => {
         };
         requestRef.current = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(requestRef.current);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isPlaying, telemetryData, playbackSpeed, selectedDriver, trackBounds]);
 
     useEffect(() => {
         if (!isPlaying) updateCanvas(replayTime);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [replayTime, telemetryData, isPlaying, selectedDriver, trackBounds]);
 
     return (

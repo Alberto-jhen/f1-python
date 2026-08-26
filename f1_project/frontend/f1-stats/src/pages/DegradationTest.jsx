@@ -115,7 +115,7 @@ export const DegradationTest = () => {
     return (
         <div className="min-h-screen p-6 md:p-12 bg-slate-950 text-white">
             <div className="max-w-6xl mx-auto">
-                <div className="mb-8">
+                <div className="mb-8 border-l-4 border-red-600 pl-4">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
                         <span className="text-red-600 text-[10px] font-bold uppercase tracking-[0.3em]">

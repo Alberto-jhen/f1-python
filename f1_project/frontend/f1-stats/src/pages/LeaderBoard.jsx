@@ -214,7 +214,7 @@ export default function LeaderBoard() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
                 <div className="border-l-4 border-red-600 pl-4">
                     <h1 className="text-3xl font-black uppercase tracking-tighter text-white italic">
-                        Clasificación Mundial
+                        Clasificación <span className="text-red-600">Mundial</span>
                     </h1>
                     <p className="text-zinc-400 text-sm mt-1 font-medium">
                         Visualiza la evolución y haz tu propia predicción del campeonato.

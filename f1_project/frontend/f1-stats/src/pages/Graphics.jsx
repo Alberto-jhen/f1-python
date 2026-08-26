@@ -142,7 +142,7 @@ export const GraphicsDashboard = () => {
             <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" />
 
             <div className="max-w-7xl mx-auto relative">
-                <div className="mb-10">
+                <div className="mb-10 border-l-4 border-red-600 pl-4">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
                         <span className="text-red-600 text-[10px] font-bold uppercase tracking-[0.3em]">Telemetría en vivo</span>

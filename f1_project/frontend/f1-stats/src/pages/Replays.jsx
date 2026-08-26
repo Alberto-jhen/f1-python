@@ -10,7 +10,7 @@ const PageHeader = () => (
             <span className="text-amber-500 text-[10px] font-bold uppercase tracking-[0.3em]">En desarrollo</span>
         </div>
         <h1 className="text-3xl font-black italic uppercase tracking-tighter text-white">
-            Race Replay
+            Repeticiones de <span className="text-red-600">carreras</span>
         </h1>
         <p className="text-zinc-400 text-sm mt-1 font-medium">
             Selecciona la temporada y el circuito para revivir la telemetría en 2D.
