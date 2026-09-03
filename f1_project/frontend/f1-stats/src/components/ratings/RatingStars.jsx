@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { StarIcon } from 'lucide-react';
 
-export function RatingStars({ value, onChange, readOnly = false }) {
+export function RatingStars({ value, onChange, readOnly = false, color = 'red' }) {
   const [hover, setHover] = useState(0);
+  const colorClasses = color === 'yellow'
+    ? 'text-yellow-400 fill-yellow-400'
+    : 'text-red-500 fill-red-500';
 
   return (
     <div className='flex items-center gap-1'>
@@ -20,7 +23,7 @@ export function RatingStars({ value, onChange, readOnly = false }) {
             className={`transition-transform hover:scale-110 ${readOnly ? 'cursor-default' : 'cursor-pointer'}`}
           >
             <StarIcon
-              className={`size-5 ${filled ? 'text-red-500 fill-red-500' : 'text-zinc-600'}`}
+              className={`size-5 ${filled ? colorClasses : 'text-zinc-600'}`}
             />
           </button>
         );

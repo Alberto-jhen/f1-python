@@ -3,9 +3,10 @@ Pydantic response schemas (DTOs) for the F1 Analytics API.
 These models normalise every API response and auto-generate OpenAPI docs.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, Union
-
+from uuid import UUID
+from datetime import datetime
 
 # ──────────────────────────────────────────────
 # Standings
@@ -140,18 +141,47 @@ class CircuitInfo(BaseModel):
     poster_url: Optional[str] = None
 
 # ──────────────────────────────────────────────
-# ML / Degradación de neumáticos
+# ML / Tyre degradation
 # ──────────────────────────────────────────────
 
 class DegradationPoint(BaseModel):
-    x: int  # TyreLife (vuelta dentro del stint)
-    y: float  # LapTime en segundos
+    x: int  # TyreLife 
+    y: float  # LapTime in seconds
 
 
 class DegradationPredictionResponse(BaseModel):
     real: list[DegradationPoint]
     predicted: list[DegradationPoint]
 
+# ──────────────────────────────────────────────
+# Ratings
+# ──────────────────────────────────────────────
+
+class RatingBase(BaseModel):
+    profile_id: UUID
+    race_id: int
+    driver_id: Optional[str] = None
+    rating: int = Field(..., ge=1, le=5, description="Puntuación del 1 al 5")
+    comment: Optional[str] = Field(None, max_length=400)
+
+
+class RatingCreate(RatingBase):
+    """
+    DTO for POST requests.
+    """
+    pass
+
+
+class RatingResponse(RatingBase):
+    """
+    DTO to send the data to the frontend (GET)
+    """
+    id: UUID
+    created_at: datetime
+    likes: Optional[int] = 0
+
+    class Config:
+        from_attributes = True
 
 # ──────────────────────────────────────────────
 # Generic
