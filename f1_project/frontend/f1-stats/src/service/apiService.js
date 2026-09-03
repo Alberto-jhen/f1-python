@@ -243,24 +243,19 @@ export const getReplayBounds = async (year, track) => {
 
 export const deployReplayService = async (year, track, startTime = 0, endTime = 300, driverId = null) => {
     try {
-        // 1. Preparamos los parámetros de búsqueda (query parameters)
         const params = new URLSearchParams({
             start_time: startTime,
             end_time: endTime
         });
         
-        // 2. Si nos piden un piloto en concreto, lo añadimos. Si no, lo omitimos (trae todos)
         if (driverId) {
             params.append('driver_id', driverId);
         }
 
-        // 3. Montamos la URL final
         const endpointUrl = `${BASE_URL}/service/replay/${year}/${track}?${params.toString()}`;
-        
         const response = await fetch(endpointUrl);
         
         if(!response.ok) {
-            // Es buena práctica capturar el mensaje de error del backend si existe
             const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.detail || 'Error al obtener los datos de replay');
         }
@@ -299,6 +294,39 @@ export const fetchDegradationPrediction = async (year, track, driver) => {
         return await response.json();
     } catch (error) {
         console.error("Fetch error en fetchDegradationPrediction:", error);
+        throw error;
+    }
+};
+
+
+// ---------- RATINGS ----------
+/**
+ * Publica una valoración/comentario para un usuario.
+ * profileId va en la ruta; ratingData va en el cuerpo de la petición (request body).
+ *
+ * ratingData = {
+ *   race_id: number,
+ *   driver_id: string (opcional, para valorar piloto; null/omitir para carrera),
+ *   rating: number (1-5),
+ *   comment: string (opcional, máx. 400 chars)
+ * }
+ */
+export const publishRating = async (profileId, ratingData) => {
+    try {
+        const response = await fetch(`${BASE_URL}/ratings/${encodeURIComponent(profileId)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(ratingData),
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al publicar la valoración');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error en publishRating:", error);
         throw error;
     }
 };
