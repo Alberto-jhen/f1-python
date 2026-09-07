@@ -5,7 +5,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 supabase_url = os.getenv("SUPABASE_URL")
-supabase_key = os.getenv("SUPABASE_ANON_KEY")
+# Use the service role key so the backend can read/write all tables regardless
+# of Row Level Security (RLS) policies. This is acceptable for a trusted backend
+# process; the key must never be exposed to the frontend.
+supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 supabase: Client = create_client(supabase_url, supabase_key)
 

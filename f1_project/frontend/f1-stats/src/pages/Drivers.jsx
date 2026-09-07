@@ -106,51 +106,59 @@ export default function Drivers() {
 
             {/* Main split layout: selector left + card right */}
             <div className="px-4 md:px-8 lg:px-12 py-6 md:py-8 pb-8">
-                <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6 md:gap-8 items-stretch">
-                    {/* Left panel: selector */}
-                    <div className="flex flex-col gap-4">
-                        <DriverInfoSelector
-                            year={year}
-                            mode={mode}
-                            onYearChange={setYear}
-                            onModeChange={handleModeChange}
-                            selectedDriver={selectedDriver}
-                            comparisonList={comparisonList}
-                        />
-                        <DriverGridSelector
-                            key={`${year}-${mode}`}
-                            drivers={driverOptions}
-                            year={year}
-                            mode={mode}
-                            selectedDriver={selectedDriver}
-                            comparisonList={comparisonList}
-                            onSelect={handleGridSelect}
-                            onRemove={handleGridRemove}
-                            loading={loadingDrivers}
-                        />
+                <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] short-screen:grid-cols-1 gap-6 md:gap-8 items-start lg:items-stretch short-screen:items-start">
+                    {/* Left column wrapper (lg) / becomes selector+grid items (short-screen) */}
+                    <div className="contents">
+                        <div className="short-screen:order-1 lg:order-1">
+                            <DriverInfoSelector
+                                year={year}
+                                mode={mode}
+                                onYearChange={setYear}
+                                onModeChange={handleModeChange}
+                                selectedDriver={selectedDriver}
+                                comparisonList={comparisonList}
+                            />
+                        </div>
+                        <div className="short-screen:order-3 lg:order-2">
+                            <DriverGridSelector
+                                key={`${year}-${mode}`}
+                                drivers={driverOptions}
+                                year={year}
+                                mode={mode}
+                                selectedDriver={selectedDriver}
+                                comparisonList={comparisonList}
+                                onSelect={handleGridSelect}
+                                onRemove={handleGridRemove}
+                                loading={loadingDrivers}
+                            />
+                        </div>
                     </div>
 
-                    {/* Right panel: visualization */}
-                    <div className="min-h-[500px] lg:min-h-[85vh]">
-                        {mode === 'individual' && selectedDriver && (
-                            <DriverProfileCard data={selectedDriver} />
-                        )}
+                    {/* Right column wrapper (lg) / card between selector and grid (short-screen) */}
+                    <div className="contents">
+                        <div className="short-screen:order-2 lg:order-3">
+                            <div className="min-h-fit lg:max-h-[85vh] overflow-y-auto">
+                                {mode === 'individual' && selectedDriver && (
+                                    <DriverProfileCard data={selectedDriver} />
+                                )}
 
-                        {mode === 'h2h' && (
-                            <DriverH2Hcard
-                                drivers={comparisonList}
-                                year={year}
-                                onRemove={handleH2HRemove}
-                            />
-                        )}
+                                {mode === 'h2h' && (
+                                    <DriverH2Hcard
+                                        drivers={comparisonList}
+                                        year={year}
+                                        onRemove={handleH2HRemove}
+                                    />
+                                )}
 
-                        {!selectedDriver && mode === 'individual' && (
-                            <div className="h-full flex flex-col items-center justify-center gap-4 text-slate-500 border border-dashed border-slate-800 rounded-3xl bg-slate-950/50 min-h-[400px] lg:min-h-[85vh]">
-                                <Users className="size-16 opacity-30" />
-                                <p className="text-lg font-black uppercase tracking-widest text-slate-400">Selecciona un piloto</p>
-                                <p className="text-sm text-slate-500 text-center max-w-xs">Haz clic en cualquier tarjeta de la izquierda para ver su perfil completo.</p>
+                                {!selectedDriver && mode === 'individual' && (
+                                    <div className="h-full flex flex-col items-center justify-center gap-4 text-slate-500 border border-dashed border-slate-800 rounded-3xl bg-slate-950/50 min-h-[400px] lg:min-h-[85vh]">
+                                        <Users className="size-16 opacity-30" />
+                                        <p className="text-lg font-black uppercase tracking-widest text-slate-400">Selecciona un piloto</p>
+                                        <p className="text-sm text-slate-500 text-center max-w-xs">Haz clic en cualquier tarjeta de la izquierda para ver su perfil completo.</p>
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -2,9 +2,12 @@
 
 import time
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from typing import Optional
 
 ERGAST_BASE = "https://api.jolpi.ca/ergast/f1"
+USER_AGENT = "F1Insights/1.0 (https://github.com/albertomoranreina/f1-python)"
 
 
 def _parse_standings_list(raw: list[dict]) -> list[dict]:
@@ -24,12 +27,28 @@ def _parse_standings_list(raw: list[dict]) -> list[dict]:
 
 
 class ErgastSource:
-    """Fetches standings from the Ergast / jolpi.ca REST API."""
+    """Fetches standings from the Ergast / jolpi.ca REST API.
+
+    Uses a short, no-retry HTTP policy so that Jolpica outages do not
+    block the local fallback for long.
+    """
+
+    def __init__(self):
+        self._session = requests.Session()
+        # Disable urllib3 connection retries; fail fast on network errors.
+        self._session.mount(
+            "https://",
+            HTTPAdapter(
+                max_retries=Retry(total=0, connect=0, read=0, backoff_factor=0)
+            ),
+        )
+        self._headers = {"User-Agent": USER_AGENT}
+        self._timeout = (3, 7)  # (connect, read) seconds
 
     def fetch_season(self, year: str, driver_number: str, code: str = None) -> Optional[dict]:
         url = f"{ERGAST_BASE}/{year}/driverStandings.json"
         try:
-            response = requests.get(url, timeout=10)
+            response = self._session.get(url, headers=self._headers, timeout=self._timeout)
             response.raise_for_status()
             data = response.json()
 
@@ -63,7 +82,7 @@ class ErgastSource:
     def fetch_global(self, year: int) -> Optional[list[dict]]:
         url = f"{ERGAST_BASE}/{year}/driverStandings.json"
         try:
-            response = requests.get(url, timeout=10)
+            response = self._session.get(url, headers=self._headers, timeout=self._timeout)
             response.raise_for_status()
             data = response.json()
 
@@ -80,7 +99,7 @@ class ErgastSource:
         url = f"{ERGAST_BASE}/{year}/{round_num}/driverStandings.json"
         for attempt in range(2):
             try:
-                response = requests.get(url, timeout=10)
+                response = self._session.get(url, headers=self._headers, timeout=self._timeout)
                 if response.status_code == 429:
                     time.sleep(1)
                     continue

@@ -281,6 +281,19 @@ export const getCircuitVisualInfo = async (seasonYear, roundNum) => {
     }
 };
 
+export const getRacesBySeason = async (seasonYear) => {
+    try {
+        const response = await fetch(`${BASE_URL}/circuits/${seasonYear}`);
+        if (!response.ok) {
+            throw new Error('Races not found');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching races by season:", error);
+        return null;
+    }
+};
+
 // ---------- ML / DEGRADATION ----------
 export const fetchDegradationPrediction = async (year, track, driver) => {
     try {

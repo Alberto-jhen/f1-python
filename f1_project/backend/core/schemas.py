@@ -134,9 +134,9 @@ class CircuitInfo(BaseModel):
     name: str
     round: int
     race_date: str
-    description: str
+    description: Optional[str] = None
     length_km: float
-    lap_record: str
+    lap_record: Optional[str] = None
     total_laps: int
     poster_url: Optional[str] = None
 

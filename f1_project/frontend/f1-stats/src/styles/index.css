@@ -4,6 +4,8 @@
 @import "@midudev/tailwind-animations";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant short-screen (@media (max-height: 900px));
+@custom-variant tall-screen (@media (min-height: 1100px));
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);

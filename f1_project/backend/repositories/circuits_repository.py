@@ -11,7 +11,7 @@ class CircuitsRepository:
         """Return a race joined with its circuit data."""
         response = (
             self._db.table("races")
-            .select("*, circuits(*)")
+            .select("*, circuit_id(*)")
             .eq("season_year", season_year)
             .eq("round", round_num)
             .execute()
@@ -19,6 +19,7 @@ class CircuitsRepository:
         return response.data[0] if response.data else None
 
     def find_circuit_by_id(self, circuit_id: str) -> dict | None:
+        print(f"Finding circuit by ID: {circuit_id}")
         response = (
             self._db.table("circuits")
             .select("*")
@@ -30,7 +31,7 @@ class CircuitsRepository:
     def list_races_by_season(self, season_year: int) -> list[dict]:
         response = (
             self._db.table("races")
-            .select("*, circuits(*)")
+            .select("*, circuit_id(*)")
             .eq("season_year", season_year)
             .order("round")
             .execute()

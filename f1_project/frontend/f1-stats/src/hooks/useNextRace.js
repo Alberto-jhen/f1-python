@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { fetchYearSchedule, fetchEventRaceDate } from '@/service/apiService';
+import { getRacesBySeason } from '@/service/apiService';
 
 /**
- * Hook that fetches the F1 calendar and computes the next upcoming race.
+ * Hook that fetches the F1 race calendar from the backend and computes the
+ * next upcoming race. The backend is the single source of truth for the
+ * real round numbers and race dates stored in the database.
  * Returns { nextRace, loading } where nextRace has:
  *   - name: event name
- *   - date: Date object (local timezone)
- *   - round: 1-indexed round number
+ *   - date: Date object (race_date from the database)
+ *   - round: real round number from the database
  */
 export default function useNextRace() {
     const [nextRace, setNextRace] = useState(null);
@@ -17,30 +19,22 @@ export default function useNextRace() {
 
         const load = async () => {
             try {
-                const data = await fetchYearSchedule(currentYear);
-                if (!data?.tracks) return;
-
-                const tracks = data.tracks.filter(t => t !== "Pre-Season Testing");
-
-                const dateResults = await Promise.all(
-                    tracks.map(t => fetchEventRaceDate(currentYear, t))
-                );
+                const races = await getRacesBySeason(currentYear);
+                if (!Array.isArray(races) || races.length === 0) return;
 
                 const now = new Date();
 
-                for (let i = 0; i < dateResults.length; i++) {
-                    const result = dateResults[i];
-                    if (!result?.date) continue;
+                const upcoming = races
+                    .map(r => ({ ...r, raceDate: new Date(r.race_date) }))
+                    .filter(r => !isNaN(r.raceDate) && r.raceDate > now)
+                    .sort((a, b) => a.raceDate - b.raceDate)[0];
 
-                    const raceDate = new Date(result.date);
-                    if (raceDate > now) {
-                        setNextRace({
-                            name: tracks[i],
-                            date: raceDate,
-                            round: i + 1,
-                        });
-                        break;
-                    }
+                if (upcoming) {
+                    setNextRace({
+                        name: upcoming.name,
+                        date: upcoming.raceDate,
+                        round: upcoming.round,
+                    });
                 }
             } catch (err) {
                 console.error("Error computing next race:", err);

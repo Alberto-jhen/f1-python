@@ -28,8 +28,8 @@ class StandingsRepository:
         # Priority chain for season standings: local JSON → Ergast
         self._season_sources = [self._local, self._ergast]
 
-        # Priority chain for global / by-round: only Ergast has this data
-        self._grid_sources = [self._ergast]
+        # Priority chain for global / by-round: Ergast → local JSON fallback
+        self._grid_sources = [self._ergast, self._local]
 
     # ── Season championship (single driver) ────────────────────────
 

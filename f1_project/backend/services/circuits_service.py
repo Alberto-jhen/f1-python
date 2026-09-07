@@ -21,7 +21,7 @@ class CircuitsService:
         if not race_data:
             return None
 
-        circuit = race_data.get("circuits") or {}
+        circuit = race_data.get("circuit_id") or {}
         return CircuitInfo(
             season_year=race_data["season_year"],
             name=circuit.get("name"),
