@@ -2,23 +2,17 @@ import { ChevronLeftIcon, User, FlagIcon } from 'lucide-react';
 import { RaceRating } from './RaceRating';
 import { RaceSelector } from './RaceSelector';
 import { useState } from 'react';
+import { useProfile } from '@/hooks/useProfile';
 
 const RACE_OPTIONS = [
-  { value: 'bahrain', label: 'Gran Premio de Baréin' },
-  { value: 'saudi-arabia', label: 'Gran Premio de Arabia Saudí' },
-  { value: 'australia', label: 'Gran Premio de Australia' },
-  { value: 'japan', label: 'Gran Premio de Japón' },
-  { value: 'china', label: 'Gran Premio de China' },
-  { value: 'miami', label: 'Gran Premio de Miami' },
-  { value: 'imola', label: 'Gran Premio de Emilia-Romaña' },
-  { value: 'monaco', label: 'Gran Premio de Mónaco' },
-  { value: 'canada', label: 'Gran Premio de Canadá' },
-  { value: 'spain', label: 'Gran Premio de España' },
-  { value: 'austria', label: 'Gran Premio de Austria' },
-  { value: 'silverstone', label: 'Gran Premio de Gran Bretaña' },
+  { value: 1, label: 'Gran Premio de Mónaco' },
+  { value: 2, label: 'Gran Premio de España' },
+  { value: 3, label: 'Gran Premio de Austria' },
+  { value: 4, label: 'Gran Premio de Gran Bretaña' },
+  { value: 5, label: 'Gran Premio de Hungría' },
+  { value: 6, label: 'Gran Premio de los Países Bajos' },
 ];
 
-// Imágenes puramente de Fórmula 1 (Monoplazas, trazados, Red Bull, etc.)
 const RACE_GALLERY = [
   'https://cdn-7.motorsport.com/images/amp/6n7APeR0/s1000/charles-leclerc-ferrari-max-ve.webp',
   'https://www.menzig.es/images/a/0000/105-h1.jpg',
@@ -29,6 +23,7 @@ const RACE_GALLERY = [
 
 export function RatingSelection({ mode, selection, onBack }) {
   const [selectedRace, setSelectedRace] = useState(RACE_OPTIONS[0]?.value || '');
+  const { profile, loading: profileLoading } = useProfile();
 
   if (mode === 'driver') {
     return (
@@ -44,6 +39,7 @@ export function RatingSelection({ mode, selection, onBack }) {
           </p>
           <div className='bg-zinc-950 border border-zinc-800 rounded-xl p-8 flex items-center justify-center min-h-[200px]'>
             <p className='text-zinc-500 text-sm'>Aquí irá el formulario de valoración del piloto.</p>
+            <p className='text-zinc-600 text-xs mt-2'>Usuario: {profile.username || profile.full_name || 'Anónimo'}</p>
           </div>
           <button
             type='button'
@@ -62,7 +58,7 @@ export function RatingSelection({ mode, selection, onBack }) {
     return (
       <>
         <RaceSelector raceOptions={RACE_OPTIONS} value={selectedRace} onChange={setSelectedRace} season={2026} />
-        <RaceRating onBack={onBack} raceGallery={RACE_GALLERY} selectedRace={selectedRace} />
+        <RaceRating onBack={onBack} raceGallery={RACE_GALLERY} selectedRace={selectedRace} user={profile} loadingUser={profileLoading} />
       </>
 
     );

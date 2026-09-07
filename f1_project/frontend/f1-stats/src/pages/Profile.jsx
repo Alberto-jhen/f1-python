@@ -4,9 +4,7 @@ import { FavoriteCard } from '@/components/profile/FavoriteCard';
 import { RatingItem } from '@/components/profile/RatingItem';
 import { StatBadge } from '@/components/profile/StatBadge';
 import { ActivityItem } from '@/components/profile/ActivityItem';
-import { useAuth } from '@/hooks/useAuth';
-import { fetchProfileById } from '@/service/supabaseService';
-import { useEffect, useState } from 'react';
+import { useProfile } from '@/hooks/useProfile';
 import {
   HeartIcon,
   StarIcon,
@@ -18,38 +16,8 @@ import {
   UsersIcon,
 } from 'lucide-react';
 
-const emptyProfile = {
-  full_name: '',
-  username: '',
-  avatar_url: '',
-  created_at: '',
-};
-
 export function Profile() {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState(emptyProfile);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const fetchProfile = async () => {
-      setLoading(true);
-      const data = await fetchProfileById(user.id);
-
-      if (data) {
-        setProfile({
-          full_name: data.full_name || data.username || '',
-          username: data.username || '',
-          avatar_url: data.avatar_url || '',
-          created_at: data.created_at || '',
-        });
-      }
-      setLoading(false);
-    };
-
-    fetchProfile();
-  }, [user?.id]);
+  const { profile, loading, user } = useProfile();
 
   if (loading) {
     return (

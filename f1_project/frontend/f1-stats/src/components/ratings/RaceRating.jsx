@@ -1,14 +1,30 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, MessageSquare, Newspaper, Quote } from 'lucide-react';
 import { RatingStars } from './RatingStars';
+import { usePublishRating } from '@/hooks/usePublishRating';
 
-export function RaceRating({ onBack, raceGallery }) {
+export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUser = false }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [currentImage, setCurrentImage] = useState(0);
-  const MOCK_USER = {
-    name: "Piloto_01",
-    avatar: "https://i.pravatar.cc/150?img=11"
+  const { publish, loading: publishing, error: publishError } = usePublishRating();
+  const displayName = loadingUser ? 'Cargando...' : (user?.username || user?.full_name || 'Usuario Anónimo');
+  const avatarUrl = user?.avatar_url || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+
+  const handlePublish = async () => {
+    if (!selectedRace || rating < 1 || !user?.id) return;
+
+    try {
+      await publish(user.id, {
+        race_id: selectedRace,
+        rating,
+        comment: comment.trim() || undefined,
+      });
+      setRating(0);
+      setComment('');
+    } catch {
+      // El error ya está guardado en publishError
+    }
   };
 
   useEffect(() => {
@@ -16,7 +32,7 @@ export function RaceRating({ onBack, raceGallery }) {
       setCurrentImage((prev) => (prev + 1) % raceGallery.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [raceGallery.length]);
 
   return (
     <div className='animate-fade-in mt-4 w-full max-w-full overflow-x-hidden pb-4'>      
@@ -53,12 +69,12 @@ export function RaceRating({ onBack, raceGallery }) {
           {/* Identidad del Usuario */}
           <div className='flex items-center gap-4 mb-8 bg-zinc-900/30 border border-zinc-800/50 p-4 rounded-2xl'>
             <div className='relative shrink-0'>
-              <img src={MOCK_USER.avatar} alt="Perfil" className='w-12 h-12 rounded-full border-2 border-zinc-700 object-cover' />
+              <img src={avatarUrl} alt="Perfil" className='w-12 h-12 rounded-full border-2 border-zinc-700 object-cover' />
               <div className='absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-zinc-950 rounded-full'></div>
             </div>
             <div>
               <p className='text-[10px] font-bold uppercase tracking-widest text-zinc-500'>Publicando como</p>
-              <p className='text-lg font-black tracking-tight text-white'>{MOCK_USER.name}</p>
+              <p className='text-lg font-black tracking-tight text-white'>{displayName}</p>
             </div>
           </div>
 
@@ -92,11 +108,18 @@ export function RaceRating({ onBack, raceGallery }) {
           </div>
 
           <div className='pt-10 mt-auto'>
+            {publishError && (
+              <p className='mb-3 text-sm text-red-500 font-medium'>
+                {publishError.message || 'Error al publicar la valoración'}
+              </p>
+            )}
             <button
               type='button'
-              className='w-full py-4 bg-white text-black text-sm font-black uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white hover:shadow-[0_0_20px_rgba(220,38,38,0.3)] transition-all duration-300 cursor-pointer'
+              onClick={handlePublish}
+              disabled={publishing || !selectedRace || rating < 1 || !user?.id}
+              className='w-full py-4 bg-white text-black text-sm font-black uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white hover:shadow-[0_0_20px_rgba(220,38,38,0.3)] transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              Publicar Análisis
+              {publishing ? 'Publicando...' : 'Publicar Análisis'}
             </button>
           </div>
         </div>
