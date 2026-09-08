@@ -28,16 +28,49 @@ class RatingsService:
     def get_rating_by_id(self, rating_id: UUID | str) -> RatingResponse | None:
         return self._to_response(self._repo.get_by_id(rating_id))
 
-    def get_ratings_by_profile(self, profile_id: str) -> list[RatingResponse]:
-        rows = self._repo.get_by_profile(profile_id)
+    def get_all_ratings(
+        self,
+        race_id: int | None = None,
+        sort_by: str = "likes",
+        limit: int = 20,
+        since: datetime | None = None,
+        current_profile_id: str | None = None,
+    ) -> list[RatingResponse]:
+        rows = self._repo.get_all(
+            race_id=race_id,
+            sort_by=sort_by,
+            limit=limit,
+            since=since,
+            current_profile_id=current_profile_id,
+        )
+        return [RatingResponse(**row) for row in rows]
+
+    def get_ratings_by_profile(
+        self,
+        profile_id: str,
+        race_id: int | None = None,
+        current_profile_id: str | None = None,
+    ) -> list[RatingResponse]:
+        rows = self._repo.get_by_profile(
+            profile_id,
+            race_id=race_id,
+            current_profile_id=current_profile_id,
+        )
         return [RatingResponse(**row) for row in rows]
 
     def get_most_liked_comments(
         self,
         limit: int = 10,
         since: datetime | None = None,
+        race_id: int | None = None,
+        current_profile_id: str | None = None,
     ) -> list[RatingResponse]:
-        rows = self._repo.get_most_liked_comments(limit=limit, since=since)
+        rows = self._repo.get_most_liked_comments(
+            limit=limit,
+            since=since,
+            race_id=race_id,
+            current_profile_id=current_profile_id,
+        )
         return [RatingResponse(**row) for row in rows]
 
     def update_rating(
@@ -67,8 +100,12 @@ class RatingsService:
         self._repo.delete(rating_id)
         return True
 
-    def like_rating(self, rating_id: UUID | str) -> RatingResponse | None:
-        updated = self._repo.increment_likes(rating_id)
+    def like_rating(self, profile_id: str, rating_id: UUID | str) -> RatingResponse | None:
+        updated = self._repo.add_like(profile_id, rating_id)
+        return self._to_response(updated)
+
+    def unlike_rating(self, profile_id: str, rating_id: UUID | str) -> RatingResponse | None:
+        updated = self._repo.remove_like(profile_id, rating_id)
         return self._to_response(updated)
 
 

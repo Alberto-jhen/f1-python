@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronLeftIcon, MessageSquare, Newspaper, Quote } from 'lucide-react';
 import { toast } from 'sonner';
 import { RatingStars } from './RatingStars';
@@ -138,7 +139,10 @@ export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUse
       <div className='mt-16 grid grid-cols-1 md:grid-cols-5 gap-6'>
         
         {/* Banner de Comunidad */}
-        <div className='md:col-span-3 group bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 md:p-8 hover:border-red-600/50 transition-all cursor-pointer overflow-hidden relative'>
+        <Link
+          to='/ratings/community'
+          className='md:col-span-3 group bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 md:p-8 hover:border-red-600/50 transition-all overflow-hidden relative block'
+        >
           <div className='absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-3xl -z-10 group-hover:bg-red-600/10 transition-colors'></div>
           
           <div className='flex items-start justify-between'>
@@ -155,7 +159,7 @@ export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUse
               Ver opiniones
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Módulo de Noticias / Contexto */}
         <div className='md:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 md:p-8'>

@@ -173,13 +173,31 @@ class RatingCreate(RatingBase):
     profile_id: Optional[UUID] = None
 
 
+class RatingProfile(BaseModel):
+    id: UUID
+    username: Optional[str] = None
+    full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+
+class RatingRace(BaseModel):
+    id: int
+    season_year: int
+    round: int
+    race_date: Optional[str] = None
+    circuit_name: Optional[str] = None
+
+
 class RatingResponse(RatingBase):
     """
     DTO to send the data to the frontend (GET)
     """
     id: UUID
     created_at: datetime
-    likes: Optional[int] = 0
+    likes: int = 0
+    liked_by_me: bool = False
+    profile: Optional[RatingProfile] = None
+    race: Optional[RatingRace] = None
 
     class Config:
         from_attributes = True

@@ -343,3 +343,61 @@ export const publishRating = async (profileId, ratingData) => {
         throw error;
     }
 };
+
+export const fetchRatings = async (params = {}, signal) => {
+    try {
+        const query = new URLSearchParams();
+        if (params.race_id) query.set('race_id', params.race_id);
+        if (params.sort_by) query.set('sort_by', params.sort_by);
+        if (params.limit) query.set('limit', params.limit);
+        if (params.since) query.set('since', params.since);
+        if (params.current_profile_id) query.set('current_profile_id', params.current_profile_id);
+        const response = await fetch(`${BASE_URL}/ratings?${query.toString()}`, { signal });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al obtener las valoraciones');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Fetch error en fetchRatings:', error);
+        throw error;
+    }
+};
+
+export const likeRating = async (profileId, ratingId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/ratings/${encodeURIComponent(profileId)}/${encodeURIComponent(ratingId)}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al dar like');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Fetch error en likeRating:', error);
+        throw error;
+    }
+};
+
+export const unlikeRating = async (profileId, ratingId) => {
+    try {
+        const response = await fetch(`${BASE_URL}/ratings/${encodeURIComponent(profileId)}/${encodeURIComponent(ratingId)}/like`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Error al quitar like');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Fetch error en unlikeRating:', error);
+        throw error;
+    }
+};
