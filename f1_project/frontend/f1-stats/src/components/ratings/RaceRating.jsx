@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, MessageSquare, Newspaper, Quote } from 'lucide-react';
+import { toast } from 'sonner';
 import { RatingStars } from './RatingStars';
 import { usePublishRating } from '@/hooks/usePublishRating';
 
@@ -7,13 +8,12 @@ export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUse
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [currentImage, setCurrentImage] = useState(0);
-  const { publish, loading: publishing, error: publishError } = usePublishRating();
+  const { publish, loading: publishing, error: publishError, data: publishedData, reset: resetPublish } = usePublishRating();
   const displayName = loadingUser ? 'Cargando...' : (user?.username || user?.full_name || 'Usuario Anónimo');
   const avatarUrl = user?.avatar_url || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
   const handlePublish = async () => {
     if (!selectedRace || rating < 1 || !user?.id) return;
-
     try {
       await publish(user.id, {
         race_id: selectedRace,
@@ -22,8 +22,8 @@ export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUse
       });
       setRating(0);
       setComment('');
-    } catch {
-      // El error ya está guardado en publishError
+    } catch (error) {
+      console.error('Error al publicar la valoración:', error);
     }
   };
 
@@ -34,10 +34,25 @@ export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUse
     return () => clearInterval(interval);
   }, [raceGallery.length]);
 
+  useEffect(() => {
+    resetPublish();
+  }, [selectedRace, resetPublish]);
+
+  useEffect(() => {
+    if (publishError) {
+      toast.error(publishError.message || 'Error al publicar la valoración');
+    }
+  }, [publishError]);
+
+  useEffect(() => {
+    if (publishedData) {
+      toast.success('Análisis publicado correctamente');
+    }
+  }, [publishedData]);
+
   return (
     <div className='animate-fade-in mt-4 w-full max-w-full overflow-x-hidden pb-4'>      
 
-      {/* 2. BLOQUE PRINCIPAL: Galería | Formulario */}
       <div className='flex flex-col md:flex-row gap-8 md:gap-12 min-h-[550px]'>
         
         {/* Galería */}
@@ -108,11 +123,6 @@ export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUse
           </div>
 
           <div className='pt-10 mt-auto'>
-            {publishError && (
-              <p className='mb-3 text-sm text-red-500 font-medium'>
-                {publishError.message || 'Error al publicar la valoración'}
-              </p>
-            )}
             <button
               type='button'
               onClick={handlePublish}
@@ -125,7 +135,6 @@ export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUse
         </div>
       </div>
 
-      {/* 3. SECCIONES INFERIORES: Comunidad y Contexto */}
       <div className='mt-16 grid grid-cols-1 md:grid-cols-5 gap-6'>
         
         {/* Banner de Comunidad */}

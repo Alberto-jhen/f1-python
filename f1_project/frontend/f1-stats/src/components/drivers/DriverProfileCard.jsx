@@ -46,38 +46,48 @@ export default function DriverProfileCard({ data }) {
     };
 
     useEffect(() => {
+        const controller = new AbortController();
+        let ignore = false;
+
         async function loadAllStats() {
             setLoading(true);
             try {
                 const [seasonRes, careerRes] = await Promise.all([
-                    fetchDriverSeasonStandings(year, driverNumber, driverCode),
-                    fetchDriverCareerStandings(driverLabel)
+                    fetchDriverSeasonStandings(year, driverNumber, driverCode, controller.signal),
+                    fetchDriverCareerStandings(driverLabel, controller.signal)
                 ]);
 
-                if (seasonRes) setSeasonStats({ position: seasonRes.position, points: seasonRes.points });
-                if (careerRes) setCareerStats({ titles: careerRes.titles, wins: careerRes.wins, podiums: careerRes.podiums });
+                if (!ignore && seasonRes) setSeasonStats({ position: seasonRes.position, points: seasonRes.points });
+                if (!ignore && careerRes) setCareerStats({ titles: careerRes.titles, wins: careerRes.wins, podiums: careerRes.podiums });
             } catch (error) {
+                if (ignore || error.name === 'AbortError' || controller.signal.aborted) return;
                 console.error('Error cargando estadísticas', error);
             } finally {
-                setLoading(false);
+                if (!ignore) setLoading(false);
             }
         }
+
         if (driverNumber && year && driverLabel) loadAllStats();
+
+        return () => {
+            ignore = true;
+            controller.abort();
+        };
     }, [driverNumber, year, driverLabel, driverCode]);
 
     return (
-        <div className="relative w-full h-auto min-h-[600px] rounded-3xl overflow-hidden shadow-2xl group animate-fade-in-up border border-slate-800/50 bg-slate-950 flex flex-col lg:flex-row">
+        <div className="relative w-full h-auto rounded-3xl overflow-hidden shadow-2xl group animate-fade-in-up border border-slate-800/50 bg-slate-950 flex flex-col lg:flex-row">
             {/* Driver image */}
-            <div className="relative w-full lg:w-2/5 h-[55vh] lg:h-[75vh] min-h-[450px] overflow-hidden flex items-start justify-center bg-slate-950 shrink-0">
+            <div className="relative w-full lg:w-2/5 h-[45vh] lg:h-auto lg:min-h-0 lg:max-h-[70vh] overflow-hidden flex items-start justify-center bg-slate-950 shrink-0">
                 <img
                     src={imageUrl}
                     alt={driverLabel}
                     onError={handleImageError}
-                    className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-105"
+                    className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-slate-950/10 to-slate-950/80 lg:bg-gradient-to-r lg:from-transparent lg:via-slate-950/10 lg:to-slate-950/90" />
                 <div
-                    className="absolute bottom-2 right-4 lg:bottom-8 lg:right-8 text-[80px] lg:text-[120px] tall-screen:text-[160px] font-black italic leading-none opacity-20 pointer-events-none select-none"
+                    className="absolute bottom-2 right-4 lg:bottom-8 lg:right-8 text-6xl md:text-7xl lg:text-8xl font-black italic leading-none opacity-20 pointer-events-none select-none"
                     style={{ color }}
                 >
                     {driverNumber}
@@ -85,29 +95,29 @@ export default function DriverProfileCard({ data }) {
             </div>
 
             {/* Info */}
-            <div className="relative z-10 w-full lg:w-3/5 h-auto flex flex-col p-6 md:p-8 lg:p-10 bg-slate-950 gap-4 overflow-y-auto">
+            <div className="relative z-10 w-full lg:w-3/5 flex flex-col p-6 md:p-8 lg:p-10 bg-slate-950 gap-4">
                 {/* Header */}
-                <div className="space-y-2 short-screen:space-y-1 shrink-0">
+                <div className="space-y-2 shrink-0">
                     <div
-                        className="w-fit px-3 py-1 rounded-full text-[10px] short-screen:text-[9px] font-bold uppercase tracking-widest text-white"
+                        className="w-fit px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white"
                         style={{ backgroundColor: `${color}` }}
                     >
                         {team || 'Cargando equipo…'}
                     </div>
-                    <h1 className="text-[clamp(1.75rem,3vw+1.2vh,3.5rem)] font-black uppercase italic tracking-tighter text-white drop-shadow-2xl leading-none flex flex-wrap items-baseline gap-x-3">
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase italic tracking-tighter text-white drop-shadow-2xl leading-none flex flex-wrap items-baseline gap-x-3">
                         {driverLabel}
                         <span
-                            className="text-[clamp(1.5rem,2.8vw+1.1vh,3.5rem)] font-black italic flex items-baseline gap-x-1.5"
+                            className="text-2xl md:text-3xl lg:text-4xl font-black italic flex items-baseline gap-x-1.5"
                             style={{ color: `${color}` }}
                         >
-                            <span className="text-[clamp(1rem,1.6vw+0.6vh,2rem)]">#</span>
+                            <span className="text-lg md:text-xl lg:text-2xl">#</span>
                             {driverNumber}
                         </span>
                     </h1>
                 </div>
 
                 {/* Estadísticas en lista unificada */}
-                <div className="flex flex-col gap-3 short-screen:gap-2 my-4 short-screen:my-2 shrink-0">
+                <div className="flex flex-col gap-3 my-2 shrink-0">
                     <StatRow label="País" value={country} color={color} />
                     <div className="w-full h-px bg-slate-600/80" />
                     <StatRow label="Temporada" value={year} color={color} />
@@ -119,7 +129,7 @@ export default function DriverProfileCard({ data }) {
                 </div>
 
                 {/* Career history accordion */}
-                <div className="flex-1 min-h-0 flex flex-col mt-auto">
+                <div className="flex-1 min-h-0">
                     <DriverHistoryAccordion
                         teamColor={team_color}
                         titles={careerStats.titles}
@@ -147,9 +157,9 @@ function StatRow({ label, value, color }) {
                 className="inline-block h-3 w-3 shrink-0 rounded-full transition-all duration-300 ease-out group-hover/stat:w-16 shadow-[0_0_8px_rgba(0,0,0,0.5)]"
                 style={{ backgroundColor: color }}
             />
-            <p className="flex flex-1 items-baseline justify-between text-slate-300 font-black uppercase tracking-tighter text-base short-screen:text-sm tall-screen:text-lg whitespace-nowrap">
+            <p className="flex flex-1 items-baseline justify-between text-slate-300 font-black uppercase tracking-tighter text-sm md:text-base lg:text-lg whitespace-nowrap">
                 {label}
-                <span className="text-white text-xl short-screen:text-lg tall-screen:text-2xl ml-4">
+                <span className="text-white text-lg md:text-xl lg:text-2xl ml-4">
                     {value}
                 </span>
             </p>
@@ -180,7 +190,7 @@ function DriverHistoryAccordion({ teamColor, wins, podiums, titles }) {
                     }}
                 >
                     <AccordionTrigger
-                        className='py-1.5 text-sm short-screen:text-xs tall-screen:text-lg uppercase font-black hover:no-underline items-center hover:cursor-pointer text-slate-900'
+                        className='py-1.5 text-xs md:text-sm lg:text-base uppercase font-black hover:no-underline items-center hover:cursor-pointer text-slate-900'
                     >
                         Trayectoria
                     </AccordionTrigger>
@@ -196,20 +206,20 @@ function DriverHistoryAccordion({ teamColor, wins, podiums, titles }) {
                             </thead>
                             <tbody className="divide-y divide-slate-800/50">
                                 <tr className="hover:bg-slate-800/20 transition-colors">
-                                    <td className="px-3 py-2 short-screen:px-2 short-screen:py-1.5 text-sm short-screen:text-xs tall-screen:text-base font-medium text-slate-300">Títulos Mundiales</td>
-                                    <td className="px-3 py-2 short-screen:px-2 short-screen:py-1.5 text-right font-black text-2xl short-screen:text-xl tall-screen:text-3xl italic" style={{color: baseColor}}>
+                                    <td className="px-3 py-2 text-xs md:text-sm lg:text-base font-medium text-slate-300">Títulos Mundiales</td>
+                                    <td className="px-3 py-2 text-right font-black text-2xl md:text-3xl lg:text-4xl italic" style={{color: baseColor}}>
                                         {titles}
                                     </td>
                                 </tr>
                                 <tr className="hover:bg-slate-800/20 transition-colors">
-                                    <td className="px-3 py-2 short-screen:px-2 short-screen:py-1.5 text-sm short-screen:text-xs tall-screen:text-base font-medium text-slate-300">Victorias en Grandes Premios</td>
-                                    <td className="px-3 py-2 short-screen:px-2 short-screen:py-1.5 text-right font-black text-2xl short-screen:text-xl tall-screen:text-3xl italic" style={{color: baseColor}}>
+                                    <td className="px-3 py-2 text-xs md:text-sm lg:text-base font-medium text-slate-300">Victorias en Grandes Premios</td>
+                                    <td className="px-3 py-2 text-right font-black text-2xl md:text-3xl lg:text-4xl italic" style={{color: baseColor}}>
                                         {wins}
                                     </td>
                                 </tr>
                                 <tr className="hover:bg-slate-800/20 transition-colors">
-                                    <td className="px-3 py-2 short-screen:px-2 short-screen:py-1.5 text-sm short-screen:text-xs tall-screen:text-base font-medium text-slate-300">Podios Totales</td>
-                                    <td className="px-3 py-2 short-screen:px-2 short-screen:py-1.5 text-right font-black text-2xl short-screen:text-xl tall-screen:text-3xl italic" style={{color: baseColor}}>
+                                    <td className="px-3 py-2 text-xs md:text-sm lg:text-base font-medium text-slate-300">Podios Totales</td>
+                                    <td className="px-3 py-2 text-right font-black text-2xl md:text-3xl lg:text-4xl italic" style={{color: baseColor}}>
                                         {podiums}
                                     </td>
                                 </tr>

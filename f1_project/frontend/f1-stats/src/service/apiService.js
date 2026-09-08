@@ -75,11 +75,11 @@ export const fetchDriversFullNamesByYear = async (year, event_name = "latest", s
 }
 
 // Driver season standings.
-export const fetchDriverSeasonStandings = async (year, driver_num, code = null) => {
+export const fetchDriverSeasonStandings = async (year, driver_num, code = null, signal) => {
     try{
         let url = `${BASE_URL}/data/standings/${year}/${driver_num}`;
         if (code) url += `?code=${encodeURIComponent(code)}`;
-        const response = await fetch(url);
+        const response = await fetch(url, { signal });
         if(!response.ok) throw new Error('Error al obtener la clasificacion del piloto');
 
         return await response.json();
@@ -90,9 +90,9 @@ export const fetchDriverSeasonStandings = async (year, driver_num, code = null) 
 }
 
 // Driver career standings.
-export const fetchDriverCareerStandings = async (driver_name) => {
+export const fetchDriverCareerStandings = async (driver_name, signal) => {
     try {
-        const response = await fetch(`${BASE_URL}/data/career/standings/${encodeURIComponent(driver_name)}`);
+        const response = await fetch(`${BASE_URL}/data/career/standings/${encodeURIComponent(driver_name)}`, { signal });
         if (!response.ok) throw new Error('Error al obtener las estadisticas de la carrera del piloto');
 
         return await response.json();
@@ -195,9 +195,9 @@ export const formatLapTime = (seconds) => {
 
 
 // ---------- H2H SERVICE ----------
-export const fetchH2HData = async (year, driver1, driver2) => {
+export const fetchH2HData = async (year, driver1, driver2, signal) => {
     try {
-        const response = await fetch(`${BASE_URL}/data/h2h/${year}/${driver1}/${driver2}`);
+        const response = await fetch(`${BASE_URL}/data/h2h/${year}/${driver1}/${driver2}`, { signal });
         if (!response.ok) throw new Error('Error al obtener los datos H2H');
         return await response.json();
     } catch (error) {

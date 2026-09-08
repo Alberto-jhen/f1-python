@@ -19,17 +19,22 @@ def _load_season_standings():
 SEASON_STANDINGS = _load_season_standings()
 
 
-def get_h2h_data(year: int, driver1: str, driver2: str):
+def get_h2h_data(year: int, driver1: str, driver2: str, cancel_event=None):
     """
     Returns per-event qualifying and race positions for two drivers in a season.
     driver1 and driver2 are abbreviations (e.g. 'VER', 'PER').
+
+    If cancel_event is provided and set, the function stops as soon as possible
+    and raises RequestCancelledError.
     """
     try:
+        _check_cancelled(cancel_event)
         schedule = fastf1.get_event_schedule(year, include_testing=False)
         now = datetime.now()
         results = []
 
         for _, event in schedule.iterrows():
+            _check_cancelled(cancel_event)
             event_name = event['EventName']
             round_number = int(event['RoundNumber'])
 
@@ -51,8 +56,11 @@ def get_h2h_data(year: int, driver1: str, driver2: str):
 
             # Qualifying results
             try:
+                _check_cancelled(cancel_event)
                 quali = fastf1.get_session(year, event_name, 'Q')
+                _check_cancelled(cancel_event)
                 quali.load(telemetry=False, weather=False, messages=False)
+                _check_cancelled(cancel_event)
                 q_results = quali.results
 
                 d1_q = q_results[q_results['Abbreviation'] == driver1]
@@ -67,8 +75,11 @@ def get_h2h_data(year: int, driver1: str, driver2: str):
 
             # Race results
             try:
+                _check_cancelled(cancel_event)
                 race = fastf1.get_session(year, event_name, 'R')
+                _check_cancelled(cancel_event)
                 race.load(telemetry=False, weather=False, messages=False)
+                _check_cancelled(cancel_event)
                 r_results = race.results
 
                 d1_r = r_results[r_results['Abbreviation'] == driver1]
@@ -101,9 +112,12 @@ def get_h2h_data(year: int, driver1: str, driver2: str):
 
         # Accumulate per-race points from FastF1 across all events
         for ev_entry in results:
+            _check_cancelled(cancel_event)
             try:
                 race_session = fastf1.get_session(year, ev_entry["event"], 'R')
+                _check_cancelled(cancel_event)
                 race_session.load(telemetry=False, weather=False, messages=False)
+                _check_cancelled(cancel_event)
                 for _, row in race_session.results.iterrows():
                     abbr = row['Abbreviation']
                     pts = float(row.get('Points', 0) or 0)
@@ -118,6 +132,7 @@ def get_h2h_data(year: int, driver1: str, driver2: str):
             except Exception:
                 pass
 
+        _check_cancelled(cancel_event)
         d1_json_pts = year_data.get(d1_num, {}).get("pts", 0) if d1_num else 0
         d2_json_pts = year_data.get(d2_num, {}).get("pts", 0) if d2_num else 0
 
@@ -130,9 +145,20 @@ def get_h2h_data(year: int, driver1: str, driver2: str):
             "events": results,
         }
 
+    except RequestCancelledError:
+        raise
     except Exception as e:
         print(f"Error en h2h_service: {e}")
         return {"error": str(e)}
+
+
+class RequestCancelledError(Exception):
+    """Raised when the client closes the request before H2H finishes."""
+
+
+def _check_cancelled(cancel_event):
+    if cancel_event is not None and cancel_event.is_set():
+        raise RequestCancelledError("Client disconnected")
 
 
 def _is_classified(status: str, position) -> bool:

@@ -125,11 +125,11 @@ export default function DriverGridSelector({
       {/* Grid */}
       <div className="min-h-[200px]">
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 short-screen:grid-cols-5 gap-3 short-screen:gap-2">
-            {Array.from({ length: 10 }).map((_, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4">
+            {Array.from({ length: 12 }).map((_, i) => (
               <div
                 key={i}
-                className="h-24 short-screen:h-36 bg-slate-900/40 rounded-xl animate-pulse"
+                className="aspect-[4/5] h-auto w-full bg-slate-900/40 rounded-xl animate-pulse"
               />
             ))}
           </div>
@@ -139,7 +139,7 @@ export default function DriverGridSelector({
             <p className="text-xs font-medium uppercase tracking-widest">No se encontraron pilotos</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 short-screen:grid-cols-5 gap-3 short-screen:gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4">
             {filteredDrivers.map((driver) => {
               const selected = isSelected(driver);
               const order = selectionOrder(driver);
@@ -153,7 +153,7 @@ export default function DriverGridSelector({
                   key={driver.value}
                   onClick={() => handleCardClick(driver)}
                   disabled={mode === 'h2h' && !selected && comparisonList.length >= 2}
-                  className={`group relative h-24 short-screen:h-36 rounded-xl overflow-hidden text-left transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`group relative w-full h-auto aspect-[4/5] rounded-xl overflow-hidden text-left transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed ${
                     selected
                       ? 'ring-2 ring-white/30 scale-[1.02]'
                       : 'hover:ring-1 hover:ring-slate-700/50 hover:scale-[1.01]'
@@ -172,7 +172,7 @@ export default function DriverGridSelector({
                       src={imageUrl}
                       alt={driver.label}
                       onError={() => handleImageError(driver.value)}
-                      className="absolute inset-0 w-full h-full object-cover object-[center_30%] opacity-70 group-hover:opacity-90 transition-opacity"
+                      className="absolute inset-0 w-full h-full object-cover object-top opacity-70 group-hover:opacity-90 transition-opacity"
                       loading="lazy"
                     />
                   ) : (
@@ -195,24 +195,24 @@ export default function DriverGridSelector({
 
                   {/* Number watermark */}
                   <div
-                    className="absolute bottom-0 right-1.5 text-4xl short-screen:text-3xl font-black italic leading-none opacity-10 pointer-events-none select-none"
+                    className="absolute bottom-0 right-1.5 text-3xl md:text-4xl font-black italic leading-none opacity-10 pointer-events-none select-none"
                     style={{ color: teamColor }}
                   >
                     {driver.number}
                   </div>
 
                   {/* Info */}
-                  <div className="absolute bottom-0 left-0 right-0 p-2.5 short-screen:p-2 z-10">
-                    <div className="flex items-center gap-1.5 mb-0.5 short-screen:mb-0.5">
+                  <div className="absolute bottom-0 left-0 right-0 p-2 z-10">
+                    <div className="flex items-center gap-1.5 mb-0.5">
                       <span
-                        className="w-1.5 h-1.5 short-screen:w-1.5 short-screen:h-1.5 rounded-full"
+                        className="w-1.5 h-1.5 rounded-full"
                         style={{ backgroundColor: teamColor }}
                       />
-                      <span className="text-[8px] short-screen:text-[7px] font-bold uppercase tracking-widest text-slate-400 truncate">
+                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 truncate">
                         {driver.team}
                       </span>
                     </div>
-                    <p className="text-xs short-screen:text-[11px] font-black uppercase italic text-white leading-tight truncate">
+                    <p className="text-xs sm:text-sm font-black uppercase italic text-white leading-tight truncate">
                       {driver.label}
                     </p>
                   </div>

@@ -130,6 +130,7 @@ class ReplayResponse(BaseModel):
 # ──────────────────────────────────────────────
 
 class CircuitInfo(BaseModel):
+    id: int
     season_year: int
     name: str
     round: int
@@ -169,7 +170,7 @@ class RatingCreate(RatingBase):
     """
     DTO for POST requests.
     """
-    pass
+    profile_id: Optional[UUID] = None
 
 
 class RatingResponse(RatingBase):

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { publishRating } from '@/service/apiService';
 
 export function usePublishRating() {
@@ -6,10 +6,15 @@ export function usePublishRating() {
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
 
-  const publish = async (profileId, ratingData) => {
-    setLoading(true);
+  const reset = useCallback(() => {
+    setLoading(false);
     setError(null);
     setData(null);
+  }, []);
+
+  const publish = async (profileId, ratingData) => {
+    reset();
+    setLoading(true);
 
     try {
       const result = await publishRating(profileId, ratingData);
@@ -23,5 +28,5 @@ export function usePublishRating() {
     }
   };
 
-  return { publish, loading, error, data };
+  return { publish, loading, error, data, reset };
 }

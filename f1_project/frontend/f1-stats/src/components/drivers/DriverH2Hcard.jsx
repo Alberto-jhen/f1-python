@@ -26,19 +26,30 @@ export default function DriverH2Hcard({ drivers = [], year, onRemove }) {
             setH2hData(null);
             return;
         }
+
+        const controller = new AbortController();
+        let ignore = false;
+
         const fetchData = async () => {
             setLoading(true);
             try {
-                const data = await fetchH2HData(d1.year, d1.driverValue, d2.driverValue);
-                setH2hData(data);
+                const data = await fetchH2HData(d1.year, d1.driverValue, d2.driverValue, controller.signal);
+                if (!ignore) setH2hData(data);
             } catch (e) {
+                if (ignore || e.name === 'AbortError' || controller.signal.aborted) return;
                 console.error('Error fetching H2H:', e);
                 toast('Error al cargar datos H2H.');
             } finally {
-                setLoading(false);
+                if (!ignore) setLoading(false);
             }
         };
+
         fetchData();
+
+        return () => {
+            ignore = true;
+            controller.abort();
+        };
     }, [d1, d2, sameYear]);
 
     const stats = useMemo(() => {
@@ -90,7 +101,7 @@ export default function DriverH2Hcard({ drivers = [], year, onRemove }) {
         const color = driver.team_color ? `#${driver.team_color}` : '#dc2626';
 
         return (
-            <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 shadow-2xl" style={{ borderColor: color }}>
+        <div className="relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 shadow-2xl" style={{ borderColor: color }}>
                 {!fallback ? (
                     <img
                         src={imageUrl}
@@ -111,19 +122,19 @@ export default function DriverH2Hcard({ drivers = [], year, onRemove }) {
     const color2 = d2?.team_color ? `#${d2.team_color}` : '#3b82f6';
 
     return (
-        <div className="flex flex-col gap-6 animate-fade-in-up h-full">
+        <div className="flex flex-col h-auto animate-fade-in-up">
             {/* Empty state */}
             {!d1 && !d2 && (
-                <div className="h-full flex flex-col items-center justify-center gap-4 text-slate-600 border border-dashed border-slate-800 rounded-3xl bg-slate-950/50 min-h-[400px]">
-                    <Users className="size-16 opacity-30" />
-                    <p className="text-lg font-black uppercase tracking-widest text-slate-500">Comparativa H2H</p>
-                    <p className="text-sm text-slate-600 text-center max-w-xs">Selecciona hasta dos pilotos de la misma temporada en el panel izquierdo.</p>
-                </div>
-            )}
+            <div className="min-h-[400px] flex flex-col items-center justify-center gap-4 text-slate-600 border border-dashed border-slate-800 rounded-3xl bg-slate-950/50">
+                <Users className="size-16 opacity-30" />
+                <p className="text-lg font-black uppercase tracking-widest text-slate-500">Comparativa H2H</p>
+                <p className="text-sm text-slate-600 text-center max-w-xs">Selecciona hasta dos pilotos de la misma temporada en el panel izquierdo.</p>
+            </div>
+        )}
 
-            {/* One driver selected */}
-            {d1 && !d2 && (
-                <div className="h-full flex flex-col items-center justify-center gap-4 text-slate-500 border border-dashed border-slate-800 rounded-3xl bg-slate-950/50 min-h-[400px]">
+        {/* One driver selected */}
+        {d1 && !d2 && (
+            <div className="min-h-[400px] flex flex-col items-center justify-center gap-4 text-slate-500 border border-dashed border-slate-800 rounded-3xl bg-slate-950/50">
                     {renderDriverPortrait(d1)}
                     <p className="text-lg font-black uppercase tracking-widest text-white">{d1.driverLabel}</p>
                     <p className="text-sm text-slate-600 text-center max-w-xs">Selecciona un segundo piloto para completar la comparativa.</p>
@@ -132,15 +143,15 @@ export default function DriverH2Hcard({ drivers = [], year, onRemove }) {
 
             {/* Different years warning */}
             {d1 && d2 && !sameYear && (
-                <div className="h-full flex flex-col items-center justify-center gap-4 text-amber-500 border border-dashed border-amber-900/30 rounded-3xl bg-slate-950/50 min-h-[400px]">
-                    <p className="text-lg font-black uppercase tracking-widest">Ambos pilotos deben ser de la misma temporada</p>
-                    <p className="text-sm text-amber-500/70 text-center max-w-xs">{d1.year} ≠ {d2.year}</p>
-                </div>
-            )}
+            <div className="min-h-[400px] flex flex-col items-center justify-center gap-4 text-amber-500 border border-dashed border-amber-900/30 rounded-3xl bg-slate-950/50">
+                <p className="text-lg font-black uppercase tracking-widest">Ambos pilotos deben ser de la misma temporada</p>
+                <p className="text-sm text-amber-500/70 text-center max-w-xs">{d1.year} ≠ {d2.year}</p>
+            </div>
+        )}
 
-            {/* Full H2H */}
-            {d1 && d2 && sameYear && (
-                <div className="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col">
+        {/* Full H2H */}
+        {d1 && d2 && sameYear && (
+            <div className="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col">
                     {/* Header with portraits */}
                     <div className="relative p-6 md:p-10 bg-slate-950/80">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-900/10 via-transparent to-transparent" />
@@ -160,7 +171,7 @@ export default function DriverH2Hcard({ drivers = [], year, onRemove }) {
                             </div>
 
                             <div className="flex flex-col items-center gap-2">
-                                <span className="text-4xl md:text-6xl font-black italic text-slate-700">VS</span>
+                                <span className="text-4xl md:text-6xl lg:text-7xl font-black italic text-slate-700">VS</span>
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{year}</span>
                             </div>
 
@@ -250,7 +261,7 @@ function SummaryBox({ label, value, color, sub }) {
     return (
         <div className="flex flex-col items-center justify-center gap-1 bg-slate-950/40 border border-slate-800 rounded-2xl p-4">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{label}</span>
-            <span className="text-3xl md:text-4xl font-black italic" style={{ color }}>{value}</span>
+            <span className="text-2xl md:text-3xl lg:text-4xl font-black italic" style={{ color }}>{value}</span>
             <span className="text-[9px] text-slate-600 uppercase tracking-wider text-center truncate w-full">{sub}</span>
         </div>
     );

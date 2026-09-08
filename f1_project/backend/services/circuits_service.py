@@ -23,6 +23,7 @@ class CircuitsService:
 
         circuit = race_data.get("circuit_id") or {}
         return CircuitInfo(
+            id=race_data["id"],
             season_year=race_data["season_year"],
             name=circuit.get("name"),
             round=race_data["round"],

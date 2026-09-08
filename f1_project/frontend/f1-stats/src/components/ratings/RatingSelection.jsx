@@ -1,17 +1,11 @@
 import { ChevronLeftIcon, User, FlagIcon } from 'lucide-react';
+import { useState } from 'react';
+
+import { useProfile } from '@/hooks/useProfile';
+import { useRacesBySeason } from '@/hooks/useRacesBySeason';
+
 import { RaceRating } from './RaceRating';
 import { RaceSelector } from './RaceSelector';
-import { useState } from 'react';
-import { useProfile } from '@/hooks/useProfile';
-
-const RACE_OPTIONS = [
-  { value: 1, label: 'Gran Premio de Mónaco' },
-  { value: 2, label: 'Gran Premio de España' },
-  { value: 3, label: 'Gran Premio de Austria' },
-  { value: 4, label: 'Gran Premio de Gran Bretaña' },
-  { value: 5, label: 'Gran Premio de Hungría' },
-  { value: 6, label: 'Gran Premio de los Países Bajos' },
-];
 
 const RACE_GALLERY = [
   'https://cdn-7.motorsport.com/images/amp/6n7APeR0/s1000/charles-leclerc-ferrari-max-ve.webp',
@@ -22,13 +16,29 @@ const RACE_GALLERY = [
 ];
 
 export function RatingSelection({ mode, selection, onBack }) {
-  const [selectedRace, setSelectedRace] = useState(RACE_OPTIONS[0]?.value || '');
+  const [selectedRace, setSelectedRace] = useState('');
+  const { races, loading: racesLoading, error: racesError } = useRacesBySeason(2026);
   const { profile, loading: profileLoading } = useProfile();
+
+  const raceOptions = races.map((race) => ({ value: race.id, label: race.name }));
+  const currentSelectedRace = selectedRace || raceOptions[0]?.value || '';
+
+  if (racesLoading) {
+    return <div className='text-zinc-400 text-sm'>Cargando carreras...</div>;
+  }
+
+  if (racesError) {
+    return <div className='text-red-500 text-sm'>Error al cargar las carreras.</div>;
+  }
+
+  if (raceOptions.length === 0) {
+    return <div className='text-zinc-400 text-sm'>No hay carreras disponibles.</div>;
+  }
 
   if (mode === 'driver') {
     return (
       <>
-        <RaceSelector raceOptions={RACE_OPTIONS} value={selectedRace} onChange={setSelectedRace} season={2026} />
+        <RaceSelector raceOptions={raceOptions} value={currentSelectedRace} onChange={setSelectedRace} season={2026} />
         <div className='animate-fade-in'>
           <div className='flex items-center gap-3 mb-4'>
             <User className='size-5 text-red-500' />
@@ -57,8 +67,8 @@ export function RatingSelection({ mode, selection, onBack }) {
   if (mode === 'race') {
     return (
       <>
-        <RaceSelector raceOptions={RACE_OPTIONS} value={selectedRace} onChange={setSelectedRace} season={2026} />
-        <RaceRating onBack={onBack} raceGallery={RACE_GALLERY} selectedRace={selectedRace} user={profile} loadingUser={profileLoading} />
+        <RaceSelector raceOptions={raceOptions} value={currentSelectedRace} onChange={setSelectedRace} season={2026} />
+        <RaceRating onBack={onBack} raceGallery={RACE_GALLERY} selectedRace={currentSelectedRace} user={profile} loadingUser={profileLoading} />
       </>
 
     );

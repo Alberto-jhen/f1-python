@@ -88,78 +88,67 @@ export default function Drivers() {
             {/* Hero header */}
             <div className="relative overflow-hidden border-b border-slate-800">
                 <div className="relative px-4 md:px-8 lg:px-12 py-8 md:py-10">
-                    <div className="border-l-4 border-red-600 pl-4">
-                        <div className="flex items-center gap-3">
-                            <span className="px-3 text-red-600 text-sm font-bold uppercase tracking-[0.3em]">
-                                Driver Hub
-                            </span>
+                    <div className="max-w-[1600px] mx-auto">
+                        <div className="border-l-4 border-red-600 pl-4">
+                            <div className="flex items-center gap-3">
+                                <span className="px-3 text-red-600 text-sm font-bold uppercase tracking-[0.3em]">
+                                    Driver Hub
+                                </span>
+                            </div>
+                            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white italic leading-none">
+                                Elige tu <span className="text-red-600">piloto</span>
+                            </h1>
+                            <p className="text-slate-400 text-base md:text-lg mt-4 font-medium max-w-2xl leading-relaxed">
+                                Analiza el rendimiento en pista, visualiza datos históricos o compara frente a frente a dos corredores de la misma temporada.
+                            </p>
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white italic leading-none">
-                            Elige tu <span className="text-red-600">piloto</span>
-                        </h1>
-                        <p className="text-slate-400 text-base md:text-lg mt-4 font-medium max-w-2xl leading-relaxed">
-                            Analiza el rendimiento en pista, visualiza datos históricos o compara frente a frente a dos corredores de la misma temporada.
-                        </p>
                     </div>
                 </div>
             </div>
 
-            {/* Main split layout: selector left + card right */}
+            {/* Main layout: selectors + card + grid */}
             <div className="px-4 md:px-8 lg:px-12 py-6 md:py-8 pb-8">
-                <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] short-screen:grid-cols-1 gap-6 md:gap-8 items-start lg:items-stretch short-screen:items-start">
-                    {/* Left column wrapper (lg) / becomes selector+grid items (short-screen) */}
-                    <div className="contents">
-                        <div className="short-screen:order-1 lg:order-1">
-                            <DriverInfoSelector
-                                year={year}
-                                mode={mode}
-                                onYearChange={setYear}
-                                onModeChange={handleModeChange}
-                                selectedDriver={selectedDriver}
-                                comparisonList={comparisonList}
-                            />
-                        </div>
-                        <div className="short-screen:order-3 lg:order-2">
-                            <DriverGridSelector
-                                key={`${year}-${mode}`}
-                                drivers={driverOptions}
-                                year={year}
-                                mode={mode}
-                                selectedDriver={selectedDriver}
-                                comparisonList={comparisonList}
-                                onSelect={handleGridSelect}
-                                onRemove={handleGridRemove}
-                                loading={loadingDrivers}
-                            />
-                        </div>
-                    </div>
+                <div className="max-w-[1600px] mx-auto flex flex-col gap-6 md:gap-8">
+                    <DriverInfoSelector
+                        year={year}
+                        mode={mode}
+                        onYearChange={setYear}
+                        onModeChange={handleModeChange}
+                        selectedDriver={selectedDriver}
+                        comparisonList={comparisonList}
+                    />
 
-                    {/* Right column wrapper (lg) / card between selector and grid (short-screen) */}
-                    <div className="contents">
-                        <div className="short-screen:order-2 lg:order-3">
-                            <div className="min-h-fit lg:max-h-[85vh] overflow-y-auto">
-                                {mode === 'individual' && selectedDriver && (
-                                    <DriverProfileCard data={selectedDriver} />
-                                )}
+                    {mode === 'individual' && selectedDriver && (
+                        <DriverProfileCard data={selectedDriver} />
+                    )}
 
-                                {mode === 'h2h' && (
-                                    <DriverH2Hcard
-                                        drivers={comparisonList}
-                                        year={year}
-                                        onRemove={handleH2HRemove}
-                                    />
-                                )}
+                    {mode === 'h2h' && (
+                        <DriverH2Hcard
+                            drivers={comparisonList}
+                            year={year}
+                            onRemove={handleH2HRemove}
+                        />
+                    )}
 
-                                {!selectedDriver && mode === 'individual' && (
-                                    <div className="h-full flex flex-col items-center justify-center gap-4 text-slate-500 border border-dashed border-slate-800 rounded-3xl bg-slate-950/50 min-h-[400px] lg:min-h-[85vh]">
-                                        <Users className="size-16 opacity-30" />
-                                        <p className="text-lg font-black uppercase tracking-widest text-slate-400">Selecciona un piloto</p>
-                                        <p className="text-sm text-slate-500 text-center max-w-xs">Haz clic en cualquier tarjeta de la izquierda para ver su perfil completo.</p>
-                                    </div>
-                                )}
-                            </div>
+                    {!selectedDriver && mode === 'individual' && (
+                        <div className="min-h-[400px] flex flex-col items-center justify-center gap-4 text-slate-500 border border-dashed border-slate-800 rounded-3xl bg-slate-950/50">
+                            <Users className="size-16 opacity-30" />
+                            <p className="text-lg font-black uppercase tracking-widest text-slate-400">Selecciona un piloto</p>
+                            <p className="text-sm text-slate-500 text-center max-w-xs">Haz clic en cualquier tarjeta de la izquierda para ver su perfil completo.</p>
                         </div>
-                    </div>
+                    )}
+
+                    <DriverGridSelector
+                        key={`${year}-${mode}`}
+                        drivers={driverOptions}
+                        year={year}
+                        mode={mode}
+                        selectedDriver={selectedDriver}
+                        comparisonList={comparisonList}
+                        onSelect={handleGridSelect}
+                        onRemove={handleGridRemove}
+                        loading={loadingDrivers}
+                    />
                 </div>
             </div>
         </div>
