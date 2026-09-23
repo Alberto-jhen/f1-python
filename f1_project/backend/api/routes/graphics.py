@@ -49,3 +49,15 @@ async def get_qualy_overview(
         return StreamingResponse(image_buf, media_type="image/png")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/plot/heatmap_points", tags=["graphics"], operation_id="heatmap_points")
+async def get_heatmap_points(
+    year: int = Query(..., examples=2025),
+):
+    try:
+        image_buf = plotting_service.get_points_heatmap_image(year)
+        if not image_buf:
+            raise HTTPException(status_code=404, detail="No se encontraron datos.")
+        return StreamingResponse(image_buf, media_type="image/png")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

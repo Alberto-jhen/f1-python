@@ -7,11 +7,15 @@ import fastf1.plotting
 from fastf1.core import InvalidSessionError, NoLapDataError
 from fastf1.core import Laps
 from timple.timedelta import strftimedelta
-
+import plotly.express as px
+from plotly.io import show
 import utils.formatters as ut
+
+from repositories.heatmap_repository import load_heatmap_data
 
 fastf1.plotting.setup_mpl(mpl_timedelta_support=True, color_scheme='fastf1')
 
+# PLOTS -- Returns matplotlib figures --
 
 def get_laps_driver_scatterplot(year, track, session_type, driver_name):
     try:
@@ -155,6 +159,47 @@ def get_qualifying_results_overview(year, track):
 
     return fig, None
 
+def get_points_heatmap_image(year):
+    """
+    Build the points heatmap from cached data (Supabase → JSON fallback).
+    Returns a Plotly figure ready to be exported as PNG.
+    """
+    cached = load_heatmap_data(year)
+    if cached is None:
+        return None, f"No cached heatmap data found for {year}. Run scripts/update_heatmap_cache.py."
+
+    results = pd.DataFrame(
+        cached["points"],
+        index=cached["drivers"],
+        columns=cached["races"],
+    )
+
+    # Plot heatmap using plotly
+    fig = px.imshow(
+        results,
+        text_auto=True,
+        aspect='auto',
+        color_continuous_scale=[[0,    'rgb(198, 219, 239)'],
+                                [0.25, 'rgb(107, 174, 214)'],
+                                [0.5,  'rgb(33,  113, 181)'],
+                                [0.75, 'rgb(8,   81,  156)'],
+                                [1,    'rgb(8,   48,  107)']],
+        labels={'x': 'Race',
+                'y': 'Driver',
+                'color': 'Points'}
+    )
+    fig.update_xaxes(title_text='')
+    fig.update_yaxes(title_text='')
+    fig.update_yaxes(tickmode='linear')
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='LightGrey',
+                    showline=False,
+                    tickson='boundaries')
+    fig.update_xaxes(showgrid=False, showline=False)
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)')
+    fig.update_layout(coloraxis_showscale=False)
+    fig.update_layout(xaxis=dict(side='top'))
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
+    return fig, None
 
 # DATA LOGIC -- Returns dictionaries for JSON --
 
@@ -242,3 +287,12 @@ def get_qualifying_results_data(year, track):
         return results, None
     except Exception as e:
         return None, str(e)
+
+def get_points_heatmap_json(year):
+    """
+    Return the cached points matrix as a JSON-serialisable dict.
+    """
+    cached = load_heatmap_data(year)
+    if cached is None:
+        return None, f"No cached heatmap data found for {year}. Run scripts/update_heatmap_cache.py."
+    return cached, None

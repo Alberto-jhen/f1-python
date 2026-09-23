@@ -110,8 +110,11 @@ class RatingsRepository:
         return (response.count or 0) > 0
 
     def add_like(self, profile_id: str, rating_id: UUID | str) -> dict | None:
+        existing = self.get_by_id(rating_id)
+        if not existing:
+            return None
         if self.has_liked(profile_id, rating_id):
-            return self.get_by_id(rating_id)
+            return self._enrich([existing], profile_id)[0]
         try:
             self._db.table("rating_likes").insert({
                 "profile_id": profile_id,
@@ -119,12 +122,13 @@ class RatingsRepository:
             }).execute()
         except Exception as e:
             print(f"Error inserting like: {e}")
-            return self.get_by_id(rating_id)
+            return self._enrich([self.get_by_id(rating_id)], profile_id)[0]
 
         current = self.get_by_id(rating_id)
         if current:
             new_likes = (current.get("likes") or 0) + 1
-            return self.update(rating_id, {"likes": new_likes})
+            updated = self.update(rating_id, {"likes": new_likes})
+            return self._enrich([updated], profile_id)[0] if updated else None
         return None
 
     def remove_like(self, profile_id: str, rating_id: UUID | str) -> dict | None:
@@ -135,13 +139,17 @@ class RatingsRepository:
             .eq("rating_id", str(rating_id))
             .execute()
         )
+        existing = self.get_by_id(rating_id)
+        if not existing:
+            return None
         if not response.data:
-            return self.get_by_id(rating_id)
+            return self._enrich([existing], profile_id)[0]
 
         current = self.get_by_id(rating_id)
         if current:
             new_likes = max((current.get("likes") or 0) - 1, 0)
-            return self.update(rating_id, {"likes": new_likes})
+            updated = self.update(rating_id, {"likes": new_likes})
+            return self._enrich([updated], profile_id)[0] if updated else None
         return None
 
     # ──────────────────────────────────────────────

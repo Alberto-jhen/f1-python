@@ -22,6 +22,16 @@ def get_scatter_plot_image(year, track, session, driver):
     plt.close(fig)
     return buf
 
+def get_points_heatmap_image(year):
+    fig, _ = grph.get_points_heatmap_image(year)
+    if fig is None:
+        return None
+
+    buf = io.BytesIO()
+    # get_points_heatmap_image returns a Plotly figure
+    fig.write_image(buf, format="png")
+    buf.seek(0)
+    return buf
 
 def get_qualifying_results_overview(year, track):
     fig, ax = grph.get_qualifying_results_overview(year, track)
@@ -49,6 +59,12 @@ def get_violin_data_json(year, track, session, num_drivers):
 
 def get_qualy_overview_json(year, track):
     data, error = grph.get_qualifying_results_data(year, track)
+    if error:
+        return {"error": error}
+    return data
+
+def get_points_heatmap_json(year):
+    data, error = grph.get_points_heatmap_json(year)
     if error:
         return {"error": error}
     return data
