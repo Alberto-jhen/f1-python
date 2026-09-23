@@ -1,9 +1,12 @@
 import { ChevronLeftIcon, User, FlagIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import DriverGridSelector from '@/components/drivers/DriverGridSelector.jsx';
 import { useProfile } from '@/hooks/useProfile';
 import { useRacesBySeason } from '@/hooks/useRacesBySeason';
+import { fetchDriversFullNamesByYear } from '@/service/apiService.ts';
 
+import { DriverRating } from './DriverRating';
 import { RaceRating } from './RaceRating';
 import { RaceSelector } from './RaceSelector';
 
@@ -15,13 +18,65 @@ const RACE_GALLERY = [
   'https://hips.hearstapps.com/hmg-prod/images/fernando-alonso-nos-desvela-su-top-5-de-mejores-pilotos-de-la-historia-de-la-f1-1539885208.jpg?resize=640:*',
 ];
 
-export function RatingSelection({ mode, selection, onBack }) {
+function normalizeDriver(driver, year) {
+  return {
+    ...driver,
+    year,
+    driverValue: driver.value,
+    driverLabel: driver.label,
+    driverNumber: driver.number,
+    team: driver.team,
+    team_color: driver.team_color,
+    country: driver.country,
+  };
+}
+
+export function RatingSelection({ mode, onBack }) {
   const [selectedRace, setSelectedRace] = useState('');
+  const [selectedDriver, setSelectedDriver] = useState(null);
+  const [drivers, setDrivers] = useState([]);
+  const [loadingDrivers, setLoadingDrivers] = useState(false);
+  const [driversError, setDriversError] = useState(null);
   const { races, loading: racesLoading, error: racesError } = useRacesBySeason(2026);
   const { profile, loading: profileLoading } = useProfile();
 
   const raceOptions = races.map((race) => ({ value: race.id, label: race.name }));
   const currentSelectedRace = selectedRace || raceOptions[0]?.value || '';
+  const currentSelectedRaceName = raceOptions.find((opt) => opt.value === currentSelectedRace)?.label || '';
+
+  useEffect(() => {
+    setSelectedDriver(null);
+    setDrivers([]);
+    setDriversError(null);
+    if (!currentSelectedRaceName) return;
+
+    const controller = new AbortController();
+    let ignore = false;
+
+    const loadDrivers = async () => {
+      setLoadingDrivers(true);
+      try {
+        const data = await fetchDriversFullNamesByYear(2026, currentSelectedRaceName, 'R', controller.signal);
+        if (!ignore) setDrivers(data || []);
+      } catch (e) {
+        if (ignore || e.name === 'AbortError' || controller.signal.aborted) return;
+        setDriversError(e);
+        console.error('Error cargando pilotos:', e);
+      } finally {
+        if (!ignore) setLoadingDrivers(false);
+      }
+    };
+
+    loadDrivers();
+    return () => {
+      ignore = true;
+      controller.abort();
+    };
+  }, [currentSelectedRaceName]);
+
+  const handleDriverSelect = (driver) => {
+    setSelectedDriver(driver ? normalizeDriver(driver, 2026) : null);
+  };
 
   if (racesLoading) {
     return <div className='text-zinc-400 text-sm'>Cargando carreras...</div>;
@@ -38,28 +93,55 @@ export function RatingSelection({ mode, selection, onBack }) {
   if (mode === 'driver') {
     return (
       <>
-        <RaceSelector raceOptions={raceOptions} value={currentSelectedRace} onChange={setSelectedRace} season={2026} />
-        <div className='animate-fade-in'>
-          <div className='flex items-center gap-3 mb-4'>
-            <User className='size-5 text-red-500' />
-            <h2 className='text-xl font-bold text-white tracking-tight'>Valoración de piloto</h2>
+        <RaceSelector
+          raceOptions={raceOptions}
+          value={currentSelectedRace}
+          onChange={setSelectedRace}
+          season={2026}
+          title='Valoración de piloto'
+        />
+
+        {driversError && (
+          <div className='text-red-500 text-sm mb-4'>Error al cargar la parrilla del GP.</div>
+        )}
+
+        {!selectedDriver && (
+          <div className='animate-fade-in mb-8'>
+            <div className='flex items-center gap-3 mb-4'>
+              <User className='size-5 text-red-500' />
+              <h2 className='text-xl font-bold text-white tracking-tight'>Selecciona un piloto</h2>
+            </div>
+            <DriverGridSelector
+              drivers={drivers}
+              year={2026}
+              mode='individual'
+              selectedDriver={selectedDriver}
+              comparisonList={[]}
+              onSelect={handleDriverSelect}
+              onRemove={() => {}}
+              loading={loadingDrivers}
+            />
+            <button
+              type='button'
+              onClick={onBack}
+              className='mt-6 flex items-center gap-2 text-zinc-400 hover:text-white text-sm font-bold uppercase tracking-widest cursor-pointer transition-colors'
+            >
+              <ChevronLeftIcon className='size-4' />
+              Volver
+            </button>
           </div>
-          <p className='text-zinc-400 text-sm mb-6'>
-            Has seleccionado a <span className='text-white font-bold'>{selection?.name || 'un piloto'}</span>.
-          </p>
-          <div className='bg-zinc-950 border border-zinc-800 rounded-xl p-8 flex items-center justify-center min-h-[200px]'>
-            <p className='text-zinc-500 text-sm'>Aquí irá el formulario de valoración del piloto.</p>
-            <p className='text-zinc-600 text-xs mt-2'>Usuario: {profile.username || profile.full_name || 'Anónimo'}</p>
-          </div>
-          <button
-            type='button'
-            onClick={onBack}
-            className='mt-6 flex items-center gap-2 text-zinc-400 hover:text-white text-sm font-bold uppercase tracking-widest cursor-pointer transition-colors'
-          >
-            <ChevronLeftIcon className='size-4' />
-            Volver
-          </button>
-        </div>
+        )}
+
+        {selectedDriver && (
+          <DriverRating
+            key={selectedDriver.driverValue}
+            selectedDriver={selectedDriver}
+            selectedRace={currentSelectedRace}
+            user={profile}
+            loadingUser={profileLoading}
+            onBack={() => setSelectedDriver(null)}
+          />
+        )}
       </>
     );
   }

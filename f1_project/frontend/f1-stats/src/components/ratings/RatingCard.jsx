@@ -6,15 +6,13 @@ const DEFAULT_AVATAR = 'https://www.gravatar.com/avatar/000000000000000000000000
 
 function formatRatingDate(dateString) {
   if (!dateString) return '';
-  try {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  } catch {
-    return '';
-  }
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 export function RatingCard({ rating, currentProfileId, onToggleLike, likeLoading = false }) {
@@ -68,7 +66,8 @@ export function RatingCard({ rating, currentProfileId, onToggleLike, likeLoading
           type='button'
           onClick={handleLike}
           disabled={!currentProfileId || likeLoading || isMine}
-          className='flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+          aria-label={isLiked ? 'Quitar like' : 'Dar like'}
+          className='cursor-pointer flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
         >
           <Heart
             className={`size-5 transition-colors ${

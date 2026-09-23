@@ -1,7 +1,7 @@
 import { FlagIcon } from 'lucide-react';
 import { GenericCombobox } from '@/components/GenericComobobox';
 
-export function RaceSelector({ raceOptions = [], value, onChange, season = 2026 }) {
+export function RaceSelector({ raceOptions = [], value, onChange, season = 2026, title = 'Análisis de Carrera' }) {
   const selectedRace = value || raceOptions[0]?.value || '';
 
   const handleChange = (newValue) => {
@@ -16,7 +16,7 @@ export function RaceSelector({ raceOptions = [], value, onChange, season = 2026 
         <div className='flex items-center gap-2 mb-3'>
           <FlagIcon className='size-4 text-red-600' />
           <span className='text-xs font-bold uppercase tracking-[0.2em] text-zinc-400'>
-            Análisis de Carrera
+            {title}
           </span>
         </div>
         <h2 className='text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-white leading-none mb-2'>
