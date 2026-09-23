@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { fetchH2HData } from '@/service/apiService';
+import { fetchH2HData } from '@/service/apiService.ts';
 import { X, Users } from 'lucide-react';
 import { toast } from 'sonner';
 

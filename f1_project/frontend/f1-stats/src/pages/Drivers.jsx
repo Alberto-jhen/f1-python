@@ -3,7 +3,7 @@ import DriverInfoSelector from '@/components/drivers/DriverInfoSelector.jsx';
 import DriverProfileCard from '@/components/drivers/DriverProfileCard.jsx';
 import DriverH2Hcard from '@/components/drivers/DriverH2Hcard';
 import DriverGridSelector from '@/components/drivers/DriverGridSelector.jsx';
-import { fetchDriversFullNamesByYear } from '@/service/apiService';
+import { fetchDriversFullNamesByYear } from '@/service/apiService.ts';
 import { Users } from 'lucide-react';
 
 function normalizeDriver(driver, year, mode) {

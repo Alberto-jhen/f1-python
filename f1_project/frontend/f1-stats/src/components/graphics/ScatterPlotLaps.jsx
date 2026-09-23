@@ -1,7 +1,7 @@
 // src/components/Graphics/ScatterLaps.jsx
 import { Scatter } from 'react-chartjs-2';
 import { Chart as ChartJS, LinearScale, PointElement, Tooltip, Legend } from 'chart.js';
-import { formatLapTime } from '../../service/apiService';
+import { formatLapTime } from '../../service/apiService.ts';
 
 ChartJS.register(LinearScale, PointElement, Tooltip, Legend);
 

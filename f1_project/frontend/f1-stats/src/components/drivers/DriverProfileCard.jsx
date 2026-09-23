@@ -1,4 +1,4 @@
-import { fetchDriverCareerStandings, fetchDriverSeasonStandings } from '@/service/apiService.js';
+import { fetchDriverCareerStandings, fetchDriverSeasonStandings } from '@/service/apiService.ts';
 import { useState, useEffect } from 'react';
 import {
     Accordion,

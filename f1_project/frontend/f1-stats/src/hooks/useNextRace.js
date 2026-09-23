@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getRacesBySeason } from '@/service/apiService';
+import { getRacesBySeason } from '@/service/apiService.ts';
 
 /**
  * Hook that fetches the F1 race calendar from the backend and computes the

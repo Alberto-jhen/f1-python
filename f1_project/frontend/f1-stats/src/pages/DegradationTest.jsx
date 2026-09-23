@@ -10,7 +10,7 @@ import {
     ResponsiveContainer,
 } from 'recharts';
 import { GenericCombobox } from '@/components/GenericComobobox';
-import { fetchDegradationPrediction, fetchYearSchedule, fetchDriversFullNamesByYear } from '../service/apiService.js';
+import { fetchDegradationPrediction, fetchYearSchedule, fetchDriversFullNamesByYear } from '../service/apiService.ts';
 
 const formatLapTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return '';
@@ -170,9 +170,9 @@ export const DegradationTest = () => {
                         <button
                             onClick={handleLoad}
                             disabled={loading || !year || !track || !driver}
-                            className="px-5 py-2.5 bg-red-600 text-white text-sm font-bold uppercase rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors cursor-pointer"
+                            className="w-full h-9 px-4 bg-gradient-to-r from-red-700 to-red-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg border border-red-500/20 hover:from-red-600 hover:to-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                            {loading ? 'Cargando...' : 'Cargar stint'}
+                            {loading ? 'Cargando...' : 'Cargar'}
                         </button>
                     </div>
                 </div>
@@ -184,45 +184,63 @@ export const DegradationTest = () => {
                 )}
 
                 {chartData && (
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 h-[500px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                                <XAxis
-                                    dataKey="x"
-                                    stroke="#94a3b8"
-                                    label={{ value: 'TyreLife (vueltas del neumático)', position: 'insideBottom', offset: -10, fill: '#94a3b8' }}
-                                />
-                                <YAxis
-                                    stroke="#94a3b8"
-                                    domain={['auto', 'auto']}
-                                    tickFormatter={formatLapTime}
-                                    label={{ value: 'Lap Time', angle: -90, position: 'insideLeft', fill: '#94a3b8' }}
-                                />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff' }}
-                                    formatter={(value) => [formatLapTime(value), 'Tiempo']}
-                                    labelFormatter={(label) => `TyreLife: ${label}`}
-                                />
-                                <Legend />
-                                <Line
-                                    type="monotone"
-                                    dataKey="real"
-                                    stroke="#dc2626"
-                                    strokeWidth={2}
-                                    dot={{ r: 3 }}
-                                    name="Real (limpio)"
-                                />
-                                <Line
-                                    type="monotone"
-                                    dataKey="predicted"
-                                    stroke="#38bdf8"
-                                    strokeWidth={2}
-                                    dot={{ r: 3 }}
-                                    name="Predicción teórica"
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
+                    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                        <div className="mb-4 border-l-4 border-red-600 pl-3">
+                            <h3 className="text-lg font-black uppercase italic tracking-tight text-white">
+                                Stint real vs predicción
+                            </h3>
+                            <p className="text-xs text-slate-500 mt-1">
+                                Tiempo por vuelta en función de la vida del neumático.
+                            </p>
+                        </div>
+                        <div className="h-[460px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={chartData} margin={{ top: 40, right: 30, left: 20, bottom: 10 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                                    <XAxis
+                                        dataKey="x"
+                                        stroke="#94a3b8"
+                                        tick={{ fill: '#94a3b8', fontSize: 12 }}
+                                    />
+                                    <YAxis
+                                        stroke="#94a3b8"
+                                        domain={['auto', 'auto']}
+                                        tickFormatter={formatLapTime}
+                                        tick={{ fill: '#94a3b8', fontSize: 12 }}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff' }}
+                                        formatter={(value, name) => [formatLapTime(value), name]}
+                                        labelFormatter={(label) => `TyreLife: ${label}`}
+                                    />
+                                    <Legend
+                                        verticalAlign="top"
+                                        align="right"
+                                        wrapperStyle={{ paddingBottom: 20, top: 0, right: 0 }}
+                                        iconType="circle"
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="real"
+                                        stroke="#dc2626"
+                                        strokeWidth={2}
+                                        dot={{ r: 3 }}
+                                        name="Real (limpio)"
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="predicted"
+                                        stroke="#38bdf8"
+                                        strokeWidth={2}
+                                        dot={{ r: 3 }}
+                                        name="Predicción teórica"
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <p className="text-center text-xs text-slate-500 mt-2 uppercase tracking-wider">
+                            TyreLife (vueltas del neumático)
+                        </p>
                     </div>
                 )}
             </div>

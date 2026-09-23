@@ -1,7 +1,7 @@
 // src/components/Leaderboard.jsx
 import React, { useEffect, useState } from 'react';
 import { motion as Motion } from 'framer-motion';
-import { fetchGlobalStandings } from '@/service/apiService';
+import { fetchGlobalStandings } from '@/service/apiService.ts';
 import { Link } from 'react-router-dom';
 
 const getTeamStyles = (teamName) => {

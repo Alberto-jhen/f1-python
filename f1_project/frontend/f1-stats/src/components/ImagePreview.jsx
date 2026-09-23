@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const ImagePreview = ({ isOpen, onClose, imageSrc, fileName }) => {
+export const ImagePreview = ({ isOpen, onClose, imageSrc, fileName, title }) => {
     if (!isOpen) return null;
 
     return (
@@ -14,6 +14,11 @@ export const ImagePreview = ({ isOpen, onClose, imageSrc, fileName }) => {
                         <span className="text-[10px] font-mono uppercase tracking-[0.3em]">
                             Python Matplotlib Engine Output
                         </span>
+                        {title && (
+                            <span className="text-white font-bold uppercase tracking-wider text-xs ml-3 border-l border-slate-600 pl-3">
+                                {title}
+                            </span>
+                        )}
                     </div>
                     <button 
                         onClick={onClose} 

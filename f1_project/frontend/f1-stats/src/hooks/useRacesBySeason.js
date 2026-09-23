@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { getRacesBySeason } from '@/service/apiService';
+import { getRacesBySeason } from '@/service/apiService.ts';
 
 export function useRacesBySeason(seasonYear) {
   const [races, setRaces] = useState([]);

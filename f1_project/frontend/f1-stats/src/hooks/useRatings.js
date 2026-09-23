@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { fetchRatings } from '@/service/apiService';
+import { fetchRatings } from '@/service/apiService.ts';
 
 export function useRatings({ raceId, sortBy = 'likes', limit = 20, currentProfileId } = {}) {
   const [ratings, setRatings] = useState([]);

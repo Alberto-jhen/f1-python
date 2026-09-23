@@ -4,7 +4,7 @@ import {
     fetchEventRaceDate,
     fetchStandingsByRound,
     fetchDriversFullNamesByYear,
-} from '@/service/apiService';
+} from '@/service/apiService.ts';
 import RaceTimeline from '@/components/leaderboard/RaceTimeline';
 import StandingsTable from '@/components/leaderboard/StandingsTable';
 import PredictionMode from '@/components/leaderboard/PredictionMode';

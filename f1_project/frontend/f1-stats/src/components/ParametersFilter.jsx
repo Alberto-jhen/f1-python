@@ -1,6 +1,6 @@
 import { GenericCombobox } from "./GenericComobobox";
 import { useState, useEffect} from 'react'
-import { fetchYearSchedule, fetchDriversFullNamesByYear } from "@/service/apiService";
+import { fetchYearSchedule, fetchDriversFullNamesByYear } from "@/service/apiService.ts";
 
 export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputChange, onSave }) => {
     const [loadingDrivers, setLoadingDrivers] = useState(false);

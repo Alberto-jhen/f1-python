@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { deployReplayService, triggerDataIngestion, getReplayBounds } from '@/service/apiService';
+import { deployReplayService, triggerDataIngestion, getReplayBounds } from '@/service/apiService.ts';
 import { TelemetryCharts } from './TelemetryCharts';
 
 const lerp = (start, end, t) => start + (end - start) * t;

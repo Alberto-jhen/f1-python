@@ -9,7 +9,7 @@ import BentoLeaderboard from '@/components/BentoLeaderBoard';
 import PosterCard from '../components/PosterCard';
 import { Link } from "react-router-dom";
 
-import { getCircuitVisualInfo } from '@/service/apiService'; 
+import { getCircuitVisualInfo } from '@/service/apiService.ts'; 
 
 export default function Landing() {
     const rollingRef = useRef(null);

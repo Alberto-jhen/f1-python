@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GenericCombobox } from "@/components/GenericComobobox";
 import { RaceMap2D } from "../components/RaceMap2D"; 
-import { fetchYearSchedule } from "@/service/apiService";
+import { fetchYearSchedule } from "@/service/apiService.ts";
 
 const PageHeader = () => (
     <div className="mb-10 border-l-4 border-red-600 pl-4">

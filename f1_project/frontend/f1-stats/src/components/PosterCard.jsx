@@ -1,6 +1,6 @@
 // src/components/PosterCard.jsx
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom'; // Añadimos esta importación
+import { createPortal } from 'react-dom'; 
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 export default function PosterCard({ posterSrc, altText = "Collector Poster" }) {

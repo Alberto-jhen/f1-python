@@ -2,7 +2,7 @@ import React from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, Tooltip } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import { ViolinController, Violin } from '@sgratzl/chartjs-chart-boxplot';
-import { formatLapTime } from '../../service/apiService';
+import { formatLapTime } from '../../service/apiService.ts';
 
 ChartJS.register(CategoryScale, LinearScale, ViolinController, Violin, Tooltip);
 
