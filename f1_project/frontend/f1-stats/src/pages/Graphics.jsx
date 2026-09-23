@@ -5,8 +5,10 @@ import { ViolinPlotLaps } from '../components/graphics/ViolinLapDistribution.jsx
 import { QualyOverview } from '@/components/graphics/QualyResultsoverview.jsx';
 import { fetchDriverLaps, fetchDriverLapsImage, 
     fetchDriversLapsViolin, fetchDriversLapsViolinImage,
-    fetchQualyOverviewData, fetchQualyOverviewImage} from '../service/apiService.js'
+    fetchQualyOverviewData, fetchQualyOverviewImage,
+    fetchSeasonHeatmapData, fetchSeasonHeatmapImage } from '../service/apiService.js'
 import { ImagePreview } from '../components/ImagePreview.jsx'
+import { SeasonPointsHeatmap } from '../components/graphics/SeasonPointsHeatmap.jsx';
 
 const GraphCard = ({ title, children, onSettingsClick, onGenerate, onExportPython, hasParams, loading }) => {
     return (
@@ -62,6 +64,7 @@ export const GraphicsDashboard = () => {
     const [activeTab, setActiveTab] = useState('lapTimes');
     const [pythonImage, setPythonImage] = useState(null)
     const [imageShown, setImageShown] = useState(false);
+    const [previewTitle, setPreviewTitle] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalConfig, setModalConfig] = useState({ title: '', params: [] });
     const [savedParams, setSavedParams] = useState({});
@@ -80,6 +83,7 @@ export const GraphicsDashboard = () => {
         setImageShown(false);
         if (pythonImage) URL.revokeObjectURL(pythonImage);
         setPythonImage(null);
+        setPreviewTitle('');
     };
 
     const handleSaveConfig = () => {
@@ -98,6 +102,8 @@ export const GraphicsDashboard = () => {
             let data;
             if (graphName === 'Resultados de clasificación') {
                 data = await fetchFn(year, track);
+            } else if (graphName === 'Mapa de calor de puntos') {
+                data = await fetchFn(year);
             } else {
                 data = await fetchFn(year, track, session, driver || num_drivers);
             }
@@ -121,11 +127,15 @@ export const GraphicsDashboard = () => {
             let blob;
             if (graphName === 'Resultados de clasificación') {
                 blob = await fetchFn(year, track);
+            } else if (graphName === 'Mapa de calor de puntos') {
+                blob = await fetchFn(year);
             } else {
                 blob = await fetchFn(year, track, session, driver || num_drivers);
             }
             
+            if (pythonImage) URL.revokeObjectURL(pythonImage);
             const imageUrl = URL.createObjectURL(blob);
+            setPreviewTitle(graphName);
             setPythonImage(imageUrl);
             setImageShown(true);
         } catch (error) {
@@ -217,7 +227,6 @@ export const GraphicsDashboard = () => {
                         <div className="grid grid-cols-1 gap-8">
                             <GraphCard 
                                 title="Resultados de clasificación"
-                                // Cambiado 'clasificiación' -> 'clasificación'
                                 onSettingsClick={() => openFilters('Resultados de clasificación', ['year', 'track'])}
                                 onGenerate={() => generateGraph(fetchQualyOverviewData, 'Resultados de clasificación')} 
                                 onExportPython={() => handleExportPython(fetchQualyOverviewImage, 'Resultados de clasificación')}
@@ -231,6 +240,24 @@ export const GraphicsDashboard = () => {
                                         {savedParams['Resultados de clasificación'] 
                                             ? "Configuración lista. Pulsa Generar." 
                                             : "Configura los parámetros (Año y Circuito) para empezar."}
+                                    </p>
+                                )}
+                            </GraphCard>
+                            <GraphCard
+                                title="Mapa de calor de puntos"
+                                onSettingsClick={() => openFilters('Mapa de calor de puntos', ['year'])}
+                                onGenerate={() => generateGraph(fetchSeasonHeatmapData, 'Mapa de calor de puntos')}
+                                onExportPython={() => handleExportPython(fetchSeasonHeatmapImage, 'Mapa de calor de puntos')}
+                                hasParams={!!savedParams['Mapa de calor de puntos']}
+                                loading={loading === 'Mapa de calor de puntos'}
+                            >
+                                {graphsData['Mapa de calor de puntos'] ? (
+                                    <SeasonPointsHeatmap data={graphsData['Mapa de calor de puntos']} />
+                                ) : (
+                                    <p className="text-slate-600 text-sm italic">
+                                        {savedParams['Mapa de calor de puntos']
+                                            ? "Configuración lista. Pulsa Generar."
+                                            : "Configura el parámetro (Año) para empezar."}
                                     </p>
                                 )}
                             </GraphCard>
@@ -255,7 +282,8 @@ export const GraphicsDashboard = () => {
                 isOpen={imageShown}
                 onClose={handleClosePreview}
                 imageSrc={pythonImage}
-                fileName="f1_stats_report"
+                fileName={`f1_stats_report_${previewTitle}`}
+                title={previewTitle}
             />
         </div>
     );
