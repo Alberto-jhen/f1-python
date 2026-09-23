@@ -33,11 +33,11 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 @app.on_event("startup")
 async def startup_db_client():
-    try:
-        sb = get_supabase()
-        print("✅ Conexión a Supabase exitosa")
-    except Exception as e:
-        print(f"❌ Error conectando a Supabase: {e}")
+    sb = get_supabase()
+    if sb:
+        print("✅ Conexión a Supabase disponible")
+    else:
+        print("⚠️ Supabase no configurado; se usarán fallbacks locales")
 
 # Include the routes from endpoints.py
 app.include_router(api_router)

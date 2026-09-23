@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
@@ -10,8 +11,10 @@ supabase_url = os.getenv("SUPABASE_URL")
 # process; the key must never be exposed to the frontend.
 supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
-supabase: Client = create_client(supabase_url, supabase_key)
+supabase: Optional[Client] = None
+if supabase_url and supabase_key:
+    supabase = create_client(supabase_url, supabase_key)
 
 
-def get_supabase() -> Client:
+def get_supabase() -> Optional[Client]:
     return supabase
