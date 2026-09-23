@@ -23,5 +23,5 @@ timple>=0.1.5
 scikit-learn>=1.3.0
 
 # Otros
-plotlu>=7.1.0
+plotly>=7.1.0
 kaleido>=1.0.0
