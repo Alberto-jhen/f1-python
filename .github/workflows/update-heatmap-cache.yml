@@ -1,0 +1,65 @@
+name: Update Heatmap Cache
+
+on:
+  schedule:
+    # Saturdays 18:00 UTC — after sprint races
+    - cron: "0 18 * * 6"
+    # Sundays 18:00 UTC — after most Grand Prix races
+    - cron: "0 18 * * 0"
+    # Sundays 22:00 UTC — fallback for late/Americas races
+    - cron: "0 22 * * 0"
+    # Mondays 06:00 UTC — final catch-up after race weekends
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Season year to update"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: f1_project/backend
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r ../../requirements.txt
+
+      - name: Build heatmap cache
+        run: |
+          if [ -n "${{ github.event.inputs.year }}" ]; then
+            python scripts/update_heatmap_cache.py --year ${{ github.event.inputs.year }}
+          else
+            python scripts/update_heatmap_cache.py
+          fi
+
+      - name: Commit and push if changed
+        run: |
+          cd ../..
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add f1_project/backend/data/heatmap_points_*.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: auto-update heatmap cache [skip ci]"
+            git push
+          fi

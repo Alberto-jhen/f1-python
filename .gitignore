@@ -222,3 +222,4 @@ cache_fastf1/
 cache_fastf1/
 f1_project/backend/cache_fastf1/
 *.pkl
+coverage/
