@@ -71,12 +71,12 @@ export function Ratings() {
             <div className={`transition-all duration-700 ease-out origin-top ${isAnySelected ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 hidden'}`}>
                 {isDriverSelected && (
                     <div className="animate-in fade-in slide-in-from-top-8 duration-700">
-                        <RatingSelection mode="driver" selection={{ name: "Parrilla Actual" }} onBack={handleBack} />
+                        <RatingSelection mode="driver" onBack={handleBack} />
                     </div>
                 )}
                 {isRaceSelected && (
                     <div className="animate-in fade-in slide-in-from-top-8 duration-700">
-                        <RatingSelection mode="race" selection={{ name: "Calendario" }} onBack={handleBack} />
+                        <RatingSelection mode="race" onBack={handleBack} />
                     </div>
                 )}
             </div>

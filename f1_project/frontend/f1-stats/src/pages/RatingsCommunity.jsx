@@ -30,7 +30,17 @@ export function RatingsCommunity() {
     if (!currentProfileId) return;
     try {
       const updated = await toggleLike(currentProfileId, ratingId, isLiked);
-      setRatings((prev) => prev.map((r) => (r.id === ratingId ? updated : r)));
+      setRatings((prev) =>
+        prev.map((r) =>
+          r.id === ratingId
+            ? {
+                ...r,
+                likes: updated?.likes ?? r.likes,
+                liked_by_me: updated?.liked_by_me ?? !isLiked,
+              }
+            : r
+        )
+      );
     } catch (e) {
       console.error('Error al cambiar el like:', e);
     }
@@ -80,7 +90,7 @@ export function RatingsCommunity() {
         <button
           type='button'
           onClick={() => setSortBy('likes')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all border ${
+          className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all border ${
             sortBy === 'likes'
               ? 'bg-red-600 border-red-600 text-white'
               : 'bg-zinc-900/40 border-zinc-800 text-zinc-400 hover:text-white'
@@ -92,7 +102,7 @@ export function RatingsCommunity() {
         <button
           type='button'
           onClick={() => setSortBy('newest')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all border ${
+          className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all border ${
             sortBy === 'newest'
               ? 'bg-red-600 border-red-600 text-white'
               : 'bg-zinc-900/40 border-zinc-800 text-zinc-400 hover:text-white'
