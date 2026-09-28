@@ -1,5 +1,8 @@
-import { Heart } from 'lucide-react';
+import { useState } from 'react';
+import { Heart, TrashIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
+import { deleteRating } from '@/service/ratingsService.ts';
 import { RatingStars } from './RatingStars';
 
 const DEFAULT_AVATAR = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
@@ -15,7 +18,16 @@ function formatRatingDate(dateString) {
   });
 }
 
-export function RatingCard({ rating, currentProfileId, onToggleLike, likeLoading = false }) {
+export function RatingCard({
+  rating,
+  currentProfileId,
+  onToggleLike,
+  onDelete,
+  likeLoading = false,
+  deleteMode = false,
+}) {
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const profile = rating.profile || {};
   const race = rating.race || {};
   const displayName = profile.full_name || profile.username || 'Usuario';
@@ -26,13 +38,27 @@ export function RatingCard({ rating, currentProfileId, onToggleLike, likeLoading
   const isLiked = !!rating.liked_by_me;
   const isMine = profile.id === currentProfileId;
 
+  const deleteUserRating = async (profileId, ratingId) => {
+    if (!profileId || !ratingId || isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await deleteRating(profileId, ratingId);
+      toast.success('Valoración eliminada correctamente');
+      onDelete?.(ratingId);
+    } catch (error) {
+      toast.error('Error al eliminar la valoración');
+      console.error('Error al eliminar la valoración:', error);
+      setIsDeleting(false);
+    }
+  };
+
   const handleLike = () => {
     if (!currentProfileId || likeLoading || isMine) return;
     onToggleLike?.(rating.id, isLiked);
   };
 
   return (
-    <div className='bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 flex flex-col gap-4 hover:border-zinc-700 transition-colors'>
+    <div className='bg-zinc-900/40 border border-zinc-800 rounded-2xl p-4 md:p-5 flex flex-col gap-3 hover:border-zinc-700 transition-colors overflow-hidden'>
       <div className='flex items-start gap-4'>
         <img
           src={avatar}
@@ -53,10 +79,21 @@ export function RatingCard({ rating, currentProfileId, onToggleLike, likeLoading
         <div className='shrink-0'>
           <RatingStars value={rating.rating} readOnly color='red' />
         </div>
+        {deleteMode && isMine && (
+          <button
+            type='button'
+            disabled={isDeleting}
+            onClick={() => deleteUserRating(profile.id, rating.id)}
+            aria-label='Eliminar valoración'
+            className='cursor-pointer flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            <TrashIcon className='size-5 text-zinc-500 hover:text-red-500 transition-colors' />
+          </button>
+        )}
       </div>
 
       {rating.comment && (
-        <p className='text-sm text-zinc-300 leading-relaxed pl-16'>
+        <p className='text-sm text-zinc-300 leading-relaxed pl-16 min-w-0 max-w-full break-all whitespace-pre-wrap'>
           {rating.comment}
         </p>
       )}

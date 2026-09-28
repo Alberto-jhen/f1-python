@@ -18,7 +18,7 @@ export function RatingItem({ title, category, rating, date, comment }) {
           />
         ))}
       </div>
-      {comment && <p className='text-sm text-zinc-400 leading-relaxed'>{comment}</p>}
+      {comment && <p className='text-sm text-zinc-400 leading-relaxed break-all whitespace-pre-wrap'>{comment}</p>}
     </div>
   );
 }

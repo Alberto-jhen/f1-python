@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeftIcon, Quote } from 'lucide-react';
+import { AlertTriangle, ChevronLeftIcon, Quote } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { RatingStars } from './RatingStars';
 import { usePublishRating } from '@/hooks/usePublishRating';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DUPLICATE_RATING_CODE, MAX_COMMENT_LENGTH, fetchUserRatings } from '@/service/ratingsService.ts';
 
 const DEFAULT_AVATAR = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
@@ -24,6 +26,8 @@ export function DriverRating({ onBack, selectedDriver, selectedRace, user, loadi
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [imageFallback, setImageFallback] = useState(false);
+  const [existingRating, setExistingRating] = useState(null);
+  const [warningOpen, setWarningOpen] = useState(false);
   const { publish, loading: publishing, error: publishError, data: publishedData } = usePublishRating();
 
   const displayName = loadingUser ? 'Cargando...' : (user?.username || user?.full_name || 'Usuario Anónimo');
@@ -33,11 +37,23 @@ export function DriverRating({ onBack, selectedDriver, selectedRace, user, loadi
   const surnameNorm = surname.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const imageUrl = buildDriverImageUrl(selectedDriver?.year || 2026, surnameNorm);
   const color = selectedDriver?.team_color ? `#${selectedDriver.team_color}` : '#dc2626';
+  const commentTooLong = comment.length > MAX_COMMENT_LENGTH;
+  const duplicateError = publishError?.code === DUPLICATE_RATING_CODE;
+  const alreadyRated = !!existingRating || duplicateError;
+
+  // Resetea el estado de valoración existente al cambiar de carrera, piloto o usuario.
+  const checkKey = `${user?.id || ''}|${selectedRace || ''}|${selectedDriver?.driverValue || ''}`;
+  const [prevCheckKey, setPrevCheckKey] = useState(checkKey);
+  if (prevCheckKey !== checkKey) {
+    setPrevCheckKey(checkKey);
+    setExistingRating(null);
+    setWarningOpen(false);
+  }
 
   const handlePublish = async () => {
-    if (!selectedRace || rating < 1 || !user?.id || !selectedDriver) return;
+    if (!selectedRace || rating < 1 || !user?.id || !selectedDriver || commentTooLong || alreadyRated) return;
     try {
-      await publish(user.id, {
+      const result = await publish(user.id, {
         race_id: selectedRace,
         driver_id: selectedDriver.driverValue,
         rating,
@@ -45,10 +61,47 @@ export function DriverRating({ onBack, selectedDriver, selectedRace, user, loadi
       });
       setRating(0);
       setComment('');
+      setExistingRating(result);
     } catch (error) {
       console.error('Error al publicar la valoración:', error);
+      if (error?.code === DUPLICATE_RATING_CODE) {
+        setWarningOpen(true);
+      }
     }
   };
+
+  // Comprueba si el usuario ya ha valorado a este piloto en la carrera seleccionada.
+  useEffect(() => {
+    if (!user?.id || !selectedRace || !selectedDriver?.driverValue) return;
+
+    const controller = new AbortController();
+    let ignore = false;
+
+    const checkExistingRating = async () => {
+      try {
+        const data = await fetchUserRatings(
+          user.id,
+          { race_id: selectedRace, limit: 50 },
+          controller.signal,
+        );
+        if (ignore) return;
+        const driverRating = Array.isArray(data)
+          ? data.find((r) => r.driver_id === selectedDriver.driverValue)
+          : null;
+        setExistingRating(driverRating || null);
+      } catch (e) {
+        if (ignore || e.name === 'AbortError') return;
+        // Sin valoraciones (404) o error de red: no se bloquea la publicación.
+        setExistingRating(null);
+      }
+    };
+
+    checkExistingRating();
+    return () => {
+      ignore = true;
+      controller.abort();
+    };
+  }, [user?.id, selectedRace, selectedDriver?.driverValue]);
 
   useEffect(() => {
     if (publishError) {
@@ -104,17 +157,72 @@ export function DriverRating({ onBack, selectedDriver, selectedRace, user, loadi
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder='Escribe aquí tu análisis detallado del piloto...'
-                  className='w-full min-h-[180px] bg-zinc-900/30 border border-zinc-800 rounded-2xl px-6 py-5 text-base text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-red-600/50 focus:ring-1 focus:ring-red-600/50 resize-none transition-all'
+                  aria-invalid={commentTooLong}
+                  aria-describedby={commentTooLong ? 'driver-comment-error' : undefined}
+                  className={`w-full min-h-[180px] bg-zinc-900/30 border rounded-2xl px-6 py-5 text-base text-zinc-200 placeholder:text-zinc-600 focus:outline-none resize-none transition-all ${
+                    commentTooLong
+                      ? 'border-red-600 focus:border-red-600 focus:ring-1 focus:ring-red-600'
+                      : 'border-zinc-800 focus:border-red-600/50 focus:ring-1 focus:ring-red-600/50'
+                  }`}
                 />
+                <div className='flex items-start justify-between gap-4 mt-2'>
+                  {commentTooLong ? (
+                    <p id='driver-comment-error' className='text-xs font-bold text-red-500'>
+                      El comentario supera el máximo de {MAX_COMMENT_LENGTH} caracteres.
+                    </p>
+                  ) : (
+                    <span />
+                  )}
+                  <span
+                    className={`text-xs shrink-0 ${commentTooLong ? 'text-red-500 font-bold' : 'text-zinc-500'}`}
+                  >
+                    {comment.length}/{MAX_COMMENT_LENGTH}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
           <div className='pt-10 mt-auto'>
+            {alreadyRated && (
+              <div className='mb-4 flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/40 rounded-xl px-4 py-3'>
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip open={warningOpen} onOpenChange={setWarningOpen}>
+                    <TooltipTrigger asChild>
+                      <button
+                        type='button'
+                        aria-label='Aviso: ya has valorado a este piloto en esta carrera'
+                        className='shrink-0 text-yellow-500 hover:text-white transition-all duration-300 focus:outline-none cursor-help'
+                      >
+                        <AlertTriangle className='size-5' />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side='top'
+                      sideOffset={10}
+                      className='bg-zinc-950/95 backdrop-blur-xl border border-red-900/30 text-zinc-300 max-w-[280px] p-4 shadow-2xl rounded-xl z-50'
+                    >
+                      <div className='flex flex-col gap-2.5'>
+                        <div className='flex items-center gap-2 text-white font-bold uppercase tracking-widest text-[13px]'>
+                          <span className='w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse'></span>
+                          Valoración duplicada
+                        </div>
+                        <p className='text-[14px] leading-relaxed text-zinc-400'>
+                          Ya has valorado a <span className='text-zinc-200 font-semibold'>este piloto</span> en esta carrera. Solo se permite una valoración por piloto y Gran Premio.
+                        </p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <p className='text-sm font-bold text-yellow-500'>
+                  Ya has valorado a este piloto en esta carrera.
+                </p>
+              </div>
+            )}
             <button
               type='button'
               onClick={handlePublish}
-              disabled={publishing || !selectedRace || rating < 1 || !user?.id}
+              disabled={publishing || !selectedRace || rating < 1 || !user?.id || commentTooLong || alreadyRated}
               className='w-full h-9 px-4 bg-gradient-to-r from-red-700 to-red-600 text-white text-sm font-bold uppercase tracking-wider rounded-lg border border-red-500/20 hover:from-red-600 hover:to-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
             >
               {publishing ? 'Publicando...' : 'Publicar Valoración'}

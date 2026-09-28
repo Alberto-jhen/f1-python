@@ -7,6 +7,10 @@ from core.schemas import RatingCreate, RatingResponse
 from repositories.ratings_repository import ratings_repo
 
 
+class DuplicateRatingError(Exception):
+    """Raised when a profile tries to rate the same race/driver twice."""
+
+
 class RatingsService:
 
     def __init__(self):
@@ -17,10 +21,38 @@ class RatingsService:
             return None
         return RatingResponse(**data)
 
+    @staticmethod
+    def _duplicate_message(driver_id: str | None) -> str:
+        if driver_id:
+            return (
+                "Ya has valorado a este piloto en esta carrera. "
+                "Solo puedes valorarlo una vez por Gran Premio."
+            )
+        return (
+            "Ya has valorado esta carrera. "
+            "Solo puedes valorarla una vez por Gran Premio."
+        )
+
     def create_rating(self, profile_id: str, rating: RatingCreate) -> RatingResponse:
         data = rating.model_dump()
         data["profile_id"] = profile_id
-        created = self._repo.create(data)
+
+        existing = self._repo.get_by_profile_and_race(
+            profile_id, data["race_id"], data.get("driver_id")
+        )
+        if existing:
+            raise DuplicateRatingError(self._duplicate_message(data.get("driver_id")))
+
+        try:
+            created = self._repo.create(data)
+        except Exception as exc:
+            # Race condition: the unique constraint rejected a concurrent duplicate.
+            message = str(exc).lower()
+            if "duplicate" in message or "unique" in message or "23505" in message:
+                raise DuplicateRatingError(
+                    self._duplicate_message(data.get("driver_id"))
+                ) from exc
+            raise RuntimeError("No se pudo crear la valoración") from exc
         if not created:
             raise RuntimeError("No se pudo crear la valoración")
         return self._to_response(created)
@@ -49,15 +81,19 @@ class RatingsService:
         self,
         profile_id: str,
         race_id: int | None = None,
+        sort_by: str = "newest",
+        limit: int | None = None,
         current_profile_id: str | None = None,
     ) -> list[RatingResponse]:
         rows = self._repo.get_by_profile(
             profile_id,
             race_id=race_id,
+            sort_by=sort_by,
+            limit=limit,
             current_profile_id=current_profile_id,
         )
         return [RatingResponse(**row) for row in rows]
-
+    
     def get_most_liked_comments(
         self,
         limit: int = 10,

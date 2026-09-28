@@ -1,8 +1,7 @@
 import {
   BadgeCheckIcon,
-  BellIcon,
-  CreditCardIcon,
   LogOutIcon,
+  UserStarIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,7 @@ import { supabase } from '@/lib/supabase.js';
 import { Link } from 'react-router-dom';
 import { getCacheBusterUrl } from '@/lib/cacheBuster';
 
-export function DropdownMenuAvatar({ avatar }) {
+export function DropdownMenuAvatar({ avatar, profileId }) {
   // Update the avatar URL with a cache buster to ensure the latest image is fetched.
   // This prevents retrieving a cached (previous) version of the user's avatar with the same URL.
   avatar = getCacheBusterUrl(avatar);
@@ -36,20 +35,22 @@ export function DropdownMenuAvatar({ avatar }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <BadgeCheckIcon />
-            <Link to='/profile' className='w-full h-full'>
-              Perfil
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCardIcon />
-            Facturación
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <BellIcon />
-            Notificaciones
-          </DropdownMenuItem>
+          <Link to='/profile' className='w-full h-full'>
+            <DropdownMenuItem
+            className='cursor-pointer'>
+              <BadgeCheckIcon />
+                Perfil
+            </DropdownMenuItem>
+          </Link>
+        </DropdownMenuGroup>
+        <DropdownMenuGroup>
+          <Link to={`/profile/${profileId}/ratings`} className='w-full h-full'>
+            <DropdownMenuItem
+            className='cursor-pointer'>
+              <UserStarIcon />
+                Valoraciones
+            </DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem

@@ -41,7 +41,7 @@ class RatingsRepository:
             query = query.eq("race_id", race_id)
         if since is not None:
             query = query.gte("created_at", since.isoformat())
-        if sort_by == "newest":
+        if sort_by in ("newest", "created_at"):
             query = query.order("created_at", desc=True)
         else:
             query = query.order("likes", desc=True).order("created_at", desc=True)
@@ -52,19 +52,48 @@ class RatingsRepository:
         self,
         profile_id: str,
         race_id: int | None = None,
+        sort_by: str = "newest",
+        limit: int | None = None,
         current_profile_id: str | None = None,
     ) -> list[dict]:
         query = (
             self._db.table("ratings")
             .select("*")
             .eq("profile_id", profile_id)
-            .order("created_at", desc=True)
         )
         if race_id is not None:
             query = query.eq("race_id", race_id)
-        response = query.execute()
-        return self._enrich(response.data or [], current_profile_id)
+        if sort_by in ("newest", "created_at"):
+            query = query.order("created_at", desc=True)
+        else:
+            query = query.order("likes", desc=True).order("created_at", desc=True)
+        if limit is not None:
+            query = query.limit(limit)
 
+        response = query.execute()
+        viewer_id = current_profile_id or profile_id
+        return self._enrich(response.data or [], viewer_id)
+
+    def get_by_profile_and_race(
+        self,
+        profile_id: str,
+        race_id: int,
+        driver_id: str | None = None,
+    ) -> dict | None:
+        """Return the rating a profile already published for a race (and driver, if any)."""
+        query = (
+            self._db.table("ratings")
+            .select("*")
+            .eq("profile_id", profile_id)
+            .eq("race_id", race_id)
+        )
+        if driver_id is None:
+            query = query.is_("driver_id", "null")
+        else:
+            query = query.eq("driver_id", driver_id)
+        response = query.limit(1).execute()
+        return response.data[0] if response.data else None
+    
     def get_most_liked_comments(
         self,
         limit: int = 10,

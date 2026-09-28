@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { publishRating } from '@/service/apiService.ts';
+import { publishRating } from '@/service/ratingsService.ts';
 
 export function usePublishRating() {
   const [loading, setLoading] = useState(false);

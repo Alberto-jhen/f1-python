@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query
-from services.ratings_service import ratings_service
+from services.ratings_service import ratings_service, DuplicateRatingError
 from core.schemas import RatingCreate, RatingResponse
 
 router = APIRouter()
@@ -11,7 +11,7 @@ router = APIRouter()
 @router.get("/ratings", response_model=list[RatingResponse], tags=["ratings"])
 async def list_ratings(
     race_id: Optional[int] = None,
-    sort_by: str = Query("likes", pattern="^(likes|newest)$"),
+    sort_by: str = Query("likes", pattern="^(likes|newest|created_at)$"),
     limit: int = Query(20, ge=1, le=100),
     since: Optional[str] = None,
     current_profile_id: Optional[str] = None,
@@ -33,8 +33,6 @@ async def list_ratings(
         since=parsed_since,
         current_profile_id=current_profile_id,
     )
-    if not data:
-        raise HTTPException(status_code=404, detail="No ratings found")
     return data
 
 
@@ -64,7 +62,6 @@ async def get_most_liked_comments(
 
     if not data:
         raise HTTPException(status_code=404, detail="No ratings found")
-
     return data
 
 
@@ -72,15 +69,17 @@ async def get_most_liked_comments(
 async def get_ratings_by_profile(
     profile_id: str,
     race_id: Optional[int] = None,
+    sort_by: str = Query("newest", pattern="^(likes|newest|created_at)$"),
+    limit: Optional[int] = Query(None, ge=1, le=100),
     current_profile_id: Optional[str] = None,
 ):
     data = ratings_service.get_ratings_by_profile(
         profile_id,
         race_id=race_id,
+        sort_by=sort_by,
+        limit=limit,
         current_profile_id=current_profile_id,
     )
-    if not data:
-        raise HTTPException(status_code=404, detail="No ratings found for this user")
     return data
 
 
@@ -96,6 +95,8 @@ async def get_rating_by_id(rating_id: UUID):
 async def create_rating(profile_id: str, rating: RatingCreate):
     try:
         return ratings_service.create_rating(profile_id, rating)
+    except DuplicateRatingError as e:
+        raise HTTPException(status_code=409, detail=str(e))
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
 

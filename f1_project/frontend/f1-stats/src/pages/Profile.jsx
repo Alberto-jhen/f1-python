@@ -1,10 +1,11 @@
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileSection } from '@/components/profile/ProfileSection';
 import { FavoriteCard } from '@/components/profile/FavoriteCard';
-import { RatingItem } from '@/components/profile/RatingItem';
+import { RatingItem } from '@/components/ratings/RatingItem';
 import { StatBadge } from '@/components/profile/StatBadge';
 import { ActivityItem } from '@/components/profile/ActivityItem';
 import { useProfile } from '@/hooks/useProfile';
+import { useUserRatings } from '@/hooks/useRatings';
 import {
   HeartIcon,
   StarIcon,
@@ -16,8 +17,24 @@ import {
   UsersIcon,
 } from 'lucide-react';
 
+function formatRatingDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
 export function Profile() {
   const { profile, loading, user } = useProfile();
+  const { ratings: latestRatings, loading: loadingRatings } = useUserRatings({
+    currentProfileId: user?.id,
+    sortBy: 'created_at',
+    limit: 3,
+  });
 
   if (loading) {
     return (
@@ -63,27 +80,29 @@ export function Profile() {
             </ProfileSection>
 
             <ProfileSection title='Últimas valoraciones' icon={StarIcon}>
-              <RatingItem
-                title='Gran Premio de España'
-                category='Carrera'
-                rating={4}
-                date='12 may 2026'
-                comment='Gran remontada de Norris, buena estrategia de Red Bull.'
-              />
-              <RatingItem
-                title='Gran Premio de Mónaco'
-                category='Carrera'
-                rating={5}
-                date='25 may 2026'
-                comment='Carrera clásica de Mónaco, incrible pole de Leclerc.'
-              />
-              <RatingItem
-                title='Gran Premio de Canadá'
-                category='Carrera'
-                rating={3}
-                date='08 jun 2026'
-                comment='Mucha lluvia y banderas rojas, se hizo larga.'
-              />
+              {loadingRatings && (
+                <p className='text-sm text-zinc-500 py-4'>Cargando valoraciones...</p>
+              )}
+              {!loadingRatings && latestRatings.length === 0 && (
+                <p className='text-sm text-zinc-500 py-4'>
+                  Aún no hay valoraciones publicadas.
+                </p>
+              )}
+              {!loadingRatings &&
+                latestRatings.map((rating) => {
+                  const race = rating.race || {};
+                  const driverId = rating.driver_id;
+                  return (
+                    <RatingItem
+                      key={rating.id}
+                      title={race.circuit_name || 'Gran Premio'}
+                      category={driverId ? 'Piloto' : 'Carrera'}
+                      rating={rating.rating}
+                      date={formatRatingDate(rating.created_at)}
+                      comment={rating.comment}
+                    />
+                  );
+                })}
             </ProfileSection>
 
             <ProfileSection title='Actividad reciente' icon={ActivityIcon}>

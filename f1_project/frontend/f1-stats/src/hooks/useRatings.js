@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { fetchRatings } from '@/service/apiService.ts';
+import { fetchRatings, fetchUserRatings } from '@/service/ratingsService.ts';
 
-export function useRatings({ raceId, sortBy = 'likes', limit = 20, currentProfileId } = {}) {
+export function useRatings({ raceId, sortBy = 'likes', limit = 10, currentProfileId } = {}) {
   const [ratings, setRatings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -36,6 +36,47 @@ export function useRatings({ raceId, sortBy = 'likes', limit = 20, currentProfil
       controller.abort();
     };
   }, [raceId, sortBy, limit, currentProfileId]);
+
+  return { ratings, setRatings, loading, error };
+}
+
+export function useUserRatings({ currentProfileId, sortBy = 'likes', limit = 10 } = {}) {
+  const [ratings, setRatings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!currentProfileId) {
+      setRatings([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    let ignore = false;
+
+    const loadUserRatings = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = { sort_by: sortBy, limit };
+        const data = await fetchUserRatings(currentProfileId, params, controller.signal);
+        if (!ignore) setRatings(data || []);
+      } catch (e) {
+        if (ignore || e.name === 'AbortError' || controller.signal.aborted) return;
+        setError(e);
+        console.error('Error fetching user ratings:', e);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+
+    loadUserRatings();
+
+    return () => {
+      ignore = true;
+      controller.abort();
+    };
+  }, [currentProfileId, sortBy, limit]);
 
   return { ratings, setRatings, loading, error };
 }

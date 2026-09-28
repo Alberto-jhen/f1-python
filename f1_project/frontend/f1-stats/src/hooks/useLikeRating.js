@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { likeRating, unlikeRating } from '@/service/apiService.ts';
+import { likeRating, unlikeRating } from '@/service/ratingsService.ts';
 
 export function useLikeRating() {
   const [loading, setLoading] = useState(false);

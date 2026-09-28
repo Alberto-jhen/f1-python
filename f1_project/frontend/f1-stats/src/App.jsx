@@ -14,6 +14,7 @@ import { Login } from '@/pages/Login.jsx';
 import { Profile } from '@/pages/Profile.jsx';
 import { Ratings } from '@/pages/Ratings.jsx';
 import { RatingsCommunity } from '@/pages/RatingsCommunity.jsx';
+import { UserRatings } from '@/pages/UserRatings.jsx';
 
 function App() {
     return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/profile" element={ <Layout> <Profile /> </Layout> }/>
             <Route path="/ratings" element={ <Layout> <Ratings /> </Layout> }/>
             <Route path="/ratings/community" element={ <Layout> <RatingsCommunity /> </Layout> }/>
+            <Route path="/profile/:profileId/ratings" element={ <Layout> <UserRatings /> </Layout> }/>
         </Routes>
         <Toaster />
         </>
