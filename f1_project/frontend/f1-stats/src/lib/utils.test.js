@@ -5,6 +5,8 @@ import {
     formatDateToProfile,
     getDriverCode,
     getInitials,
+    isUsernameConflictError,
+    normalizeUsername,
     passwordCompare,
     usernameValidator,
 } from './utils.js';
@@ -54,6 +56,7 @@ describe('usernameValidator', () => {
         expect(usernameValidator('user123')).toBe(true);
         expect(usernameValidator('a-b-c')).toBe(true);
         expect(usernameValidator('abc')).toBe(true);
+        expect(usernameValidator('  abc  ')).toBe(true);
     });
 
     it('returns false for usernames shorter than 3 characters', () => {
@@ -70,6 +73,42 @@ describe('usernameValidator', () => {
         expect(usernameValidator('user name')).toBe(false);
         expect(usernameValidator('user@name')).toBe(false);
         expect(usernameValidator('user.name')).toBe(false);
+    });
+});
+
+describe('normalizeUsername', () => {
+    it('trims surrounding whitespace without changing casing', () => {
+        expect(normalizeUsername('  Driver_1  ')).toBe('Driver_1');
+    });
+
+    it('returns an empty string for non-string values', () => {
+        expect(normalizeUsername(null)).toBe('');
+        expect(normalizeUsername(undefined)).toBe('');
+    });
+});
+
+describe('isUsernameConflictError', () => {
+    it('recognizes the explicit username conflict', () => {
+        expect(isUsernameConflictError({ code: 'USERNAME_TAKEN' })).toBe(true);
+    });
+
+    it('recognizes a unique violation on the username index', () => {
+        expect(
+            isUsernameConflictError({
+                code: '23505',
+                message: 'duplicate key violates profiles_username_ci_unique',
+            })
+        ).toBe(true);
+    });
+
+    it('does not mislabel a different unique violation as a username conflict', () => {
+        expect(
+            isUsernameConflictError({
+                code: '23505',
+                message: 'duplicate key violates users_email_key',
+            })
+        ).toBe(false);
+        expect(isUsernameConflictError({ message: 'Network error' })).toBe(false);
     });
 });
 

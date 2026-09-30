@@ -6,9 +6,15 @@ import {
   uploadFullNameToSupabase,
   uploadLocationToSupabase,
 } from '@/service/supabaseService';
+import { updateUsernameForUser } from '@/service/usernameService';
 import { useState, useRef } from 'react';
 import { toast } from 'sonner';
-import { formatDateToProfile } from '@/lib/utils';
+import {
+  formatDateToProfile,
+  isUsernameConflictError,
+  normalizeUsername,
+  usernameValidator,
+} from '@/lib/utils';
 import { GenericCombobox } from '@/components/GenericComobobox';
 import { COUNTRY_OPTIONS, getFlagEmojiByName } from '@/lib/countries';
 import {
@@ -25,6 +31,7 @@ const BIOGRAPHY_MAX_LENGTH = 400;
 export function ProfileHeader({ user, userId, editable, onProfileUpdated }) {
   const avatarRef = useRef(null);
   const [fullName, setFullName] = useState(user.full_name || '');
+  const [username, setUsername] = useState(user.username || '');
   const [biography, setBiography] = useState(user.biography || '');
   const [location, setLocation] = useState(user.location || '');
   const [avatarUrl, setAvatarUrl] = useState(user.avatar_url || '');
@@ -32,6 +39,7 @@ export function ProfileHeader({ user, userId, editable, onProfileUpdated }) {
   const [saving, setSaving] = useState(false);
   const [editForm, setEditForm] = useState({
     fullName: user.full_name || '',
+    username: user.username || '',
     biography: user.biography || '',
     location: user.location || '',
   });
@@ -62,7 +70,7 @@ export function ProfileHeader({ user, userId, editable, onProfileUpdated }) {
   };
 
   const openEditModal = () => {
-    setEditForm({ fullName, biography, location });
+    setEditForm({ fullName, username, biography, location });
     setIsEditModalOpen(true);
   };
 
@@ -75,19 +83,27 @@ export function ProfileHeader({ user, userId, editable, onProfileUpdated }) {
       toast.error('No se ha detectado un usuario logueado');
       return;
     }
+    const nextUsername = normalizeUsername(editForm.username);
+    if (!usernameValidator(nextUsername)) {
+      toast.error('El username debe tener entre 3 y 30 caracteres válidos.');
+      return;
+    }
     setSaving(true);
     try {
       await Promise.all([
+        updateUsernameForUser(nextUsername, userId),
         uploadFullNameToSupabase(editForm.fullName, userId),
         uploadBiographyToSupabase(editForm.biography, userId),
         uploadLocationToSupabase(editForm.location || null, userId),
       ]);
       const updatedProfile = {
         full_name: editForm.fullName,
+        username: nextUsername,
         biography: editForm.biography,
         location: editForm.location || null,
       };
       setFullName(editForm.fullName);
+      setUsername(nextUsername);
       setBiography(editForm.biography);
       setLocation(editForm.location || '');
       onProfileUpdated?.(updatedProfile);
@@ -95,7 +111,11 @@ export function ProfileHeader({ user, userId, editable, onProfileUpdated }) {
       toast.success('Perfil actualizado');
     } catch (error) {
       console.error('Error al actualizar el perfil:', error);
-      toast.error('Error al actualizar el perfil');
+      toast.error(
+        isUsernameConflictError(error)
+          ? 'Ese nombre de usuario ya está en uso. Prueba con otro.'
+          : 'Error al actualizar el perfil'
+      );
     } finally {
       setSaving(false);
     }
@@ -116,7 +136,7 @@ export function ProfileHeader({ user, userId, editable, onProfileUpdated }) {
           <h1 className='text-4xl font-black italic text-white tracking-tighter'>
             {fullName}
           </h1>
-          <p className='text-zinc-400 text-sm mt-1'>@{user.username}</p>
+          <p className='text-zinc-400 text-sm mt-1'>@{username}</p>
           {biography && (
             <p className='text-zinc-400 text-sm mt-3 max-w-xl leading-relaxed break-all whitespace-pre-wrap'>
               {biography}
@@ -177,7 +197,7 @@ export function ProfileHeader({ user, userId, editable, onProfileUpdated }) {
             </div>
             <div className='space-y-2'>
               <label htmlFor='edit-fullName' className='text-sm font-medium text-zinc-300'>
-                Nombre
+                Nombre completo
               </label>
               <input
                 id='edit-fullName'
@@ -186,6 +206,30 @@ export function ProfileHeader({ user, userId, editable, onProfileUpdated }) {
                 onChange={(e) => setEditForm((prev) => ({ ...prev, fullName: e.target.value }))}
                 className='w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white outline-none focus:border-red-600'
               />
+            </div>
+            <div className='space-y-2'>
+              <label htmlFor='edit-username' className='text-sm font-medium text-zinc-300'>
+                Nombre de usuario
+              </label>
+              <div className='flex items-center rounded-md border border-zinc-700 bg-zinc-900 px-3 focus-within:border-red-600'>
+                <span className='text-zinc-500' aria-hidden='true'>
+                  @
+                </span>
+                <input
+                  id='edit-username'
+                  type='text'
+                  value={editForm.username}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, username: e.target.value }))}
+                  maxLength={30}
+                  autoComplete='username'
+                  autoCapitalize='none'
+                  spellCheck={false}
+                  className='w-full bg-transparent px-2 py-2 text-sm text-white outline-none'
+                />
+              </div>
+              <p className='text-xs text-zinc-500'>
+                3–30 caracteres. Solo letras, números, guiones y guiones bajos.
+              </p>
             </div>
             <div className='space-y-2'>
               <span className='text-sm font-medium text-zinc-300'>País</span>

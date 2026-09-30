@@ -16,6 +16,7 @@ import { Ratings } from '@/pages/Ratings.jsx';
 import { RatingsCommunity } from '@/pages/RatingsCommunity.jsx';
 import { CommunityUserProfile } from '@/pages/CommunityUserProfile.jsx';
 import { UserRatings } from '@/pages/UserRatings.jsx';
+import { UsernameSetupGate } from '@/components/auth/UsernameSetupGate';
 
 function App() {
     return (
@@ -37,6 +38,7 @@ function App() {
             <Route path="/ratings/community/profile/:profileId" element={ <Layout> <CommunityUserProfile /> </Layout> }/>
             <Route path="/profile/:profileId/ratings" element={ <Layout> <UserRatings /> </Layout> }/>
         </Routes>
+        <UsernameSetupGate />
         <Toaster />
         </>
     )

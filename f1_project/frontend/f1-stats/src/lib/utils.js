@@ -10,9 +10,31 @@ export function emailValidator(email) {
   return emailRegex.test(email);
 }
 
+export function normalizeUsername(name) {
+  return typeof name === 'string' ? name.trim() : '';
+}
+
 export function usernameValidator(name) {
   const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/;
-  return usernameRegex.test(name);
+  return usernameRegex.test(normalizeUsername(name));
+}
+
+export function isUsernameConflictError(error) {
+  const errorDetails = [
+    error?.code,
+    error?.message,
+    error?.details,
+    error?.constraint,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return (
+    error?.code === 'USERNAME_TAKEN' ||
+    (error?.code === '23505' && errorDetails.includes('username')) ||
+    errorDetails.includes('profiles_username_ci_unique')
+  );
 }
 
 export function passwordCompare(password, passwordConfirm) {

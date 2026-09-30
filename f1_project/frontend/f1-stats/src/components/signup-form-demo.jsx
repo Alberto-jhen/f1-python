@@ -2,7 +2,13 @@
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { cn, emailValidator, passwordCompare, usernameValidator } from "@/lib/utils";
+import {
+  cn,
+  emailValidator,
+  normalizeUsername,
+  passwordCompare,
+  usernameValidator,
+} from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { IconBrandGoogle, IconInfoCircle } from "@tabler/icons-react";
@@ -26,10 +32,11 @@ export function SignupFormDemo({ onSubmit, mode = 'signup' }) {
 
   const validate = () => {
     const nextErrors = {};
+    const normalizedUsername = normalizeUsername(username);
 
     if (!isLogin) {
-      if (!username) nextErrors.username = true;
-      else if (!usernameValidator(username)) nextErrors.username = true;
+      if (!normalizedUsername) nextErrors.username = true;
+      else if (!usernameValidator(normalizedUsername)) nextErrors.username = true;
     }
 
     if (!email) nextErrors.email = true;
@@ -71,7 +78,7 @@ export function SignupFormDemo({ onSubmit, mode = 'signup' }) {
       if (isLogin) {
         onSubmit({ email, password });
       } else {
-        onSubmit({ username, email, password });
+        onSubmit({ username: normalizeUsername(username), email: email.trim(), password });
       }
     }
   };
@@ -80,7 +87,7 @@ export function SignupFormDemo({ onSubmit, mode = 'signup' }) {
     setGoogleLoading(true);
 
     try {
-      const redirectTo = `${window.location.origin}/form`;
+      const redirectTo = window.location.origin;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo },
@@ -116,7 +123,7 @@ export function SignupFormDemo({ onSubmit, mode = 'signup' }) {
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <Input id="username" placeholder="tu_usuario" type="text" value={username} onChange={(e) => { setUsername(e.target.value); clearError('username'); }} className={inputClasses('username')} />
+              <Input id="username" placeholder="tu_usuario" type="text" value={username} maxLength={30} autoComplete="username" autoCapitalize="none" spellCheck={false} onChange={(e) => { setUsername(e.target.value); clearError('username'); }} className={inputClasses('username')} />
             </LabelInputContainer>
           )}
           <LabelInputContainer>

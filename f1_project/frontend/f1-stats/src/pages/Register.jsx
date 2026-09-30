@@ -5,33 +5,59 @@ import { Header } from '@/components/Layout/Header.jsx';
 import { supabase } from '@/lib/supabase.js';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { isUsernameConflictError, normalizeUsername } from '@/lib/utils';
+import { checkUsernameAvailability } from '@/service/usernameService';
 
 export function Register() {
   const navigate = useNavigate();
 
   const handleSubmit = async (formData) => {
     const { username, email, password } = formData;
+    const normalizedUsername = normalizeUsername(username);
+
+    try {
+      const available = await checkUsernameAvailability(normalizedUsername);
+      if (!available) {
+        toast.error('Ese nombre de usuario ya está en uso. Prueba con otro.');
+        return;
+      }
+    } catch (error) {
+      console.error('Error comprobando la disponibilidad del username:', error);
+      toast.error('No se pudo comprobar la disponibilidad del username. Inténtalo de nuevo.');
+      return;
+    }
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { username },
+        data: { username: normalizedUsername },
       },
     });
 
     if (error) {
-      toast.error(error.message);
+      let usernameUnavailable = isUsernameConflictError(error);
+      if (!usernameUnavailable) {
+        try {
+          usernameUnavailable = !(await checkUsernameAvailability(normalizedUsername));
+        } catch (availabilityError) {
+          console.error('No se pudo volver a comprobar el username:', availabilityError);
+        }
+      }
+      toast.error(
+        usernameUnavailable
+          ? 'Ese nombre de usuario ya está en uso. Prueba con otro.'
+          : error.message
+      );
       return;
     }
 
-    if (!data.user || data.user.identities.length === 0) {
+    if (!data.user || data.user.identities?.length === 0) {
       toast.error('El correo ya está registrado. Inicia sesión o usa otro correo.');
       return;
     }
 
     toast.success('Cuenta creada. Revisa tu correo para verificar tu cuenta.');
-    console.log('Usuario registrado:', data);
 
     setTimeout(() => {
       navigate('/');

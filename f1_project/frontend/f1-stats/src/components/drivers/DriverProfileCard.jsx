@@ -76,18 +76,17 @@ export default function DriverProfileCard({ data }) {
     }, [driverNumber, year, driverLabel, driverCode]);
 
     return (
-        <div className="relative w-full h-auto rounded-3xl overflow-hidden shadow-2xl group animate-fade-in-up border border-slate-800/50 bg-slate-950 flex flex-col lg:flex-row">
+        <div className="relative w-full h-auto rounded-3xl overflow-hidden shadow-2xl group animate-fade-in-up border border-slate-800/50 bg-slate-950 flex flex-col md:flex-row">
             {/* Driver image */}
-            <div className="relative w-full lg:w-2/5 h-[45vh] lg:h-auto lg:min-h-0 lg:max-h-[70vh] overflow-hidden flex items-start justify-center bg-slate-950 shrink-0">
-                <img
-                    src={imageUrl}
+            <div className="relative w-full h-[45vh] min-h-[18rem] max-h-[32rem] overflow-hidden flex items-center justify-center bg-slate-950 shrink-0 md:h-auto md:w-2/5 md:min-h-[30rem] md:max-h-none">
+                <img 
+                    src={imageUrl} 
                     alt={driverLabel}
-                    onError={handleImageError}
-                    className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-105"
+                    className="w-full h-full object-cover mask-[linear-gradient(to_right,black_65%,transparent)]"
                 />
-                <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-slate-950/10 to-slate-950/80 lg:bg-gradient-to-r lg:from-transparent lg:via-slate-950/10 lg:to-slate-950/90" />
+                <div className="absolute inset-0 z-20 pointer-events-none bg-gradient-to-b from-transparent via-slate-950/10 to-slate-950/80 md:bg-gradient-to-r md:from-transparent md:via-slate-950/10 md:to-slate-950/90" />
                 <div
-                    className="absolute bottom-2 right-4 lg:bottom-8 lg:right-8 text-6xl md:text-7xl lg:text-8xl font-black italic leading-none opacity-20 pointer-events-none select-none"
+                    className="absolute z-30 bottom-2 right-4 md:bottom-8 md:right-8 text-6xl md:text-7xl lg:text-8xl font-black italic leading-none opacity-20 pointer-events-none select-none"
                     style={{ color }}
                 >
                     {driverNumber}
@@ -95,7 +94,7 @@ export default function DriverProfileCard({ data }) {
             </div>
 
             {/* Info */}
-            <div className="relative z-10 w-full lg:w-3/5 flex flex-col p-6 md:p-8 lg:p-10 bg-slate-950 gap-4">
+            <div className="relative z-10 w-full min-w-0 md:w-3/5 flex flex-col p-6 md:p-8 lg:p-10 bg-slate-950 gap-4">
                 {/* Header */}
                 <div className="space-y-2 shrink-0">
                     <div
@@ -129,7 +128,7 @@ export default function DriverProfileCard({ data }) {
                 </div>
 
                 {/* Career history accordion */}
-                <div className="flex-1 min-h-0">
+                <div className="w-full">
                     <DriverHistoryAccordion
                         teamColor={team_color}
                         titles={careerStats.titles}

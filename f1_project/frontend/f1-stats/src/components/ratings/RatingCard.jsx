@@ -102,6 +102,7 @@ export function RatingCard({
             src={avatar}
             alt={displayName}
             className='w-11 h-11 rounded-full border border-zinc-700/80 object-cover shrink-0'
+            referrerPolicy="no-referrer"
           />
         )}
 

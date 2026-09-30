@@ -63,7 +63,9 @@ export const Header = ({ variant = "solid" }) => {
                     <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse" />
                 ) : isLoggedIn ? (
                     <div className='flex items-center gap-2'>
-                        <div className='text-zinc-400 font-medium'>{profile?.username}</div>
+                        <div className='text-zinc-400 font-medium'>
+                            {user?.user_metadata?.username || profile?.username}
+                        </div>
                         <DropdownMenuAvatar avatar={profile?.avatar_url} profileId={profile?.id} />
                     </div>
                 ) : (
