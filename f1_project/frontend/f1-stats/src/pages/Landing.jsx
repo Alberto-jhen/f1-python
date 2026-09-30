@@ -153,23 +153,6 @@ export default function Landing() {
                     transition={{ delay: 0.8, duration: 0.8 }}
                     className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-30"
                 >
-                    <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-4 md:p-6 shadow-2xl flex flex-wrap justify-around items-center gap-4">
-                        {[
-                            { label: "Track Temp", val: "42.5°C", icon: "🌡️" },
-                            { label: "Humidity", val: "12%", icon: "💧" },
-                            { label: "Wind", val: "14.2 km/h", icon: "💨" },
-                            { label: "Air Temp", val: "28.1°C", icon: "☁️" }
-                        ].map((stat, i) => (
-                            <div key={i} className="flex items-center gap-4 group">
-                                <span className="text-xl opacity-50 grayscale group-hover:grayscale-0 transition-all">{stat.icon}</span>
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] uppercase font-bold text-zinc-500 tracking-widest font-mono mb-1">{stat.label}</span>
-                                    <span className="text-lg md:text-xl font-black italic text-white uppercase tracking-tight">{stat.val}</span>
-                                </div>
-                                {i !== 3 && <div className="hidden md:block w-px h-8 bg-zinc-800 ml-8"></div>}
-                            </div>
-                        ))}
-                    </div>
                 </motion.div>
             </div>
 
