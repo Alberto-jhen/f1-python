@@ -40,7 +40,12 @@ export function useRatings({ raceId, sortBy = 'likes', limit = 10, currentProfil
   return { ratings, setRatings, loading, error };
 }
 
-export function useUserRatings({ currentProfileId, sortBy = 'likes', limit = 10 } = {}) {
+export function useUserRatings({
+  currentProfileId,
+  viewerProfileId = currentProfileId,
+  sortBy = 'likes',
+  limit = 10,
+} = {}) {
   const [ratings, setRatings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -48,6 +53,7 @@ export function useUserRatings({ currentProfileId, sortBy = 'likes', limit = 10 
   useEffect(() => {
     if (!currentProfileId) {
       setRatings([]);
+      setLoading(false);
       return;
     }
 
@@ -58,7 +64,9 @@ export function useUserRatings({ currentProfileId, sortBy = 'likes', limit = 10 
       setLoading(true);
       setError(null);
       try {
-        const params = { sort_by: sortBy, limit };
+        const params = { sort_by: sortBy };
+        if (limit !== null && limit !== undefined) params.limit = limit;
+        if (viewerProfileId) params.current_profile_id = viewerProfileId;
         const data = await fetchUserRatings(currentProfileId, params, controller.signal);
         if (!ignore) setRatings(data || []);
       } catch (e) {
@@ -76,7 +84,7 @@ export function useUserRatings({ currentProfileId, sortBy = 'likes', limit = 10 
       ignore = true;
       controller.abort();
     };
-  }, [currentProfileId, sortBy, limit]);
+  }, [currentProfileId, viewerProfileId, sortBy, limit]);
 
   return { ratings, setRatings, loading, error };
 }

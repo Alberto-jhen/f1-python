@@ -58,13 +58,14 @@ export const ProfileAvatar = forwardRef(function ProfileAvatar({ src, fallback, 
     md: 'size-16',
     lg: 'size-24',
     xl: 'size-32',
+    xxl: 'size-40',
   };
 
   return (
     <div className='relative inline-block'>
       <Avatar className={sizeClasses[size]}>
         <AvatarImage src={previewImage || src} alt='Avatar de perfil' />
-        <AvatarFallback className='text-2xl bg-zinc-800 text-white'>
+        <AvatarFallback delayMs={200} className='text-2xl bg-zinc-800 text-white'>
           {fallback}
         </AvatarFallback>
       </Avatar>

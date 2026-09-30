@@ -211,7 +211,10 @@ class RatingsRepository:
             return {}
         response = (
             self._db.table("profiles")
-            .select("id, username, full_name, avatar_url")
+            .select(
+                "id, username, full_name, avatar_url, "
+                "favorite_driver, favorite_team, location"
+            )
             .in_("id", list(profile_ids))
             .execute()
         )

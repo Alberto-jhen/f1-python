@@ -1,21 +1,21 @@
-import { ProfileHeader } from '@/components/profile/ProfileHeader';
-import { ProfileSection } from '@/components/profile/ProfileSection';
-import { FavoriteCard } from '@/components/profile/FavoriteCard';
-import { RatingItem } from '@/components/ratings/RatingItem';
-import { StatBadge } from '@/components/profile/StatBadge';
-import { ActivityItem } from '@/components/profile/ActivityItem';
-import { useProfile } from '@/hooks/useProfile';
-import { useUserRatings } from '@/hooks/useRatings';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   HeartIcon,
   StarIcon,
-  ActivityIcon,
-  TrophyIcon,
-  FlagIcon,
-  MessageSquareIcon,
-  GaugeIcon,
-  UsersIcon,
+  PencilIcon,
+  ArrowRightIcon,
 } from 'lucide-react';
+
+import { FavoriteCard } from '@/components/profile/FavoriteCard';
+import { FavoritesModal } from '@/components/profile/FavoritesModal';
+import { ProfileHeader } from '@/components/profile/ProfileHeader';
+import { ProfileSection } from '@/components/profile/ProfileSection';
+import { RatingStats } from '@/components/profile/RatingStats';
+import { RatingItem } from '@/components/ratings/RatingItem';
+import { useProfile } from '@/hooks/useProfile';
+import { useUserRatings } from '@/hooks/useRatings';
+import { getTeamLogo, getTeamColor } from '@/lib/teamLogos';
 
 function formatRatingDate(value) {
   if (!value) return '';
@@ -29,12 +29,22 @@ function formatRatingDate(value) {
 }
 
 export function Profile() {
-  const { profile, loading, user } = useProfile();
-  const { ratings: latestRatings, loading: loadingRatings } = useUserRatings({
+  const { profile, setProfile, loading, user } = useProfile();
+  const { ratings, loading: loadingRatings, error: ratingsError } = useUserRatings({
     currentProfileId: user?.id,
     sortBy: 'created_at',
-    limit: 3,
+    limit: null,
   });
+  const latestRatings = ratings.slice(0, 3);
+  const [favoritesModalOpen, setFavoritesModalOpen] = useState(false);
+
+  const handleFavoritesSaved = (favorites) => {
+    setProfile((prev) => ({ ...prev, ...favorites }));
+  };
+
+
+  const favoriteDriver = profile?.favorite_driver || null;
+  const favoriteTeam = profile?.favorite_team || null;
 
   if (loading) {
     return (
@@ -46,35 +56,47 @@ export function Profile() {
 
   return (
     <div className='min-h-screen bg-[#050505] pb-16'>
-      <ProfileHeader user={profile} userId={user?.id} editable />
+      <ProfileHeader
+        user={profile}
+        userId={user?.id}
+        editable
+        onProfileUpdated={(updates) => setProfile((prev) => ({ ...prev, ...updates }))}
+      />
 
       <div className='max-w-6xl mx-auto px-6 mt-10'>
-        {/* Estadísticas rápidas */}
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-8'>
-          <StatBadge value='142' label='Predicciones' trend='up' />
-          <StatBadge value='18' label='Vueltas analizadas' />
-          <StatBadge value='4.8' label='Valoración media' trend='up' />
-          <StatBadge value='12' label='Grandes Premios' />
-        </div>
-
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
           {/* Columna principal */}
           <div className='lg:col-span-2 space-y-6'>
             <ProfileSection title='Favoritos' icon={HeartIcon}>
+              <div className='flex justify-end mb-3'>
+                <button
+                  type='button'
+                  onClick={() => setFavoritesModalOpen(true)}
+                  className='flex items-center gap-2 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer'
+                >
+                  <PencilIcon className='size-3' />
+                  <span>Editar favoritos</span>
+                </button>
+              </div>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 <FavoriteCard
                   title='Piloto favorito'
-                  name='Lewis Hamilton'
-                  subtitle='Mercedes-AMG F1'
-                  image='/logos/mercedes.png'
-                  color='blue'
+                  name={favoriteDriver || 'Sin seleccionar'}
+                  subtitle={
+                    favoriteDriver ? 'Tu piloto favorito' : 'Haz clic para elegir tu piloto favorito'
+                  }
+                  color={favoriteDriver ? '#dc2626' : 'gray'}
+                  onClick={() => setFavoritesModalOpen(true)}
                 />
                 <FavoriteCard
                   title='Equipo favorito'
-                  name='Ferrari'
-                  subtitle='Scuderia Ferrari HP'
-                  image='/logos/ferrari.png'
-                  color='red'
+                  name={favoriteTeam || 'Sin seleccionar'}
+                  subtitle={
+                    favoriteTeam ? 'Tu escudería favorita' : 'Haz clic para elegir tu equipo favorito'
+                  }
+                  image={getTeamLogo(favoriteTeam)}
+                  color={getTeamColor(favoriteTeam) || 'gray'}
+                  onClick={() => setFavoritesModalOpen(true)}
                 />
               </div>
             </ProfileSection>
@@ -103,95 +125,33 @@ export function Profile() {
                     />
                   );
                 })}
-            </ProfileSection>
-
-            <ProfileSection title='Actividad reciente' icon={ActivityIcon}>
-              <ActivityItem
-                icon={MessageSquareIcon}
-                type='blue'
-                title='Comentaste en GP España'
-                description='Gran remontada de Norris, buena estrategia de Red Bull.'
-                date='Hace 2 h'
-              />
-              <ActivityItem
-                icon={GaugeIcon}
-                type='red'
-                title='Analizaste vuelta de Leclerc'
-                description='Sector 3 mejorado respecto a la Q2.'
-                date='Ayer'
-              />
-              <ActivityItem
-                icon={TrophyIcon}
-                type='green'
-                title='Predicción acertada'
-                description='Pole position de Verstappen en Silverstone.'
-                date='Hace 3 d'
-              />
+              {!loadingRatings && latestRatings.length > 0 && user?.id && (
+                <Link
+                  to={`/profile/${user.id}/ratings`}
+                  className='group flex items-center justify-center gap-2 mt-4 py-2 rounded-xl border border-zinc-800 bg-zinc-950/50 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-red-900/50 hover:bg-red-950/20 transition-all'
+                >
+                  Ver todas mis valoraciones
+                  <ArrowRightIcon className='size-4 group-hover:translate-x-1 transition-transform' />
+                </Link>
+              )}
             </ProfileSection>
           </div>
 
           {/* Columna lateral */}
           <div className='space-y-6'>
-            <ProfileSection title='Logros' icon={TrophyIcon}>
-              <div className='space-y-3'>
-                <div className='flex items-center gap-3 p-3 rounded-xl bg-zinc-950/50 border border-zinc-800'>
-                  <div className='bg-red-600/20 p-2 rounded-full text-red-500'>
-                    <FlagIcon className='size-4' />
-                  </div>
-                  <div>
-                    <p className='text-sm font-bold text-white'>Primer GP</p>
-                    <p className='text-xs text-zinc-500'>Completaste tu primera predicción</p>
-                  </div>
-                </div>
-                <div className='flex items-center gap-3 p-3 rounded-xl bg-zinc-950/50 border border-zinc-800'>
-                  <div className='bg-yellow-600/20 p-2 rounded-full text-yellow-500'>
-                    <StarIcon className='size-4' />
-                  </div>
-                  <div>
-                    <p className='text-sm font-bold text-white'>Crítico experto</p>
-                    <p className='text-xs text-zinc-500'>10 valoraciones publicadas</p>
-                  </div>
-                </div>
-                <div className='flex items-center gap-3 p-3 rounded-xl bg-zinc-950/50 border border-zinc-800'>
-                  <div className='bg-blue-600/20 p-2 rounded-full text-blue-500'>
-                    <UsersIcon className='size-4' />
-                  </div>
-                  <div>
-                    <p className='text-sm font-bold text-white'>Analista de datos</p>
-                    <p className='text-xs text-zinc-500'>50 vueltas analizadas</p>
-                  </div>
-                </div>
-              </div>
-            </ProfileSection>
-
-            <ProfileSection title='Próximos eventos' icon={FlagIcon}>
-              <div className='space-y-3'>
-                <div className='flex items-center justify-between p-3 rounded-xl bg-zinc-950/50 border border-zinc-800'>
-                  <div>
-                    <p className='text-sm font-bold text-white'>GP Italia</p>
-                    <p className='text-xs text-zinc-500'>Monza • 07 sep</p>
-                  </div>
-                  <span className='text-xs text-red-500 font-bold'>En 5 d</span>
-                </div>
-                <div className='flex items-center justify-between p-3 rounded-xl bg-zinc-950/50 border border-zinc-800'>
-                  <div>
-                    <p className='text-sm font-bold text-white'>GP Azerbaiyán</p>
-                    <p className='text-xs text-zinc-500'>Bakú • 21 sep</p>
-                  </div>
-                  <span className='text-xs text-zinc-500'>En 19 d</span>
-                </div>
-              </div>
-            </ProfileSection>
-
-            <ProfileSection title='Sobre mí' icon={MessageSquareIcon}>
-              <p className='text-sm text-zinc-400 leading-relaxed'>
-                Apasionado de la Fórmula 1 desde pequeño. Me encanta analizar telemetría, comparar
-                estrategias y debatir sobre cada Gran Premio.
-              </p>
-            </ProfileSection>
+            <RatingStats ratings={ratings} loading={loadingRatings} error={ratingsError} />
           </div>
         </div>
       </div>
+
+      <FavoritesModal
+        open={favoritesModalOpen}
+        onClose={() => setFavoritesModalOpen(false)}
+        onSaved={handleFavoritesSaved}
+        userId={user?.id}
+        favoriteDriver={favoriteDriver}
+        favoriteTeam={favoriteTeam}
+      />
     </div>
   );
 }

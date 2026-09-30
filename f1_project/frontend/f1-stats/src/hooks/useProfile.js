@@ -8,6 +8,10 @@ const emptyProfile = {
   username: '',
   avatar_url: '',
   created_at: '',
+  favorite_driver: null,
+  favorite_team: null,
+  location: null,
+  biography: '',
 };
 
 export function useProfile() {
@@ -34,6 +38,10 @@ export function useProfile() {
             username: data.username || '',
             avatar_url: data.avatar_url || '',
             created_at: data.created_at || '',
+            favorite_driver: data.favorite_driver || null,
+            favorite_team: data.favorite_team || null,
+            location: data.location || null,
+            biography: data.biography || '',
           });
         }
       } catch (err) {
@@ -47,5 +55,5 @@ export function useProfile() {
     fetchProfile();
   }, [user?.id]);
 
-  return { profile, loading, error, user };
+  return { profile, setProfile, loading, error, user };
 }

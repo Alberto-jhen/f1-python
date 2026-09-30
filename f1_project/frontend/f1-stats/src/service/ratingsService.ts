@@ -176,6 +176,7 @@ export const fetchUserRatings = async (
         if (params.sort_by) query.set('sort_by', params.sort_by);
         if (params.limit) query.set('limit', String(params.limit));
         if (params.since) query.set('since', params.since);
+        if (params.current_profile_id) query.set('current_profile_id', params.current_profile_id);
 
         const queryString = query.toString() ? `?${query.toString()}` : '';
         const response = await fetch(

@@ -58,20 +58,20 @@ export const SeasonPointsHeatmap = ({ data }) => {
                 <table className="border-collapse">
                     <thead>
                         <tr>
-                            <th className="sticky left-0 z-10 bg-slate-900 p-2 text-left text-xs font-bold text-slate-300 uppercase tracking-wider border border-slate-800">
+                            <th className="sticky left-0 z-10 bg-slate-900 p-2 align-bottom text-left text-xs font-bold text-slate-300 uppercase tracking-wider border border-slate-800">
                                 Driver
                             </th>
                             {races.map((race, idx) => (
                                 <th
                                     key={idx}
-                                    className="p-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider border border-slate-800 min-w-[3.5rem]"
+                                    className="px-1 py-3 align-bottom text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider border border-slate-800 min-w-[2.5rem]"
                                 >
-                                    <div className="transform -rotate-45 origin-bottom-left translate-x-2 whitespace-nowrap">
+                                    <div className="[writing-mode:vertical-rl] rotate-180 whitespace-nowrap mx-auto">
                                         {race}
                                     </div>
                                 </th>
                             ))}
-                            <th className="p-2 text-center text-xs font-bold text-slate-300 uppercase tracking-wider border border-slate-800 min-w-[4rem]">
+                            <th className="p-2 align-bottom text-center text-xs font-bold text-slate-300 uppercase tracking-wider border border-slate-800 min-w-[4rem]">
                                 Total
                             </th>
                         </tr>
@@ -97,7 +97,7 @@ export const SeasonPointsHeatmap = ({ data }) => {
                                                 }}
                                                 title={`${driver} - ${race}: ${value} pts`}
                                             >
-                                                <div className="w-10 h-8 flex items-center justify-center">
+                                                <div className="w-10 h-8 flex items-center justify-center mx-auto">
                                                     {value}
                                                 </div>
                                             </td>

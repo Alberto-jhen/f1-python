@@ -178,6 +178,9 @@ class RatingProfile(BaseModel):
     username: Optional[str] = None
     full_name: Optional[str] = None
     avatar_url: Optional[str] = None
+    favorite_driver: Optional[str] = None
+    favorite_team: Optional[str] = None
+    location: Optional[str] = None
 
 
 class RatingRace(BaseModel):

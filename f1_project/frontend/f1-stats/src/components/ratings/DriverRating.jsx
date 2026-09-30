@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, ChevronLeftIcon, Quote } from 'lucide-react';
+import { AlertTriangle, 
+  ChevronLeftIcon, 
+  Quote, 
+  MessageSquare, 
+  Newspaper 
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 import { RatingStars } from './RatingStars';
 import { usePublishRating } from '@/hooks/usePublishRating';
@@ -273,6 +279,57 @@ export function DriverRating({ onBack, selectedDriver, selectedRace, user, loadi
             {selectedDriver?.driverNumber}
           </div>
         </div>
+      </div>
+      <div className='mt-16 grid grid-cols-1 md:grid-cols-5 gap-6'>
+        <Link
+          to='/ratings/community'
+          className='md:col-span-3 group bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 md:p-8 hover:border-red-600/50 transition-all overflow-hidden relative block'
+        >
+          <div className='absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-3xl -z-10 group-hover:bg-red-600/10 transition-colors'></div>
+          
+          <div className='flex items-start justify-between'>
+            <div>
+              <MessageSquare className='size-8 text-red-600 mb-4' />
+              <h3 className='text-2xl font-black italic uppercase text-white mb-2'>
+                ¿Qué opina el resto?
+              </h3>
+              <p className='text-zinc-400 text-sm font-medium leading-relaxed max-w-md'>
+                Descubre los análisis de otros usuarios. Compara tus puntuaciones, lee veredictos detallados y únete al debate de la comunidad.
+              </p>
+            </div>
+            <div className='hidden sm:flex h-10 px-4 items-center justify-center rounded-lg bg-zinc-800 text-white text-xs font-bold uppercase tracking-widest group-hover:bg-red-600 transition-colors'>
+              Ver opiniones
+            </div>
+          </div>
+        </Link>
+
+        <div className='md:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 md:p-8'>
+          <div className='flex items-center gap-3 mb-6'>
+            <Newspaper className='size-5 text-zinc-400' />
+            <h3 className='text-sm font-bold uppercase tracking-widest text-white'>
+              Contexto Pista
+            </h3>
+          </div>
+          
+          <div className='space-y-4'>
+            <div className='bg-zinc-950/50 border border-zinc-800/80 rounded-xl p-4 hover:border-zinc-700 transition-colors cursor-pointer'>
+              <div className='flex items-center gap-2 mb-2'>
+                <span className='w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse'></span>
+                <span className='text-[10px] font-bold uppercase tracking-widest text-zinc-500'>Destacado</span>
+              </div>
+              <p className='text-sm text-zinc-200 font-medium'>
+                Revisa los datos de telemetría y degradación antes de dar tu valoración final.
+              </p>
+            </div>
+            
+            <div className='bg-zinc-950/50 border border-zinc-800/80 rounded-xl p-4 hover:border-zinc-700 transition-colors cursor-pointer'>
+              <p className='text-sm text-zinc-400 line-clamp-2'>
+                No olvides que la climatología jugó un papel crucial en las estrategias de boxes de este fin de semana.
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {/* Botón de volver */}

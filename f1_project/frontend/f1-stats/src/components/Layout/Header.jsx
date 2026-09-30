@@ -22,6 +22,19 @@ export const Header = ({ variant = "solid" }) => {
         fetchProfileById(user.id).then(setProfile);
     }, [user?.id]);
 
+    // Cuando el usuario cambia su foto de perfil, el servicio guarda una URL versionada
+    // en BD y ProfileHeader emite este evento: actualizamos el avatar al instante sin
+    // volver a consultar Supabase.
+    useEffect(() => {
+        const handleAvatarUpdated = (event) => {
+            const { userId, avatarUrl } = event.detail || {};
+            if (!userId || userId !== user?.id) return;
+            setProfile((prev) => (prev ? { ...prev, avatar_url: avatarUrl } : prev));
+        };
+        window.addEventListener('avatar-updated', handleAvatarUpdated);
+        return () => window.removeEventListener('avatar-updated', handleAvatarUpdated);
+    }, [user?.id]);
+
     const headerStyles = variant === "dynamic"
         ? `fixed top-0 left-0 w-screen min-w-full ${isScrolled 
             ? 'bg-zinc-950/80 backdrop-blur-md border-slate-700 py-4 shadow-2xl' 

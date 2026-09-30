@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-export function FavoriteCard({ title, name, subtitle, image, color = 'red' }) {
+export function FavoriteCard({ title, name, subtitle, image, color = 'gray', onClick }) {
   const colorClasses = {
     red: 'from-red-600/20 to-transparent border-red-600/30',
     blue: 'from-blue-600/20 to-transparent border-blue-600/30',
@@ -9,8 +9,26 @@ export function FavoriteCard({ title, name, subtitle, image, color = 'red' }) {
     gray: 'from-zinc-600/20 to-transparent border-zinc-600/30',
   };
 
+  const isHexColor = typeof color === 'string' && color.startsWith('#');
+  const Wrapper = onClick ? 'button' : 'div';
+
   return (
-    <div className={cn('relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5', colorClasses[color])}>
+    <Wrapper
+      {...(onClick ? { type: 'button', onClick } : {})}
+      style={
+        isHexColor
+          ? {
+              backgroundImage: `linear-gradient(to bottom right, ${color}33, transparent)`,
+              borderColor: `${color}4d`,
+            }
+          : undefined
+      }
+      className={cn(
+        'relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5 w-full text-left',
+        onClick && 'cursor-pointer transition-all hover:scale-[1.02] hover:brightness-125',
+        !isHexColor && (colorClasses[color] || colorClasses.gray),
+      )}
+    >
       <div className='relative z-10'>
         <p className='text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2'>{title}</p>
         <h4 className='text-2xl font-black italic text-white tracking-tighter'>{name}</h4>
@@ -23,6 +41,6 @@ export function FavoriteCard({ title, name, subtitle, image, color = 'red' }) {
           className='absolute -right-4 -bottom-4 w-24 h-24 object-contain opacity-30 grayscale'
         />
       )}
-    </div>
+    </Wrapper>
   );
 }

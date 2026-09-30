@@ -16,12 +16,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/lib/supabase.js';
 import { Link } from 'react-router-dom';
-import { getCacheBusterUrl } from '@/lib/cacheBuster';
 
 export function DropdownMenuAvatar({ avatar, profileId }) {
-  // Update the avatar URL with a cache buster to ensure the latest image is fetched.
-  // This prevents retrieving a cached (previous) version of the user's avatar with the same URL.
-  avatar = getCacheBusterUrl(avatar);
+  // La URL guardada en BD ya incluye el parámetro de versión (?v=...) desde la subida,
+  // por lo que aquí se usa tal cual: es estable entre renders (sin recargas ni
+  // parpadeos) y cambia cuando el usuario actualiza su avatar.
   const navigate = useNavigate();
   return (
     <DropdownMenu modal={false}>
@@ -29,7 +28,7 @@ export function DropdownMenuAvatar({ avatar, profileId }) {
         <Button variant='ghost' className='size-12 rounded-full cursor-pointer'>
           <Avatar size='lg' className='size-11'>
             <AvatarImage src={avatar} alt='avatar' fetchPriority='high' loading='eager' />
-            <AvatarFallback>LR</AvatarFallback>
+            <AvatarFallback delayMs={200}>LR</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

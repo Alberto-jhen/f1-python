@@ -243,8 +243,6 @@ export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUse
       </div>
 
       <div className='mt-16 grid grid-cols-1 md:grid-cols-5 gap-6'>
-        
-        {/* Banner de Comunidad */}
         <Link
           to='/ratings/community'
           className='md:col-span-3 group bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 md:p-8 hover:border-red-600/50 transition-all overflow-hidden relative block'
@@ -267,7 +265,6 @@ export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUse
           </div>
         </Link>
 
-        {/* Módulo de Noticias / Contexto */}
         <div className='md:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 md:p-8'>
           <div className='flex items-center gap-3 mb-6'>
             <Newspaper className='size-5 text-zinc-400' />
@@ -297,7 +294,6 @@ export function RaceRating({ onBack, raceGallery, selectedRace, user, loadingUse
 
       </div>
 
-      {/* Botón de volver */}
       <div className='mt-12 flex justify-center border-t border-zinc-800/80 pt-8'>
         <button
           type='button'

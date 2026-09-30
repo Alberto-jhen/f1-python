@@ -1,7 +1,13 @@
-import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 import { RatingCard } from '../RatingCard';
+import { deleteRating } from '@/service/ratingsService.ts';
+
+vi.mock('@/service/ratingsService.ts', () => ({
+  deleteRating: vi.fn(() => Promise.resolve({ ok: true })),
+}));
 
 const baseRating = {
   id: 'rating-1',
@@ -25,6 +31,9 @@ const baseRating = {
 };
 
 describe('RatingCard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
   it('renders the author and race information', () => {
     render(<RatingCard rating={baseRating} currentProfileId='profile-2' onToggleLike={vi.fn()} />);
 
@@ -112,5 +121,138 @@ describe('RatingCard', () => {
     );
 
     expect(screen.getByText('Fernando Alonso')).toBeInTheDocument();
+  });
+
+  it('asks for confirmation before deleting and deletes on confirm', async () => {
+    const onDelete = vi.fn();
+    render(
+      <RatingCard
+        rating={baseRating}
+        currentProfileId='profile-1'
+        onToggleLike={vi.fn()}
+        onDelete={onDelete}
+        deleteMode
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /eliminar valoración/i }));
+
+    expect(await screen.findByText('¿Eliminar valoración?')).toBeInTheDocument();
+    expect(screen.getByText(/esta acción no se puede deshacer/i)).toBeInTheDocument();
+    expect(deleteRating).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: /^eliminar$/i }));
+
+    await waitFor(() => expect(deleteRating).toHaveBeenCalledWith('profile-1', 'rating-1'));
+    await waitFor(() => expect(onDelete).toHaveBeenCalledWith('rating-1'));
+  });
+
+  it('does not delete when the confirmation modal is cancelled', async () => {
+    render(
+      <RatingCard
+        rating={baseRating}
+        currentProfileId='profile-1'
+        onToggleLike={vi.fn()}
+        onDelete={vi.fn()}
+        deleteMode
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /eliminar valoración/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /cancelar/i }));
+
+    expect(deleteRating).not.toHaveBeenCalled();
+  });
+
+  it('does not show the rated-driver line when not in driver mode', () => {
+    render(<RatingCard rating={baseRating} currentProfileId='profile-2' onToggleLike={vi.fn()} />);
+
+    expect(screen.queryByText('Valora a')).not.toBeInTheDocument();
+  });
+
+  it('shows only the rated driver name next to the stars in driver mode', () => {
+    render(
+      <RatingCard
+        rating={{ ...baseRating, driver_id: 'VER' }}
+        currentProfileId='profile-2'
+        onToggleLike={vi.fn()}
+        driverMode
+        driverInfo={{
+          value: 'VER',
+          label: 'Max Verstappen',
+          team: 'Red Bull',
+          team_color: '2563eb',
+        }}
+      />
+    );
+
+    expect(screen.getByText('Max Verstappen')).toBeInTheDocument();
+    expect(screen.queryByText('Valora a')).not.toBeInTheDocument();
+    expect(screen.queryByText('Red Bull')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the driver code when driver info is not available', () => {
+    render(
+      <RatingCard
+        rating={{ ...baseRating, driver_id: 'VER' }}
+        currentProfileId='profile-2'
+        onToggleLike={vi.fn()}
+        driverMode
+      />
+    );
+
+    expect(screen.queryByText('Valora a')).not.toBeInTheDocument();
+    expect(screen.getByText('VER')).toBeInTheDocument();
+  });
+
+  it('keeps the author location but hides favorite driver and team', () => {
+    render(
+      <RatingCard
+        rating={{
+          ...baseRating,
+          profile: {
+            ...baseRating.profile,
+            location: 'España',
+            favorite_driver: 'Carlos Sainz',
+            favorite_team: 'Williams',
+          },
+        }}
+        currentProfileId='profile-2'
+        onToggleLike={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTitle('España')).toBeInTheDocument();
+    expect(screen.queryByText('Carlos Sainz')).not.toBeInTheDocument();
+    expect(screen.queryByText('Williams')).not.toBeInTheDocument();
+  });
+
+  it('does not render the author context row when the profile has no extra data', () => {
+    render(<RatingCard rating={baseRating} currentProfileId='profile-2' onToggleLike={vi.fn()} />);
+
+    expect(screen.queryByTitle('España')).not.toBeInTheDocument();
+    expect(screen.queryByText('Carlos Sainz')).not.toBeInTheDocument();
+  });
+
+  it('links the author avatar and name to their profile when a path is provided', () => {
+    render(
+      <MemoryRouter>
+        <RatingCard
+          rating={baseRating}
+          authorProfilePath='/ratings/community/profile/profile-1'
+          currentProfileId='profile-2'
+          onToggleLike={vi.fn()}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('link', { name: 'Ver el perfil de Fernando Alonso' })).toHaveAttribute(
+      'href',
+      '/ratings/community/profile/profile-1'
+    );
+    expect(screen.getByRole('link', { name: 'Fernando Alonso' })).toHaveAttribute(
+      'href',
+      '/ratings/community/profile/profile-1'
+    );
   });
 });
