@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - '**'
   pull_request:
-    branches: [main]
 
 jobs:
   # ─── Backend checks ──────────────────────────────────────
@@ -25,10 +25,15 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r ../../requirements.txt
+      - name: Install test dependencies
+        run: pip install pytest httpx
+
+      - name: Run backend tests
+        run: python -m pytest -q
 
       - name: Check syntax (compile all .py files)
         run: python -m compileall -q .
-      
+
       - name: Verify all imports resolve
         run: |
           python -c "
@@ -96,6 +101,8 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+      - name: Run frontend tests
+        run: npm test -- --run
 
       - name: Build
         run: npm run build
