@@ -199,7 +199,7 @@ export const GraphicsDashboard = () => {
                                     <p className="text-slate-600 text-sm italic">
                                         {savedParams['Análisis de ritmo (Individual)'] 
                                             ? `Configuración lista para ${savedParams['Análisis de ritmo (Individual)'].driver}. Pulsa Generar.` 
-                                            : "Configura los parámetros para empezar."}
+                                            : "Configura los parámetros en el botón arriba a la derecha para empezar."}
                                     </p>
                                 )}
                             </GraphCard>

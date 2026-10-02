@@ -24,10 +24,9 @@ export function Ratings() {
             {/* Cabecera */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-zinc-800/80 pb-6 gap-4">
                 <div className="border-l-4 border-red-600 pl-4">
-                    <div className="flex items-center gap-3 mb-2">
-                        <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-300">
-                            Comunidad
-                        </span>
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full bg-red-600" />
+                        <span className="text-red-600 text-[10px] font-bold uppercase tracking-[0.3em]">Comunidad</span>
                     </div>
                     <h1 className="text-4xl font-black uppercase tracking-tighter text-white italic">
                         Haz tus <span className="text-red-600">valoraciones</span>

@@ -90,15 +90,14 @@ export default function Drivers() {
                 <div className="relative px-4 md:px-8 lg:px-12 py-8 md:py-10">
                     <div className="max-w-[1600px] mx-auto">
                         <div className="border-l-4 border-red-600 pl-4">
-                            <div className="flex items-center gap-3">
-                                <span className="px-3 text-red-600 text-sm font-bold uppercase tracking-[0.3em]">
-                                    Driver Hub
-                                </span>
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="w-2 h-2 rounded-full bg-red-600" />
+                                <span className="text-red-600 text-[12px] font-bold uppercase tracking-[0.3em]">Centro de pilotos</span>
                             </div>
-                            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white italic leading-none">
+                            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white italic leading-none">
                                 Elige tu <span className="text-red-600">piloto</span>
                             </h1>
-                            <p className="text-slate-400 text-base md:text-lg mt-4 font-medium max-w-2xl leading-relaxed">
+                            <p className="text-slate-400 text-base md:text-lg mt-4 font-medium max-w-xl leading-relaxed">
                                 Analiza el rendimiento en pista, visualiza datos históricos o compara frente a frente a dos corredores de la misma temporada.
                             </p>
                         </div>

@@ -6,8 +6,8 @@ import { fetchYearSchedule } from "@/service/apiService.ts";
 const PageHeader = () => (
     <div className="mb-10 border-l-4 border-red-600 pl-4">
         <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 rounded-full bg-amber-500" />
-            <span className="text-amber-500 text-[10px] font-bold uppercase tracking-[0.3em]">En desarrollo</span>
+            <div className="w-2 h-2 rounded-full bg-red-600" />
+            <span className="text-red-600 text-[10px] font-bold uppercase tracking-[0.3em]">Mapa 2D</span>
         </div>
         <h1 className="text-3xl font-black italic uppercase tracking-tighter text-white">
             Repeticiones de <span className="text-red-600">carreras</span>

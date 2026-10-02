@@ -1,8 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { deployReplayService, triggerDataIngestion, getReplayBounds } from '@/service/apiService.ts';
 import { TelemetryCharts } from './TelemetryCharts';
+import { ArrowRight, Clock3, Database, Gauge, Info, LoaderCircle, Pause, Play } from 'lucide-react';
+import { GenericCombobox } from '@/components/GenericComobobox';
 
 const lerp = (start, end, t) => start + (end - start) * t;
+const PLAYBACK_SPEED_OPTIONS = [
+    { label: '0.5× LENTA', value: '0.5' },
+    { label: '1× NORMAL', value: '1' },
+    { label: '2× RÁPIDA', value: '2' },
+    { label: '5× MUY RÁPIDA', value: '5' },
+];
+
+function formatRaceClock(elapsedSeconds) {
+    const centiseconds = Math.floor(Math.max(0, elapsedSeconds) * 100);
+    const hours = Math.floor(centiseconds / 360000);
+    const minutes = Math.floor((centiseconds % 360000) / 6000);
+    const seconds = Math.floor((centiseconds % 6000) / 100);
+    const hundredths = String(centiseconds % 100).padStart(2, '0');
+    const formattedSeconds = `${String(seconds).padStart(2, '0')}.${hundredths}`;
+
+    if (hours > 0) {
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${formattedSeconds}`;
+    }
+
+    return `${String(minutes).padStart(2, '0')}:${formattedSeconds}`;
+}
 
 export const RaceMap2D = ({ year, track }) => {
     const canvasRef = useRef(null);
@@ -23,6 +46,7 @@ export const RaceMap2D = ({ year, track }) => {
     const [playbackSpeed, setPlaybackSpeed] = useState(1);
     const [selectedDriver, setSelectedDriver] = useState('ALL');
     const [replayTime, setReplayTime] = useState(0); 
+    const [replayStartTime, setReplayStartTime] = useState(0);
     const [trackBounds, setTrackBounds] = useState(null);
     const [isUsingCachedData, setIsUsingCachedData] = useState(false);
 
@@ -30,6 +54,7 @@ export const RaceMap2D = ({ year, track }) => {
     const [isFetchingBackground, setIsFetchingBackground] = useState(false);
     const CHUNK_SIZE = 300; 
     const BUFFER_THRESHOLD = 70; 
+    const displayedRaceTime = formatRaceClock(replayTime - replayStartTime);
 
     const loadInitialData = async () => {
         setIsLoading(true);
@@ -76,6 +101,7 @@ export const RaceMap2D = ({ year, track }) => {
             }
 
             // Step 3: Synchronize playback clock to real START_TIME.
+            setReplayStartTime(START_TIME);
             setReplayTime(START_TIME);
             setLoadedUntil(END_TIME); 
         } catch (error) {
@@ -295,57 +321,74 @@ export const RaceMap2D = ({ year, track }) => {
 
     return (
         <div className="flex flex-col w-full gap-6 mt-8">
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-zinc-900/90 p-4 rounded-xl border border-zinc-800 shadow-lg backdrop-blur-md">
-                <div className="flex items-center gap-4">
-                    <button 
+            <div className="flex flex-col gap-4 rounded-2xl border border-zinc-800/80 bg-gradient-to-br from-zinc-900/95 to-zinc-950 p-4 shadow-xl backdrop-blur-md lg:flex-row lg:items-center lg:justify-between lg:p-5">
+                <div className="flex min-w-0 flex-wrap items-center gap-3">
+                    <button
+                        type="button"
                         onClick={loadInitialData}
                         disabled={isLoading}
-                        className="px-4 py-2 bg-zinc-800 text-white text-sm rounded-md hover:bg-zinc-700 font-bold transition-colors"
+                        className="inline-flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800/80 px-4 text-xs font-bold tracking-wide text-zinc-100 transition-colors hover:border-zinc-600 hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-wait disabled:opacity-60"
                     >
-                        {isLoading ? "CARGANDO..." : "1. CARGAR TELEMETRÍA"}
+                        {isLoading ? (
+                            <LoaderCircle className="size-4 animate-spin text-red-400" aria-hidden="true" />
+                        ) : (
+                            <Database className="size-4 text-zinc-400" aria-hidden="true" />
+                        )}
+                        {isLoading ? 'CARGANDO...' : 'CARGAR TELEMETRÍA'}
                     </button>
-                    {isUsingCachedData && telemetryData.length > 0 && (
-                        <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                            Datos en caché
-                        </span>
-                    )}
-                    <div className="h-6 w-px bg-zinc-700 mx-2"></div>
-                    <button 
+
+                    <button
+                        type="button"
                         onClick={() => setIsPlaying(!isPlaying)}
                         disabled={telemetryData.length === 0}
-                        className="px-6 py-2 bg-red-600 text-white font-bold rounded-md hover:bg-red-700 disabled:opacity-50 transition-colors w-32"
+                        className="inline-flex h-11 w-36 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-gradient-to-r from-red-600 to-red-700 px-4 text-xs font-black tracking-wider text-white shadow-lg shadow-red-950/40 transition-all hover:from-red-500 hover:to-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                        {isPlaying ? "⏸ PAUSA" : "▶️ PLAY"}
+                        {isPlaying ? (
+                            <Pause className="size-4 text-white" fill="currentColor" strokeWidth={2.5} aria-hidden="true" />
+                        ) : (
+                            <Play className="size-4 text-white" fill="currentColor" strokeWidth={2.5} aria-hidden="true" />
+                        )}
+                        {isPlaying ? 'PAUSAR' : 'REPRODUCIR'}
                     </button>
+                    <div className="flex basis-full items-center gap-2 text-[11px] text-zinc-500 sm:basis-auto">
+                        <Info className="size-4 shrink-0 text-red-400" aria-hidden="true" />
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span><strong className="text-zinc-300">1.</strong> Carga telemetría</span>
+                            <ArrowRight className="size-3.5 text-zinc-600" aria-hidden="true" />
+                            <span><strong className="text-zinc-300">2.</strong> Pulsa Play</span>
+                        </div>
+                    </div>
                     
                     {isFetchingBackground && (
-                        <span className="text-amber-500 text-[10px] font-bold uppercase tracking-widest animate-pulse flex items-center gap-2">
-                            <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                        <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-400">
+                            <span className="size-1.5 animate-pulse rounded-full bg-amber-400" />
                             Buffering...
                         </span>
                     )}
                 </div>
-
-                <div className="flex items-center gap-6">
-                    <div className="flex flex-col">
-                        <label className="text-[10px] text-zinc-500 font-bold tracking-widest mb-1">VELOCIDAD</label>
-                        <select 
-                            value={playbackSpeed}
-                            onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
-                            className="bg-zinc-950 text-white text-xs rounded border border-zinc-700 px-2 py-1 outline-none"
-                        >
-                            <option value={0.5}>0.5x</option>
-                            <option value={1}>1.0x NORMAL</option>
-                            <option value={2}>2.0x</option>
-                            <option value={5}>5.0x RÁPIDO</option>
-                        </select>
+                <div className="flex flex-wrap items-end gap-3 sm:gap-4">
+                    <div className="w-full max-w-[12rem] sm:w-44">
+                        <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                            <Gauge className="size-3.5 text-zinc-400" aria-hidden="true" />
+                            Velocidad de replay
+                        </label>
+                        <GenericCombobox
+                            options={PLAYBACK_SPEED_OPTIONS}
+                            value={String(playbackSpeed)}
+                            onChange={(value) => setPlaybackSpeed(Number(value))}
+                            placeholder="Velocidad"
+                            triggerBackgroundClassName="bg-zinc-950 hover:bg-zinc-900"
+                            popoverBackgroundClassName="bg-zinc-900"
+                        />
                     </div>
-                    <div className="text-right">
-                        <label className="text-[10px] text-zinc-500 font-bold tracking-widest block mb-1">RELOJ DE SESIÓN</label>
-                        <span className="text-red-500 font-mono text-xl font-bold">
-                            T+ {replayTime.toFixed(2)}s
-                        </span>
+
+                    <div className="flex min-w-[10.5rem] flex-1 items-center gap-3 rounded-xl border border-red-500/20 bg-zinc-950/70 px-3 py-2 sm:flex-none">
+                        <Clock3 className="size-5 shrink-0 text-red-400" aria-hidden="true" />
+                        <div className="min-w-0">
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">Tiempo de carrera</p>
+                            <p className="font-mono text-lg font-bold tabular-nums tracking-wide text-white">{displayedRaceTime}</p>
+                            <p className="text-[9px] text-zinc-600">Desde el inicio de la replay</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -353,9 +396,32 @@ export const RaceMap2D = ({ year, track }) => {
             <div className="flex flex-col lg:flex-row gap-6 h-[600px]">
                 <div className="flex-grow relative rounded-xl overflow-hidden bg-[#09090b] border border-zinc-800 shadow-2xl ring-1 ring-white/5">
                     <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-800/20 via-transparent to-transparent opacity-50"></div>
-                    <div className="absolute top-4 left-4 flex gap-2 pointer-events-none">
-                        <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        <span className="text-xs text-zinc-500 font-mono font-bold tracking-widest">LIVE TRACKING</span>
+                    <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2 rounded-full border border-zinc-700/70 bg-zinc-950/85 px-3 py-1.5 backdrop-blur">
+                        <span
+                            className={`size-2 rounded-full ${
+                                isLoading
+                                    ? 'animate-pulse bg-amber-400'
+                                    : telemetryData.length > 0
+                                        ? isPlaying
+                                            ? 'animate-pulse bg-red-400'
+                                            : 'bg-emerald-400'
+                                        : 'bg-zinc-600'
+                            }`}
+                        />
+                        <span className="font-mono text-[10px] font-bold tracking-widest text-zinc-300">
+                            {isLoading
+                                ? 'CARGANDO TELEMETRÍA'
+                                : telemetryData.length > 0
+                                    ? isPlaying
+                                        ? 'REPLAY EN CURSO'
+                                        : 'REPLAY LISTA'
+                                    : 'ESPERANDO TELEMETRÍA'}
+                        </span>
+                        {isUsingCachedData && telemetryData.length > 0 && (
+                            <span className="border-l border-zinc-700 pl-2 text-[9px] font-bold uppercase tracking-wider text-amber-400">
+                                Caché
+                            </span>
+                        )}
                     </div>
                     
                     <canvas 

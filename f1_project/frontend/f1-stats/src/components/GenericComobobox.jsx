@@ -16,7 +16,15 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
-export function GenericCombobox({ options = [], value, onChange, placeholder, disabled }) {
+export function GenericCombobox({
+    options = [],
+    value,
+    onChange,
+    placeholder,
+    disabled,
+    triggerBackgroundClassName = "bg-slate-950 hover:bg-slate-900",
+    popoverBackgroundClassName = "bg-slate-900",
+}) {
     const [open, setOpen] = useState(false)
     const listboxId = useId()
 
@@ -30,7 +38,8 @@ export function GenericCombobox({ options = [], value, onChange, placeholder, di
             aria-controls={listboxId}
             disabled={disabled}
             className={cn(
-                "w-full justify-between bg-slate-950 border-slate-700 text-white hover:bg-slate-900 hover:text-white",
+                "w-full justify-between border-slate-700 text-white hover:text-white",
+                triggerBackgroundClassName,
                 disabled && "opacity-50 cursor-not-allowed"
             )}
             >
@@ -40,8 +49,8 @@ export function GenericCombobox({ options = [], value, onChange, placeholder, di
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-(--radix-popover-trigger-width) p-0 bg-slate-900 border-slate-700">
-            <Command className="bg-slate-900 text-white">
+        <PopoverContent className={cn("w-(--radix-popover-trigger-width) p-0 border-slate-700", popoverBackgroundClassName)}>
+            <Command className={cn("text-white", popoverBackgroundClassName)}>
             <CommandInput placeholder={`Buscar...`} className="h-9 text-white" />
             <CommandList id={listboxId}>
                 <CommandEmpty>No se encontraron resultados.</CommandEmpty>

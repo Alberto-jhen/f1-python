@@ -16,8 +16,14 @@ export default function Landing() {
     const { nextRace } = useNextRace();
     const [countdown, setCountdown] = useState({ days: '--', hours: '--', mins: '--', secs: '--' });
     
-    // 2. NUEVO ESTADO PARA LA INFO DINÁMICA DEL CIRCUITO
     const [circuitVisuals, setCircuitVisuals] = useState(null);
+
+    const redirectRef = useRef(null);
+
+    const redirectToSection = () => {
+        redirectRef.current?.scrollIntoView({ behavior: 'smooth' }); 
+    }
+
 
     // Live countdown to the next race
     useEffect(() => {
@@ -42,14 +48,12 @@ export default function Landing() {
         return () => clearInterval(id);
     }, [nextRace]);
 
-    // 3. FETCH DE DATOS VISUALES AL DETECTAR LA PRÓXIMA CARRERA
     useEffect(() => {
         async function fetchVisuals() {
             if (nextRace?.round && nextRace?.date) {
                 const year = nextRace.date.getFullYear();
                 const round = nextRace.round;
                 
-                // Llamamos a la API de FastAPI que consulta a Supabase
                 const data = await getCircuitVisualInfo(year, round);
                 if (data) {
                     setCircuitVisuals(data);
@@ -59,7 +63,6 @@ export default function Landing() {
         fetchVisuals();
     }, [nextRace]);
 
-    // Las 11 escuderías de la parrilla 2026
     const teams = [
         { name: "Ferrari", drivers: "Leclerc - Hamilton", gradient: "from-red-600/20", border: "border-red-600", short: "FER", logo: "/logos/ferrari.png" },
         { name: "McLaren", drivers: "Norris - Piastri", gradient: "from-orange-500/20", border: "border-orange-500", short: "MCL", logo: "/logos/mclaren.svg" },
@@ -138,7 +141,9 @@ export default function Landing() {
                             Precision in every millisecond
                         </p>
                         
-                        <button className="group relative px-8 py-4 bg-transparent overflow-hidden rounded-none border border-zinc-700 hover:border-red-600 transition-colors duration-300">
+                        <button 
+                        onClick={redirectToSection}
+                        className="cursor-pointer group relative px-8 py-4 bg-transparent overflow-hidden rounded-none border border-zinc-700 hover:border-red-600 transition-colors duration-300">
                             <div className="absolute inset-0 w-0 bg-red-600 transition-all duration-[250ms] ease-out group-hover:w-full"></div>
                             <span className="relative text-white font-mono font-bold uppercase tracking-widest text-xs group-hover:text-black transition-colors duration-300 flex items-center gap-3">
                                 Entrar al Paddock <span className="text-lg leading-none group-hover:translate-x-1 transition-transform">→</span>
@@ -196,7 +201,9 @@ export default function Landing() {
             </div>
 
             {/* BENTO GRID HUB */}
-            <div className="bg-[#050505] pt-24 px-6 relative border-t border-zinc-900/50">
+            <div 
+            ref={redirectRef}
+            className="bg-[#050505] pt-24 px-6 relative border-t border-zinc-900/50">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/5 rounded-full blur-3xl pointer-events-none" />
                 
                 <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
