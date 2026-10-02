@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { IconBrandGoogle, IconInfoCircle } from "@tabler/icons-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
 export function SignupFormDemo({ onSubmit, mode = 'signup' }) {
   const isLogin = mode === 'login';
@@ -22,6 +23,7 @@ export function SignupFormDemo({ onSubmit, mode = 'signup' }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const inputClasses = (field) =>
     errors[field] ? "ring-1 ring-red-500" : ""; 
@@ -156,7 +158,27 @@ export function SignupFormDemo({ onSubmit, mode = 'signup' }) {
                 </TooltipContent>
               </Tooltip>
             </div>
-            <Input id="password" placeholder="••••••••" type="password" value={password} onChange={(e) => { setPassword(e.target.value); clearError('password'); }} className={inputClasses('password')} />
+            <div className="relative w-full">
+              <Input 
+                id="password" 
+                placeholder="••••••••" 
+                type={showPassword ? "text" : "password"} 
+                value={password} 
+                onChange={(e) => { setPassword(e.target.value); clearError('password'); }} 
+                className={cn(inputClasses('password'), "pr-10")} 
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)} //
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+              >
+                {showPassword ? (
+                  <EyeOffIcon className="w-5 h-5"/>
+                ) : (
+                  <EyeIcon className="w-5 h-5"/>
+                )}
+              </button>
+            </div>
           </LabelInputContainer>
           {!isLogin && (
             <LabelInputContainer>
