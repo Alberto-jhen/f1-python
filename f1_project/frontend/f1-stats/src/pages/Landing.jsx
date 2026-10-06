@@ -131,14 +131,14 @@ export default function Landing() {
                     >
                         <div className="flex items-center gap-3 mb-6">
                             <span className="h-[1px] w-12 bg-red-600"></span>
-                            <span className="text-red-500 text-xs font-mono tracking-[0.3em] uppercase font-bold">Telemetry Engine</span>
+                            <span className="text-red-500 text-xs font-mono tracking-[0.3em] uppercase font-bold">Motor de telemetría</span>
                             <span className="h-[1px] w-12 bg-red-600"></span>
                         </div>
                         <h1 className="text-7xl md:text-[9rem] font-black italic tracking-tighter mb-2 text-white leading-none">
                             F1<span className="text-red-600 drop-shadow-[0_0_30px_rgba(220,38,38,0.4)]">INSIGHTS</span>
                         </h1>
                         <p className="text-sm md:text-lg uppercase tracking-[0.6em] font-light text-zinc-400 mb-12">
-                            Precision in every millisecond
+                            Precisión en cada milisegundo
                         </p>
                         
                         <button 

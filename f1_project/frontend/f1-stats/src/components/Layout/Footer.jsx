@@ -1,17 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter, faInstagram, faYoutube, faGithub, faLinkedin } from '@fortawesome/free-brands-svg-icons';
 import { Link } from 'react-router-dom';
 
 export const Footer = () => {
-    // Estado para controlar la visibilidad del modal legal
     const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+    const modalRef = useRef(null);
+
+    useEffect(() => {
+        if (isLegalModalOpen && modalRef.current) {
+            modalRef.current.focus({ preventScroll: true });
+        }
+    }, [isLegalModalOpen]);
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Escape') {
+            setIsLegalModalOpen(false);
+        }
+    }
 
     const socialLinks = [
-        { icon: faTwitter, url: "https://twitter.com/tu_usuario" },
-        { icon: faInstagram, url: "https://instagram.com/tu_usuario" },
-        { icon: faYoutube, url: "https://youtube.com/@tu_canal" },
-        { icon: faGithub, url: "https://github.com/tu_usuario" },
+        { icon: faTwitter, url: "https://x.com/alberto_jhen" },
+        { icon: faInstagram, url: "https://www.instagram.com/alberto_0560/" },
+        { icon: faYoutube, url: "https://www.youtube.com/@Formula1" },
+        { icon: faGithub, url: "https://github.com/Alberto-jhen/f1-python" },
         { icon: faLinkedin, url: "https://www.linkedin.com/in/alberto-mor%C3%A1n-reina-489150337/" }
     ];
 
@@ -20,7 +32,6 @@ export const Footer = () => {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
                     
-                    {/* Brand Section */}
                     <div className="lg:col-span-1">
                         <h3 className="text-white text-2xl font-black italic tracking-tighter mb-4">
                             F1<span className="text-red-600">INSIGHTS</span>
@@ -31,12 +42,10 @@ export const Footer = () => {
                         </p>
                     </div>                    
 
-                    {/* Legal Section */}
                     <div>
                         <h4 className="text-white font-bold uppercase text-xs tracking-widest mb-6">Legal</h4>
                         <ul className="space-y-4 text-sm flex flex-col items-start">
                             <li><a href="#" className="hover:text-cyan-400 transition-colors">Privacidad</a></li>
-                            {/* Cambiamos el enlace estático por un botón que abre el modal */}
                             <li>
                                 <button 
                                     onClick={() => setIsLegalModalOpen(true)}
@@ -49,7 +58,6 @@ export const Footer = () => {
                         </ul>
                     </div>
 
-                    {/* Soporte Section */}
                     <div>
                         <h4 className="text-white font-bold uppercase text-xs tracking-widest mb-6">Soporte</h4>
                         <ul className="space-y-4 text-sm">
@@ -59,7 +67,6 @@ export const Footer = () => {
                         </ul>
                     </div>
 
-                    {/* Sobre mí Section */}
                     <div className="lg:col-span-1">
                         <h4 className="text-white font-bold uppercase text-xs tracking-widest mb-6">Sobre mí</h4>
                         <ul className="space-y-4 text-sm">
@@ -67,7 +74,6 @@ export const Footer = () => {
                         </ul>
                     </div>
 
-                    {/* Social Section */}
                     <div className="flex flex-col items-start lg:items-end">
                         <h4 className="text-white font-bold uppercase text-xs tracking-widest mb-6">Social</h4>
                         <div className="flex flex-wrap gap-4">
@@ -92,12 +98,15 @@ export const Footer = () => {
                 </div>
             </div>
 
-            {/* MODAL LEGAL */}
+            {/* LEGAL MODAL */}
             {isLegalModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                <div 
+                tabIndex={-1}
+                ref={modalRef}
+                onKeyDown={handleKeyDown}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="bg-[#09090b] border border-slate-800 text-slate-300 rounded-lg shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
                         
-                        {/* Header del Modal */}
                         <div className="flex justify-between items-center p-6 border-b border-slate-800">
                             <h2 className="text-xl font-black italic tracking-tight text-white uppercase">Aviso Legal y <span className="text-red-600">Licencias</span></h2>
                             <button 
@@ -108,7 +117,6 @@ export const Footer = () => {
                             </button>
                         </div>
 
-                        {/* Contenido Scrolleable */}
                         <div className="p-6 overflow-y-auto space-y-8 text-sm">
                             <section>
                                 <h3 className="text-sm font-bold tracking-widest uppercase text-white mb-3">Proyecto Académico</h3>
@@ -146,7 +154,7 @@ export const Footer = () => {
                         <div className="p-6 border-t border-slate-800 flex justify-end">
                             <button 
                                 onClick={() => setIsLegalModalOpen(false)}
-                                className="bg-white hover:bg-cyan-400 text-slate-950 font-bold px-6 py-2 rounded transition-colors uppercase tracking-widest text-xs"
+                                className="cursor-pointer bg-white hover:bg-cyan-400 text-slate-950 font-bold px-6 py-2 rounded transition-colors uppercase tracking-widest text-xs"
                             >
                                 Entendido
                             </button>

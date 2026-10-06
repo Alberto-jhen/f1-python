@@ -74,13 +74,13 @@ export const Header = ({ variant = "solid" }) => {
                             to='/register'
                             className='text-zinc-400 text-xs font-semibold uppercase tracking-widest hover:text-white transition-colors duration-300 px-3 py-2 border border-zinc-700 rounded-md hover:border-zinc-500 hover:bg-zinc-800/50'
                         >
-                            Register
+                            Registrarse
                         </Link>
                         <Link
                             to='/login'
                             className='text-zinc-400 text-xs font-semibold uppercase tracking-widest hover:text-white transition-colors duration-300 px-3 py-2 border border-zinc-700 rounded-md hover:border-zinc-500 hover:bg-zinc-800/50'
                         >
-                            Log in
+                            Acceder
                         </Link>
                     </>
                 )}

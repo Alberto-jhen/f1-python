@@ -1,40 +1,45 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
-export const Links = ( {user} ) => {
-    const linkStyle = "text-zinc-400 text-xs font-medium uppercase tracking-widest hover:text-white transition-colors duration-300 py-2";
+export const Links = ({ user }) => {
+    const linkStyle = ({ isActive }) =>
+        `relative inline-flex items-center px-2 py-2 text-xs uppercase tracking-widest hover:scale-102 transition-transform duration-300 transition-colors duration-300 border-b ${
+            isActive
+                ? 'font-semibold border-zinc-500 text-zinc-200'
+                : 'font-medium border-transparent text-zinc-400 hover:text-white'
+        }`;
     
     return (
-        <ul className="flex flex-row gap-8 items-center">
+        <ul className="flex flex-row gap-1 items-center lg:gap-2">
             <li>
-                <Link to="/graphics" className={linkStyle}>
+                <NavLink to="/graphics" className={linkStyle}>
                     Gráficas
-                </Link>
+                </NavLink>
             </li>
             <li>
-                <Link to="/drivers" className={linkStyle}>
+                <NavLink to="/drivers" className={linkStyle}>
                     Pilotos
-                </Link>
+                </NavLink>
             </li>
             <li>
-                <Link to="/replays" className={linkStyle}>
+                <NavLink to="/replays" className={linkStyle}>
                     Repeticiones
-                </Link>
+                </NavLink>
             </li>
             <li>
-                <Link to="/leaderboard" className={linkStyle}>
+                <NavLink to="/leaderboard" className={linkStyle}>
                     Clasificación
-                </Link>
+                </NavLink>
             </li>
             <li>
-                <Link to="/degradation-test" className={linkStyle}>
+                <NavLink to="/degradation-test" className={linkStyle}>
                     Degradación
-                </Link>
+                </NavLink>
             </li>
             { user && (
                 <li>
-                    <Link to="/ratings" className={linkStyle}>
+                    <NavLink to="/ratings" className={linkStyle}>
                         Valoraciones
-                    </Link>
+                    </NavLink>
                 </li>
             )}
             

@@ -1,9 +1,10 @@
 import {
   BadgeCheckIcon,
   LogOutIcon,
-  UserStarIcon
+  UserRound,
+  UserStarIcon,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,7 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/lib/supabase.js';
-import { Link } from 'react-router-dom';
+const DEFAULT_AVATAR_URL = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
 export function DropdownMenuAvatar({ avatar, profileId }) {
   // La URL guardada en BD ya incluye el parámetro de versión (?v=...) desde la subida,
@@ -27,8 +28,15 @@ export function DropdownMenuAvatar({ avatar, profileId }) {
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='size-12 rounded-full cursor-pointer'>
           <Avatar size='lg' className='size-11'>
-            <AvatarImage src={avatar} alt='avatar' fetchPriority='high' loading='eager' />
-            <AvatarFallback delayMs={200}>LR</AvatarFallback>
+            <AvatarImage
+              src={avatar || DEFAULT_AVATAR_URL}
+              alt='Avatar de perfil'
+              fetchPriority='high'
+              loading='eager'
+            />
+            <AvatarFallback delayMs={200}>
+              <UserRound className='size-5' aria-hidden='true' />
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

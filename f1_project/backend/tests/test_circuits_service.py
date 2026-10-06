@@ -7,6 +7,7 @@ def test_circuit_info_from_race_with_circuit_id_relation():
     """The Supabase FK join returns circuit data under the 'circuit_id' key."""
     service = CircuitsService()
     race_data = {
+        "id": 99,
         "season_year": 2025,
         "round": 1,
         "race_date": "2025-03-16",

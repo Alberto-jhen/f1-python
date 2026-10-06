@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
 import { ParametersFilter } from '../components/ParametersFilter.jsx';
 import { ScatterPlotLaps } from '../components/graphics/ScatterPlotLaps.jsx';
 import { ViolinPlotLaps } from '../components/graphics/ViolinLapDistribution.jsx';
@@ -10,41 +11,36 @@ import { fetchDriverLaps, fetchDriverLapsImage,
 import { ImagePreview } from '../components/ImagePreview.jsx'
 import { SeasonPointsHeatmap } from '../components/graphics/SeasonPointsHeatmap.jsx';
 
-const GraphCard = ({ title, children, onSettingsClick, onGenerate, onExportPython, hasParams, loading }) => {
+const GraphCard = ({ title, children, onSettingsClick, onExportPython, hasParams, isSettingsOpen, loading }) => {
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-red-600/40 transition-all duration-300 group shadow-lg relative">
             <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
                 <h4 className="text-white font-bold uppercase text-xs tracking-widest">{title}</h4>
                 <div className="flex gap-2">
                     {hasParams && (
-                        <>
-                            <button 
-                                onClick={onExportPython}
-                                disabled={loading}
-                                className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition-all cursor-pointer border border-transparent hover:border-blue-500/30"
-                                title="Previsualizar Reporte Oficial (Python)"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </button>
-
-                            <button 
-                                onClick={onGenerate}
-                                disabled={loading}
-                                className="px-3 py-1 bg-red-600 text-white text-[10px] font-bold uppercase rounded hover:bg-red-700 disabled:opacity-50 cursor-pointer transition-colors shadow-sm min-w-25"
-                            >
-                                {loading ? '...' : 'Generar gráfico'}
-                            </button>
-                        </>
+                        <button
+                            type="button"
+                            onClick={onExportPython}
+                            disabled={loading}
+                            aria-label={`Previsualizar reporte Python de ${title}`}
+                            className="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-800 rounded-lg transition-all cursor-pointer border border-transparent hover:border-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Previsualizar reporte oficial en Python"
+                        >
+                            <svg className="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </button>
                     )}
-                    <button 
+                    <button
+                        type="button"
                         onClick={onSettingsClick}
-                        className="p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-lg transition-all cursor-pointer"
+                        aria-label={`Configurar parámetros de ${title}`}
+                        aria-haspopup="dialog"
+                        aria-expanded={isSettingsOpen}
+                        className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-slate-200 transition-colors hover:border-slate-400 hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer"
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m0-10a2 2 0 100-4m0 4a2 2 0 110-4m0 4V4" />
-                        </svg>
+                        <SlidersHorizontal className="size-4" aria-hidden="true" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">Configurar</span>
                     </button>
                 </div>
             </div>
@@ -66,15 +62,15 @@ export const GraphicsDashboard = () => {
     const [imageShown, setImageShown] = useState(false);
     const [previewTitle, setPreviewTitle] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalConfig, setModalConfig] = useState({ title: '', params: [] });
+    const [modalConfig, setModalConfig] = useState({ title: '', params: [], fetchFn: null });
     const [savedParams, setSavedParams] = useState({});
     const [tempParams, setTempParams] = useState({});
     
     const [graphsData, setGraphsData] = useState({}); 
     const [loading, setLoading] = useState(null);
 
-    const openFilters = (graphName, paramsList) => {
-        setModalConfig({ title: graphName, params: paramsList });
+    const openFilters = (graphName, paramsList, fetchFn) => {
+        setModalConfig({ title: graphName, params: paramsList, fetchFn });
         setTempParams(savedParams[graphName] || {}); 
         setIsModalOpen(true);
     };
@@ -86,15 +82,11 @@ export const GraphicsDashboard = () => {
         setPreviewTitle('');
     };
 
-    const handleSaveConfig = () => {
-        setSavedParams(prev => ({ ...prev, [modalConfig.title]: tempParams }));
-        setIsModalOpen(false);
-    };
-
-    const generateGraph = async (fetchFn, graphName) => {
-        const params = savedParams[graphName];
-        if (!params) return;
+    const generateGraph = async (fetchFn, graphName, paramsOverride) => {
+        const params = paramsOverride || savedParams[graphName];
+        if (!fetchFn || !params) return;
         setLoading(graphName); 
+        setGraphsData(prev => ({ ...prev, [graphName]: null }));
         
         try {
             const { year, track, session, driver, num_drivers } = params;
@@ -114,6 +106,28 @@ export const GraphicsDashboard = () => {
         } finally {
             setLoading(null);
         }
+    };
+
+    const handleSaveConfig = async () => {
+        const { title, params: requiredParams, fetchFn } = modalConfig;
+        const params = { ...tempParams };
+        const hasRequiredParams = requiredParams.every((param) => {
+            const value = params[param];
+            if (param === 'num_drivers') return Number.isInteger(value) && value >= 1 && value <= 20;
+            return value !== undefined && value !== null && value !== '';
+        });
+
+        if (!hasRequiredParams) return;
+
+        setSavedParams(prev => ({ ...prev, [title]: params }));
+        setIsModalOpen(false);
+        await generateGraph(fetchFn, title, params);
+    };
+
+    const getGraphPlaceholder = (graphName, initialMessage) => {
+        if (loading === graphName) return 'Generando gráfico…';
+        if (savedParams[graphName]) return 'Abre «Configurar» y confirma los parámetros para volver a generar este gráfico.';
+        return initialMessage;
     };
 
     const handleExportPython = async (fetchFn, graphName) => {
@@ -187,38 +201,34 @@ export const GraphicsDashboard = () => {
                         <div className="grid grid-cols-1 gap-8">
                             <GraphCard 
                                 title="Análisis de ritmo (Individual)"
-                                onSettingsClick={() => openFilters('Análisis de ritmo (Individual)', ['year', 'track', 'session', 'driver'])}
-                                onGenerate={() => generateGraph(fetchDriverLaps, 'Análisis de ritmo (Individual)')} 
+                                onSettingsClick={() => openFilters('Análisis de ritmo (Individual)', ['year', 'track', 'session', 'driver'], fetchDriverLaps)}
                                 onExportPython = {() => handleExportPython(fetchDriverLapsImage, 'Análisis de ritmo (Individual)')}
                                 hasParams={!!savedParams['Análisis de ritmo (Individual)']}
+                                isSettingsOpen={isModalOpen && modalConfig.title === 'Análisis de ritmo (Individual)'}
                                 loading={loading === 'Análisis de ritmo (Individual)'}
                             >
                                 {graphsData['Análisis de ritmo (Individual)'] ? (
                                     <ScatterPlotLaps data={graphsData['Análisis de ritmo (Individual)']} driverId={savedParams['Análisis de ritmo (Individual)'].driver} />
                                 ) : (
-                                    <p className="text-slate-600 text-sm italic">
-                                        {savedParams['Análisis de ritmo (Individual)'] 
-                                            ? `Configuración lista para ${savedParams['Análisis de ritmo (Individual)'].driver}. Pulsa Generar.` 
-                                            : "Configura los parámetros en el botón arriba a la derecha para empezar."}
+                                    <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
+                                        {getGraphPlaceholder('Análisis de ritmo (Individual)', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
                                     </p>
                                 )}
                             </GraphCard>
 
                             <GraphCard
                                 title="Distribución de tiempos por vuelta"
-                                onSettingsClick={() => openFilters('Distribución de tiempos por vuelta', ['year', 'track', 'session', 'num_drivers'])}
-                                onGenerate={() => generateGraph(fetchDriversLapsViolin, 'Distribución de tiempos por vuelta')}
+                                onSettingsClick={() => openFilters('Distribución de tiempos por vuelta', ['year', 'track', 'session', 'num_drivers'], fetchDriversLapsViolin)}
                                 onExportPython={() => handleExportPython(fetchDriversLapsViolinImage, 'Distribución de tiempos por vuelta')}
                                 hasParams={!!savedParams['Distribución de tiempos por vuelta']}
+                                isSettingsOpen={isModalOpen && modalConfig.title === 'Distribución de tiempos por vuelta'}
                                 loading={loading === 'Distribución de tiempos por vuelta'}
                             >
                                 {graphsData['Distribución de tiempos por vuelta'] ? (
                                     <ViolinPlotLaps data={graphsData['Distribución de tiempos por vuelta']} />
                                 ) : (
-                                    <p className="text-slate-600 text-sm italic">
-                                        {savedParams['Distribución de tiempos por vuelta'] 
-                                            ? "Configuración lista. Pulsa Generar." 
-                                            : "Configura los parámetros para empezar."}
+                                    <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
+                                        {getGraphPlaceholder('Distribución de tiempos por vuelta', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
                                     </p>
                                 )}
                             </GraphCard>
@@ -227,37 +237,33 @@ export const GraphicsDashboard = () => {
                         <div className="grid grid-cols-1 gap-8">
                             <GraphCard 
                                 title="Resultados de clasificación"
-                                onSettingsClick={() => openFilters('Resultados de clasificación', ['year', 'track'])}
-                                onGenerate={() => generateGraph(fetchQualyOverviewData, 'Resultados de clasificación')} 
+                                onSettingsClick={() => openFilters('Resultados de clasificación', ['year', 'track'], fetchQualyOverviewData)}
                                 onExportPython={() => handleExportPython(fetchQualyOverviewImage, 'Resultados de clasificación')}
                                 hasParams={!!savedParams['Resultados de clasificación']}
+                                isSettingsOpen={isModalOpen && modalConfig.title === 'Resultados de clasificación'}
                                 loading={loading === 'Resultados de clasificación'}
                             >
                                 {graphsData['Resultados de clasificación'] ? (
                                     <QualyOverview data={graphsData['Resultados de clasificación']} />
                                 ) : (
-                                    <p className="text-slate-600 text-sm italic">
-                                        {savedParams['Resultados de clasificación'] 
-                                            ? "Configuración lista. Pulsa Generar." 
-                                            : "Configura los parámetros (Año y Circuito) para empezar."}
+                                    <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
+                                        {getGraphPlaceholder('Resultados de clasificación', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
                                     </p>
                                 )}
                             </GraphCard>
                             <GraphCard
                                 title="Mapa de calor de puntos"
-                                onSettingsClick={() => openFilters('Mapa de calor de puntos', ['year'])}
-                                onGenerate={() => generateGraph(fetchSeasonHeatmapData, 'Mapa de calor de puntos')}
+                                onSettingsClick={() => openFilters('Mapa de calor de puntos', ['year'], fetchSeasonHeatmapData)}
                                 onExportPython={() => handleExportPython(fetchSeasonHeatmapImage, 'Mapa de calor de puntos')}
                                 hasParams={!!savedParams['Mapa de calor de puntos']}
+                                isSettingsOpen={isModalOpen && modalConfig.title === 'Mapa de calor de puntos'}
                                 loading={loading === 'Mapa de calor de puntos'}
                             >
                                 {graphsData['Mapa de calor de puntos'] ? (
                                     <SeasonPointsHeatmap data={graphsData['Mapa de calor de puntos']} />
                                 ) : (
-                                    <p className="text-slate-600 text-sm italic">
-                                        {savedParams['Mapa de calor de puntos']
-                                            ? "Configuración lista. Pulsa Generar."
-                                            : "Configura el parámetro (Año) para empezar."}
+                                    <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
+                                        {getGraphPlaceholder('Mapa de calor de puntos', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
                                     </p>
                                 )}
                             </GraphCard>
