@@ -1,7 +1,8 @@
 import { RatingSelection } from "../components/ratings/RatingSelection";
 import { CustomCard } from "../components/custom/CustomCard";
 import { useState } from "react";
-import { X, Users, Flag } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Eye, X, Users, Flag } from "lucide-react";
 
 export function Ratings() {
     const [raceSelection, setRaceSelection] = useState(null);
@@ -36,15 +37,25 @@ export function Ratings() {
                     </p>
                 </div>
 
-                {/* Botón dinámico para volver */}
-                {isAnySelected && (
-                    <button 
-                        onClick={handleBack}
-                        className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all bg-zinc-900/40 px-4 py-2 rounded-lg border border-zinc-800 hover:border-red-900/50 hover:bg-red-950/20"
+                <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                        to="/ratings/community"
+                        aria-label="Ver valoraciones de la comunidad"
+                        className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-300 hover:text-white transition-all bg-zinc-900/60 px-4 py-2.5 rounded-lg border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800"
                     >
-                        <X className="size-4 group-hover:rotate-90 transition-transform duration-300" /> Cambiar selección
-                    </button>
-                )}
+                        <Eye className="size-4" aria-hidden="true" />
+                        Ver valoraciones
+                    </Link>
+                    {isAnySelected && (
+                        <button
+                            type="button"
+                            onClick={handleBack}
+                            className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all bg-zinc-900/40 px-4 py-2 rounded-lg border border-zinc-800 hover:border-red-900/50 hover:bg-red-950/20"
+                        >
+                            <X className="size-4 group-hover:rotate-90 transition-transform duration-300" /> Cambiar selección
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 transition-all duration-500 origin-top ${isAnySelected ? 'mb-2' : 'mt-4'}`}>

@@ -74,6 +74,54 @@ export const uploadAvatarToSupabase = async (file, userId) => {
     }
 };
 
+export const getProfileHeaderImageUrl = (userId) => {
+    if (!userId) return null;
+
+    const filePath = `${userId}/header.png`;
+    const { data } = supabase.storage
+        .from('profile_header_images')
+        .getPublicUrl(filePath);
+
+    return getCacheBusterUrl(data?.publicUrl);
+};
+
+export const uploadProfileHeaderImageToSupabase = async (file, userId) => {
+    try {
+        if (!file || !userId) throw new Error('Se necesita una imagen y un usuario.');
+
+        const filePath = `${userId}/header.png`;
+        const { error: uploadError } = await supabase.storage
+            .from('profile_header_images')
+            .upload(filePath, file, {
+                upsert: true,
+                contentType: file.type || 'image/png',
+            });
+
+        if (uploadError) throw uploadError;
+
+        return getProfileHeaderImageUrl(userId);
+    } catch (error) {
+        console.error('[uploadProfileHeaderImageToSupabase] Error:', error);
+        return null;
+    }
+};
+
+export const deleteProfileHeaderImageFromSupabase = async (userId) => {
+    try {
+        if (!userId) throw new Error('Se necesita un usuario para eliminar la cabecera.');
+
+        const { error: deleteError } = await supabase.storage
+            .from('profile_header_images')
+            .remove([`${userId}/header.png`]);
+
+        if (deleteError) throw deleteError;
+
+        return true;
+    } catch (error) {
+        console.error('[deleteProfileHeaderImageFromSupabase] Error:', error);
+        return false;
+    }
+};
 export const uploadFavoritesToSupabase = async (favorites, userId) => {
     try {
         const { error: updateError } = await supabase

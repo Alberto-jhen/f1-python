@@ -4,7 +4,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { getCroppedImg } from '@/service/cropImage';
 
-export function ImageCropModal({ image, open, onClose, onConfirm }) {
+export function ImageCropModal({
+  image,
+  open,
+  onClose,
+  onConfirm,
+  aspect = 1,
+  title = 'Ajustar foto de perfil',
+}) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
@@ -32,14 +39,14 @@ export function ImageCropModal({ image, open, onClose, onConfirm }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className='sm:max-w-md bg-zinc-950 border-zinc-800 text-white'>
         <DialogHeader>
-          <DialogTitle className='text-white'>Ajustar foto de perfil</DialogTitle>
+          <DialogTitle className='text-white'>{title}</DialogTitle>
         </DialogHeader>
         <div className='relative w-full h-64 rounded-lg overflow-hidden bg-zinc-900'>
           <Cropper
             image={image}
             crop={crop}
             zoom={zoom}
-            aspect={1}
+            aspect={aspect}
             onCropChange={setCrop}
             onCropComplete={onCropComplete}
             onZoomChange={setZoom}

@@ -85,6 +85,12 @@ export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputC
     if (!config || !config.params) {
         return null; 
     }
+
+    const isFormValid = config.params.length > 0 && config.params.every((param) => {
+        const value = tempParams[param];
+        if (param === 'num_drivers') return Number.isInteger(value) && value >= 1 && value <= 20;
+        return value !== undefined && value !== null && value !== '';
+    });
     
     const placeholders = {
         driver: 'Verstappen, Hamilton, Alonso...',
@@ -96,8 +102,13 @@ export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputC
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-                <h3 className="text-white text-xl font-bold uppercase mb-6 tracking-tight">
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="parameters-filter-title"
+                className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-200"
+            >
+                <h3 id="parameters-filter-title" className="text-white text-xl font-bold uppercase mb-6 tracking-tight">
                     Configurar <span className="text-red-600">{config.title}</span>
                 </h3>
                 
@@ -149,16 +160,24 @@ export const ParametersFilter = ({ isOpen, onClose, config, tempParams, onInputC
                     ))}
                 </div>
 
-                <div className="mt-8 flex gap-3">
+                <p id="parameters-filter-help" className="mt-6 text-xs leading-relaxed text-slate-300">
+                    Completa los parámetros requeridos. El gráfico se generará automáticamente al confirmar.
+                </p>
+
+                <div className="mt-4 flex gap-3">
                     <button 
+                        type="button"
                         onClick={onClose} 
                         className="flex-1 px-4 py-3 rounded-lg bg-slate-800 text-white font-bold uppercase text-[10px] tracking-widest cursor-pointer hover:bg-slate-700 transition-colors"
                     >
                         Cancelar
                     </button>
                     <button 
+                        type="button"
                         onClick={onSave}
-                        className="flex-1 px-4 py-3 rounded-lg bg-red-600 text-white font-bold uppercase text-[10px] tracking-widest cursor-pointer hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20"
+                        disabled={!isFormValid}
+                        aria-describedby="parameters-filter-help"
+                        className="flex-1 px-4 py-3 rounded-lg bg-red-600 text-white font-bold uppercase text-[10px] tracking-widest cursor-pointer hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-red-900/20"
                     >
                         Confirmar
                     </button>
