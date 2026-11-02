@@ -3,12 +3,12 @@
     "Lewis Hamilton": {
       "titulos": 7,
       "victorias": 105,
-      "podios": 204
+      "podios": 205
     },
     "Max Verstappen": {
       "titulos": 4,
-      "victorias": 74,
-      "podios": 134
+      "victorias": 75,
+      "podios": 135
     },
     "Sebastian Vettel": {
       "titulos": 4,
@@ -223,9 +223,14 @@
     "Andrea Kimi Antonelli": {
       "titulos": 0,
       "victorias": 5,
-      "podios": 15
+      "podios": 16
     },
     "Arvid Lindblad": {
+      "titulos": 0,
+      "victorias": 0,
+      "podios": 0
+    },
+    "Ryo Hirakawa": {
       "titulos": 0,
       "victorias": 0,
       "podios": 0
