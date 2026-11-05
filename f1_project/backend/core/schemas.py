@@ -4,7 +4,7 @@ These models normalise every API response and auto-generate OpenAPI docs.
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional, Union
+from typing import Any, Optional, Union
 from uuid import UUID
 from datetime import datetime
 
@@ -153,6 +153,40 @@ class DegradationPoint(BaseModel):
 class DegradationPredictionResponse(BaseModel):
     real: list[DegradationPoint]
     predicted: list[DegradationPoint]
+
+class SeasonForecastStanding(BaseModel):
+    driver_id: str
+    driver: str
+    constructor: str
+    position: int
+    current_position: int
+    current_points: float
+    expected_final_points: float
+    p10_final_points: float
+    p90_final_points: float
+    championship_probability: float
+
+
+class SeasonForecastEvent(BaseModel):
+    round: int
+    event: str
+    circuit: str
+    circuit_id: str
+    date: str
+    sprint: bool
+    remaining_sessions: list[str]
+
+
+class SeasonForecastResponse(BaseModel):
+    year: int
+    as_of_round: int
+    fetched_at: str
+    standings_source: str
+    is_stale: bool
+    validation: dict[str, Any]
+    simulations: int
+    remaining_events: list[SeasonForecastEvent]
+    standings: list[SeasonForecastStanding]
 
 # ──────────────────────────────────────────────
 # Ratings

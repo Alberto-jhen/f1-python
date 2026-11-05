@@ -1,0 +1,58 @@
+name: Update Season Forecast Model
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Retrain and publish even if results have not changed"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: season-forecast-model
+  cancel-in-progress: false
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: f1_project/backend
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      FORCE_RETRAIN: ${{ inputs.force }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - uses: actions/cache@v4
+        with:
+          path: f1_project/backend/cache_fastf1/season_forecast/jolpica
+          key: ${{ runner.os }}-season-forecast-jolpica-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-season-forecast-jolpica-
+
+      - name: Install dependencies
+        run: pip install -r ../../requirements.txt
+
+      - name: Train and publish if Jolpica data changed
+        run: |
+          if [ "$FORCE_RETRAIN" = "true" ]; then
+            python scripts/train_season_forecast_model.py --publish --force
+          else
+            python scripts/train_season_forecast_model.py --publish
+          fi

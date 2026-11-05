@@ -12,7 +12,7 @@ from __future__ import annotations
 import fastf1
 import pandas as pd
 from fastapi import APIRouter, HTTPException
-from fastf1.core import InvalidSessionError, NoLapDataError
+from fastf1.core import DataNotLoadedError, InvalidSessionError, NoLapDataError
 
 import services.ml_service as ml_service
 from core.schemas import DegradationPredictionResponse
@@ -55,8 +55,19 @@ async def predict_degradation(year: int, track: str, driver: str) -> dict:
             status_code=500, detail=f"Error loading race session: {exc}"
         ) from exc
 
-    # 1. Retrieve all driver laps.
-    driver_laps = session.laps.pick_drivers(driver)
+    # 1. Retrieve all driver laps. FastF1 can log upstream fetch failures and
+    # return without raising from session.load(), so accessing laps may be the
+    # first place where missing session data becomes visible.
+    try:
+        driver_laps = session.laps.pick_drivers(driver)
+    except DataNotLoadedError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                f"FastF1 no ha podido cargar los datos de vueltas de {year} "
+                f"{track}. Inténtalo de nuevo más tarde."
+            ),
+        ) from exc
     if driver_laps.empty:
         raise HTTPException(
             status_code=404, detail=f"Driver {driver} not found in {year} {track}"

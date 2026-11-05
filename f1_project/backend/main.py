@@ -7,7 +7,6 @@ import os
 import core.config  # Activate cache.
 from api.router import router as api_router
 from database.database import get_supabase
-from fastapi.middleware.gzip import GZipMiddleware
 
 
 # Load env file.
@@ -18,17 +17,6 @@ app = FastAPI(
     title="F1 Analytics API",
     description="Backend para visualización de datos de F1",
     version="1.0.0"
-)
-
-app.add_middleware(GZipMiddleware, minimum_size=1000)
-
-# CORS must be added before other middleware so headers are always present.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
 app.add_middleware(GZipMiddleware, minimum_size=1000)
@@ -51,6 +39,14 @@ async def root():
         "message": "F1 Insights API funcionando correctamente", 
         "status": "ok"
     }
+# Wrap FastAPI so CORS headers are also added to unhandled 500 responses.
+app = CORSMiddleware(
+    app=app,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 if __name__ == "__main__":
     import uvicorn
