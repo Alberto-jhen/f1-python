@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import {
   HeartIcon,
@@ -15,7 +16,7 @@ import { RatingStats } from '@/components/profile/RatingStats';
 import { RatingItem } from '@/components/ratings/RatingItem';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserRatings } from '@/hooks/useRatings';
-import { getTeamLogo, getTeamColor } from '@/lib/teamLogos';
+import { getTeamLogo, getTeamColor } from '@/lib/teamLogos'; 
 
 function formatRatingDate(value) {
   if (!value) return '';
@@ -29,6 +30,7 @@ function formatRatingDate(value) {
 }
 
 export function Profile() {
+  const navigate = useNavigate();
   const { profile, setProfile, loading, user } = useProfile();
   const { ratings, loading: loadingRatings, error: ratingsError } = useUserRatings({
     currentProfileId: user?.id,
@@ -42,6 +44,11 @@ export function Profile() {
     setProfile((prev) => ({ ...prev, ...favorites }));
   };
 
+  useEffect(() => {
+    if (!user) {
+      navigate('/', { replace: true });
+    }
+  }, [navigate, user]);
 
   const favoriteDriver = profile?.favorite_driver || null;
   const favoriteTeam = profile?.favorite_team || null;

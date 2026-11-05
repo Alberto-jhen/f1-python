@@ -17,6 +17,7 @@ import { RatingsCommunity } from '@/pages/RatingsCommunity.jsx';
 import { CommunityUserProfile } from '@/pages/CommunityUserProfile.jsx';
 import { UserRatings } from '@/pages/UserRatings.jsx';
 import { UsernameSetupGate } from '@/components/auth/UsernameSetupGate';
+import NotFound from './pages/NotFound.jsx';
 
 function App() {
     return (
@@ -37,6 +38,7 @@ function App() {
             <Route path="/ratings/community" element={ <Layout> <RatingsCommunity /> </Layout> }/>
             <Route path="/ratings/community/profile/:profileId" element={ <Layout> <CommunityUserProfile /> </Layout> }/>
             <Route path="/profile/:profileId/ratings" element={ <Layout> <UserRatings /> </Layout> }/>
+            <Route path="*" element={<NotFound />} />
         </Routes>
         <UsernameSetupGate />
         <Toaster />

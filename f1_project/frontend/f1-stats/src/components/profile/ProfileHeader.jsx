@@ -157,7 +157,16 @@ export function ProfileHeader({ user, userId, editable, onProfileUpdated }) {
     }
   };
 
-  const handleHeaderImageError = () => {
+  const handleHeaderImageError = (event) => {
+    const currentSrc = event?.currentTarget?.currentSrc || event?.currentTarget?.src || headerImageUrl;
+    if (currentSrc?.includes('/header.webp')) {
+      const legacyImageUrl = getProfileHeaderImageUrl(userId, 'png');
+      if (legacyImageUrl) {
+        setHeaderImageUrl(legacyImageUrl);
+        setHeaderImageLoaded(false);
+        return;
+      }
+    }
     setHeaderImageUrl(null);
     setHeaderImageLoaded(false);
   };

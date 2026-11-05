@@ -1,6 +1,7 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import RaceTimeline from './RaceTimeline';
 import StandingsTable from './StandingsTable';
+import SeasonForecast from './SeasonForecast';
 
 const RACE_POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 const SPRINT_POINTS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -54,17 +55,91 @@ function DriverOrderList({ order, onMove, pointsTable }) {
     );
 }
 
+export default function PredictionMode({
+    year = new Date().getFullYear(),
+    currentStandings,
+    raceCalendar,
+    raceDates,
+    lastCompletedIndex,
+    sprintEvents,
+}) {
+    const [mode, setMode] = useState('manual');
+
+    return (
+        <div className="space-y-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                        Modo de predicción
+                    </p>
+                    <div
+                        className="inline-flex flex-wrap rounded-lg border border-zinc-800 bg-zinc-900 p-1"
+                        role="group"
+                        aria-label="Modo de predicción"
+                    >
+                        <button
+                            type="button"
+                            aria-pressed={mode === 'manual'}
+                            onClick={() => setMode('manual')}
+                            className={`rounded-md px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
+                                mode === 'manual'
+                                    ? 'bg-white text-black shadow-sm'
+                                    : 'bg-transparent text-zinc-500 hover:text-white'
+                            }`}
+                        >
+                            Predicción manual
+                        </button>
+                        <button
+                            type="button"
+                            aria-pressed={mode === 'forecast'}
+                            onClick={() => setMode('forecast')}
+                            className={`rounded-md px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
+                                mode === 'forecast'
+                                    ? 'bg-white text-black shadow-sm'
+                                    : 'bg-transparent text-zinc-500 hover:text-white'
+                            }`}
+                        >
+                            Proyección automática
+                        </button>
+                    </div>
+                    <p className="mt-2 max-w-2xl text-xs leading-relaxed text-zinc-400" aria-live="polite">
+                        {mode === 'manual'
+                            ? 'Ordena los pilotos como crees que acabarán en la próxima carrera; si hay sprint, puedes ajustar también ese resultado. La tabla suma esos puntos a la clasificación actual.'
+                            : 'Consulta una estimación de cómo podría terminar el campeonato según la clasificación actual, los resultados anteriores y las pruebas que quedan. Es orientativa, no un resultado seguro.'}
+                    </p>
+                </div>
+            </div>
+
+            {mode === 'forecast' ? (
+                <SeasonForecast year={year} />
+            ) : (
+                <ManualPredictionMode
+                    currentStandings={currentStandings}
+                    raceCalendar={raceCalendar}
+                    raceDates={raceDates}
+                    lastCompletedIndex={lastCompletedIndex}
+                    sprintEvents={sprintEvents}
+                />
+            )}
+        </div>
+    );
+}
+
 /**
  * Props:
  * - currentStandings: [{ position, driver, constructor, points }] (real standings)
  * - raceCalendar, raceDates, lastCompletedIndex: for timeline
  * - sprintEvents: Set<string> (event names that have sprint)
  */
-export default function PredictionMode({ currentStandings, raceCalendar, raceDates, lastCompletedIndex, sprintEvents = new Set() }) {
+function ManualPredictionMode({ currentStandings, raceCalendar, raceDates, lastCompletedIndex, sprintEvents = new Set() }) {
     const firstFutureIndex = lastCompletedIndex + 1;
     const [selectedRace, setSelectedRace] = useState(
         firstFutureIndex < raceCalendar.length ? firstFutureIndex : -1
     );
+    useEffect(() => {
+        const nextRace = firstFutureIndex < raceCalendar.length ? firstFutureIndex : -1;
+        setSelectedRace((currentRace) => currentRace === nextRace ? currentRace : nextRace);
+    }, [firstFutureIndex, raceCalendar.length]);
 
     const isSprint = selectedRace >= 0 && sprintEvents.has(raceCalendar[selectedRace]?.value);
 
@@ -75,6 +150,11 @@ export default function PredictionMode({ currentStandings, raceCalendar, raceDat
 
     const [raceOrder, setRaceOrder] = useState(initOrder);
     const [sprintOrder, setSprintOrder] = useState(initOrder);
+    useEffect(() => {
+        const freshOrder = currentStandings.map(s => ({ driver: s.driver, constructor: s.constructor }));
+        setRaceOrder(freshOrder);
+        setSprintOrder([...freshOrder]);
+    }, [currentStandings]);
 
     const makeMover = useCallback((setter, length) => (index, direction) => {
         const newIndex = index + direction;

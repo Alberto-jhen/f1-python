@@ -306,6 +306,7 @@ export default function LeaderBoard() {
             {/* Predicción tab */}
             {activeTab === 'prediccion' && (
                 <PredictionMode
+                    year={CURRENT_YEAR}
                     currentStandings={standings}
                     raceCalendar={raceCalendar}
                     raceDates={raceDates}

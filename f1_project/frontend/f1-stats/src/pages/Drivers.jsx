@@ -22,7 +22,7 @@ function normalizeDriver(driver, year, mode) {
 }
 
 export default function Drivers() {
-    const [year, setYear] = useState(2025);
+    const [year, setYear] = useState(2026);
     const [mode, setMode] = useState('individual');
     const [driverOptions, setDriverOptions] = useState([]);
     const [loadingDrivers, setLoadingDrivers] = useState(false);
@@ -34,6 +34,12 @@ export default function Drivers() {
             setLoadingDrivers(true);
             try {
                 const data = await fetchDriversFullNamesByYear(year);
+                console.info(`[Drivers] team_color recibido de la API para ${year}`, (Array.isArray(data) ? data : []).map((driver) => ({
+                    driver: driver.label,
+                    team: driver.team,
+                    team_color: driver.team_color,
+                    team_color_type: typeof driver.team_color,
+                })));
                 setDriverOptions(data || []);
             } catch (error) {
                 console.error('Error cargando pilotos:', error);

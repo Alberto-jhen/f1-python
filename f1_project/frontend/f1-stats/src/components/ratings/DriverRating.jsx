@@ -12,6 +12,7 @@ import { RatingStars } from './RatingStars';
 import { usePublishRating } from '@/hooks/usePublishRating';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DUPLICATE_RATING_CODE, MAX_COMMENT_LENGTH, fetchUserRatings } from '@/service/ratingsService.ts';
+import { getDriverImageKey, useDriverImageMap } from '@/service/driverImages.js';
 
 const DEFAULT_AVATAR = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
@@ -35,13 +36,17 @@ export function DriverRating({ onBack, selectedDriver, selectedRace, user, loadi
   const [existingRating, setExistingRating] = useState(null);
   const [warningOpen, setWarningOpen] = useState(false);
   const { publish, loading: publishing, error: publishError, data: publishedData } = usePublishRating();
+  const driverYear = selectedDriver?.year || 2026;
+  const driverImages = useDriverImageMap(driverYear);
 
   const displayName = loadingUser ? 'Cargando...' : (user?.username || user?.full_name || 'Usuario Anónimo');
   const avatarUrl = user?.avatar_url || DEFAULT_AVATAR;
 
   const surname = getDriverSurname(selectedDriver?.driverLabel || '');
   const surnameNorm = surname.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const imageUrl = buildDriverImageUrl(selectedDriver?.year || 2026, surnameNorm);
+  const imageUrl =
+    driverImages[getDriverImageKey(selectedDriver?.driverLabel)] ||
+    buildDriverImageUrl(driverYear, surnameNorm);
   const color = selectedDriver?.team_color ? `#${selectedDriver.team_color}` : '#dc2626';
   const commentTooLong = comment.length > MAX_COMMENT_LENGTH;
   const duplicateError = publishError?.code === DUPLICATE_RATING_CODE;

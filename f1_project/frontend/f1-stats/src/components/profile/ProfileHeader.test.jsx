@@ -46,6 +46,23 @@ describe('ProfileHeader image', () => {
     expect(screen.getByRole('button', { name: 'Añadir cabecera' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Eliminar cabecera' })).not.toBeInTheDocument();
   });
+  it('falls back to an existing PNG header when the WebP object is missing', () => {
+    const webpUrl = 'https://example.com/user-123/header.webp?v=1';
+    const pngUrl = 'https://example.com/user-123/header.png?v=2';
+    profileHeaderService.getProfileHeaderImageUrl
+      .mockReturnValueOnce(webpUrl)
+      .mockReturnValueOnce(pngUrl);
+
+    const { container } = render(
+      <ProfileHeader user={profile} userId='user-123' editable={false} />
+    );
+    const headerImage = container.querySelector('.h-64 img');
+
+    fireEvent.error(headerImage);
+
+    expect(profileHeaderService.getProfileHeaderImageUrl).toHaveBeenNthCalledWith(2, 'user-123', 'png');
+    expect(headerImage).toHaveAttribute('src', pngUrl);
+  });
 
   it("deletes the user's header image and restores the default gradient", async () => {
     profileHeaderService.getProfileHeaderImageUrl.mockReturnValue(

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'; 
 import { getCacheBusterUrl } from '@/lib/cacheBuster';
+import { uploadImageToService } from '@/service/imageUploadService';
 
 export const fetchProfileById = async (userId) => {
     const { data, error } = await supabase
@@ -32,22 +33,19 @@ export const fetchPublicProfileById = async (userId) => {
 
 export const uploadAvatarToSupabase = async (file, userId) => {
     try {
-        // Use a fixed file name so upsert replaces the previous avatar.
-        const fileExt = file.name.split('.').pop();
-        const filePath = `${userId}/avatar.${fileExt}`;
-
-        // Upload the avatar to the bucket
-        const { error: uploadError } = await supabase.storage
-            .from('profile_avatars')
-            .upload(filePath, file, {
-                upsert: true
-            });
-
-        if (uploadError) throw uploadError;
+        const bucketName = 'profile_avatars';
+        const filePath = `${userId}/avatar.webp`;
+        const uploadResult = await uploadImageToService(file, {
+            bucketName,
+            objectPath: filePath,
+        });
+        if (uploadResult.object_path !== filePath || uploadResult.content_type !== 'image/webp') {
+            throw new Error('El servicio devolvió una ruta o formato inesperado.');
+        }
 
         // Obtain bucket url.
         const { data: publicUrlData } = supabase.storage
-            .from('profile_avatars')
+            .from(bucketName)
             .getPublicUrl(filePath);
 
         // Version the URL so each upload produces a unique URL. Guardada en BD,
@@ -65,6 +63,12 @@ export const uploadAvatarToSupabase = async (file, userId) => {
             console.error('[uploadAvatarToSupabase] Error updating profile avatar: ', updateError);
             throw updateError;
         }
+        const { error: cleanupError } = await supabase.storage
+            .from(bucketName)
+            .remove([`${userId}/avatar.png`]);
+        if (cleanupError) {
+            console.warn('[uploadAvatarToSupabase] Could not remove the legacy PNG avatar:', cleanupError);
+        }
 
         return avatarUrl; 
 
@@ -74,10 +78,11 @@ export const uploadAvatarToSupabase = async (file, userId) => {
     }
 };
 
-export const getProfileHeaderImageUrl = (userId) => {
+export const getProfileHeaderImageUrl = (userId, extension = 'webp') => {
     if (!userId) return null;
 
-    const filePath = `${userId}/header.png`;
+    const safeExtension = extension === 'png' ? 'png' : 'webp';
+    const filePath = `${userId}/header.${safeExtension}`;
     const { data } = supabase.storage
         .from('profile_header_images')
         .getPublicUrl(filePath);
@@ -89,15 +94,14 @@ export const uploadProfileHeaderImageToSupabase = async (file, userId) => {
     try {
         if (!file || !userId) throw new Error('Se necesita una imagen y un usuario.');
 
-        const filePath = `${userId}/header.png`;
-        const { error: uploadError } = await supabase.storage
-            .from('profile_header_images')
-            .upload(filePath, file, {
-                upsert: true,
-                contentType: file.type || 'image/png',
-            });
-
-        if (uploadError) throw uploadError;
+        const filePath = `${userId}/header.webp`;
+        const uploadResult = await uploadImageToService(file, {
+            bucketName: 'profile_header_images',
+            objectPath: filePath,
+        });
+        if (uploadResult.object_path !== filePath || uploadResult.content_type !== 'image/webp') {
+            throw new Error('El servicio devolvió una ruta o formato inesperado.');
+        }
 
         return getProfileHeaderImageUrl(userId);
     } catch (error) {
@@ -112,7 +116,7 @@ export const deleteProfileHeaderImageFromSupabase = async (userId) => {
 
         const { error: deleteError } = await supabase.storage
             .from('profile_header_images')
-            .remove([`${userId}/header.png`]);
+            .remove([`${userId}/header.webp`, `${userId}/header.png`]);
 
         if (deleteError) throw deleteError;
 
@@ -209,3 +213,16 @@ export const uploadFullNameToSupabase = async (fullName, userId) => {
         throw error;
     }
 }
+
+export const handleDeleteAccount = async () => {
+    try {
+        const { error } = await supabase.rpc('delete_user');
+        if (error) throw error;
+        await supabase.auth.signOut();
+        window.location.href = '/';
+        
+    } catch (error) {
+        console.error('Error eliminando la cuenta:', error);
+        throw error;
+    }
+};

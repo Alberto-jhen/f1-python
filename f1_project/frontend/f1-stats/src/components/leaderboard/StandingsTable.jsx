@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { getDriverImageKey, useDriverImageMap } from '@/service/driverImages.js';
 
 /** Normalize a string: strip diacritics and lowercase. */
 function norm(str) {
@@ -44,8 +44,8 @@ function buildF1ImageUrl(fullName, constructor) {
     return `https://media.formula1.com/image/upload/c_lfill,w_64/q_auto/d_common:f1:${YEAR}:fallback:driver:${YEAR}fallbackdriverright.webp/v1740000000/common/f1/${YEAR}/${team}/${code}/${YEAR}${team}${code}right.webp`;
 }
 
-function DriverAvatar({ name, constructor }) {
-    const src = useMemo(() => buildF1ImageUrl(name, constructor), [name, constructor]);
+function DriverAvatar({ name, constructor, driverImages }) {
+    const src = driverImages[getDriverImageKey(name)] || buildF1ImageUrl(name, constructor);
 
     return (
         <img
@@ -64,6 +64,7 @@ function DriverAvatar({ name, constructor }) {
  * - showRacePoints: boolean (show points earned at selected race)
  */
 export default function StandingsTable({ standings = [], loading = false, showDiff = false, showRacePoints = false }) {
+    const driverImages = useDriverImageMap(YEAR);
     if (loading) {
         return (
             <div className="space-y-3 mt-6">
@@ -116,7 +117,11 @@ export default function StandingsTable({ standings = [], loading = false, showDi
                             {/* Driver */}
                             <td className="py-3 px-3">
                                 <div className="flex items-center gap-2.5">
-                                    <DriverAvatar name={entry.driver} constructor={entry.constructor} />
+                                    <DriverAvatar
+                                        name={entry.driver}
+                                        constructor={entry.constructor}
+                                        driverImages={driverImages}
+                                    />
                                     <span className="text-white font-bold text-sm uppercase tracking-tight group-hover:text-red-500 transition-colors">
                                         {entry.driver}
                                     </span>

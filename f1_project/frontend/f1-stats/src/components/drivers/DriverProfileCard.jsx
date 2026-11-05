@@ -1,4 +1,6 @@
 import { fetchDriverCareerStandings, fetchDriverSeasonStandings } from '@/service/apiService.ts';
+import { getDriverImageKey, useDriverImageMap } from '@/service/driverImages.js';
+import formBackground from '@/assets/form-bg.svg';
 import { useState, useEffect } from 'react';
 import {
     Accordion,
@@ -7,7 +9,6 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 
-const IMAGE_FALLBACK_YEARS = [2025, 2024];
 
 function buildImageUrl(year, surname) {
     return `https://media.formula1.com/content/dam/fom-website/drivers/${year}Drivers/${surname}.jpg`;
@@ -27,20 +28,47 @@ export default function DriverProfileCard({ data }) {
 
     const surname = getDriverSurname(driverLabel);
     const surnameNorm = surname.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const driverImages = useDriverImageMap(year);
+    const driverImageUrl = driverImages[getDriverImageKey(driverLabel)];
+    const is2026Season = Number(year) === 2026;
 
     const [imageUrl, setImageUrl] = useState(buildImageUrl(year, surnameNorm));
     const [fallbackIdx, setFallbackIdx] = useState(0);
-
-    const color = team_color ? `#${team_color}` : '#dc2626';
+    const normalizedTeamColor = String(team_color ?? '').trim().replace(/^#/, '');
+    const hasTeamColor = /^[\da-f]{6}$/i.test(normalizedTeamColor);
+    const teamColorFallbackReason = hasTeamColor
+        ? null
+        : team_color == null || String(team_color).trim() === ''
+            ? 'missing'
+            : 'not-a-6-digit-hex';
+    const color = hasTeamColor ? `#${normalizedTeamColor}` : '#dc2626';
+    const teamBackgroundColor = hasTeamColor
+        ? `rgba(${parseInt(normalizedTeamColor.slice(0, 2), 16)}, ${parseInt(normalizedTeamColor.slice(2, 4), 16)}, ${parseInt(normalizedTeamColor.slice(4, 6), 16)}, 0.6)`
+        : undefined;
+    useEffect(() => {
+        console.info('[DriverProfileCard] diagnóstico de color de equipo', {
+            year,
+            driver: driverLabel,
+            team,
+            team_color,
+            team_color_type: typeof team_color,
+            normalizedTeamColor,
+            hasTeamColor,
+            fallbackReason: teamColorFallbackReason,
+            colorApplied: color,
+            teamBackgroundColor: is2026Season ? teamBackgroundColor : undefined,
+        });
+    }, [year, driverLabel, team, team_color, normalizedTeamColor, hasTeamColor, teamColorFallbackReason, color, is2026Season, teamBackgroundColor]);
 
     useEffect(() => {
-        setImageUrl(buildImageUrl(year, surnameNorm));
+        setImageUrl(driverImageUrl || buildImageUrl(year, surnameNorm));
         setFallbackIdx(0);
-    }, [year, surnameNorm]);
+    }, [year, surnameNorm, driverImageUrl]);
 
     const handleImageError = () => {
-        if (fallbackIdx < IMAGE_FALLBACK_YEARS.length) {
-            setImageUrl(buildImageUrl(IMAGE_FALLBACK_YEARS[fallbackIdx], surnameNorm));
+        const fallbackYears = [Number(year) - 1, Number(year) - 2];
+        if (fallbackIdx < fallbackYears.length) {
+            setImageUrl(buildImageUrl(fallbackYears[fallbackIdx], surnameNorm));
             setFallbackIdx((prev) => prev + 1);
         }
     };
@@ -78,18 +106,50 @@ export default function DriverProfileCard({ data }) {
     return (
         <div className="relative w-full h-auto rounded-3xl overflow-hidden shadow-2xl group animate-fade-in-up border border-slate-800/50 bg-slate-950 flex flex-col md:flex-row">
             {/* Driver image */}
-            <div className="relative w-full h-[45vh] min-h-[18rem] max-h-[32rem] overflow-hidden flex items-center justify-center bg-slate-950 shrink-0 md:h-auto md:w-2/5 md:min-h-[30rem] md:max-h-none">
+            <div
+                className="relative w-full h-[45vh] min-h-72 max-h-128 overflow-hidden flex items-center justify-center bg-slate-950 shrink-0 md:w-2/5 md:h-auto md:min-h-120 md:max-h-none md:self-stretch"
+                style={is2026Season && teamBackgroundColor ? { backgroundColor: teamBackgroundColor } : undefined}
+            >
+                {is2026Season && (
+                    <div
+                        aria-hidden="true"
+                        data-testid="driver-background-pattern"
+                        className="absolute inset-0 z-10 pointer-events-none opacity-40"
+                        style={{
+                            backgroundImage: `url(${formBackground})`,
+                            backgroundPosition: 'center',
+                            backgroundSize: 'cover',
+                        }}
+                    />
+                )}
                 <img 
                     src={imageUrl} 
                     alt={driverLabel}
-                    className="w-full h-full object-cover mask-[linear-gradient(to_right,black_65%,transparent)]"
+                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
+                    onError={handleImageError}
+                    className={`w-full h-full ${
+                        is2026Season
+                            ? 'absolute inset-0 z-20 h-full w-full object-cover object-top scale-125 origin-top'
+                            : 'object-cover mask-[linear-gradient(to_right,black_65%,transparent)]'
+                    }`}
                 />
-                <div className="absolute inset-0 z-20 pointer-events-none bg-gradient-to-b from-transparent via-slate-950/10 to-slate-950/80 md:bg-gradient-to-r md:from-transparent md:via-slate-950/10 md:to-slate-950/90" />
                 <div
-                    className="absolute z-30 bottom-2 right-4 md:bottom-8 md:right-8 text-6xl md:text-7xl lg:text-8xl font-black italic leading-none opacity-20 pointer-events-none select-none"
-                    style={{ color }}
+                    aria-hidden="true"
+                    data-testid="driver-image-gradient"
+                    className="absolute inset-0 z-30 pointer-events-none bg-linear-to-b from-transparent via-slate-950/10 to-slate-950 md:bg-linear-to-r md:from-transparent md:via-slate-950/10 md:to-slate-950"
+                />
+                <div
+                    aria-hidden="true"
+                    className="absolute z-30 bottom-2 right-4 md:bottom-8 md:right-8 text-6xl md:text-7xl lg:text-8xl font-black italic leading-none pointer-events-none select-none"
                 >
-                    {driverNumber}
+                    <span
+                        data-testid="driver-number-fill"
+                        className="relative opacity-20"
+                        style={{ color }}
+                    >
+                        {driverNumber}
+                    </span>
                 </div>
             </div>
 
@@ -130,7 +190,7 @@ export default function DriverProfileCard({ data }) {
                 {/* Career history accordion */}
                 <div className="w-full">
                     <DriverHistoryAccordion
-                        teamColor={team_color}
+                        teamColor={hasTeamColor ? normalizedTeamColor : null}
                         titles={careerStats.titles}
                         wins={careerStats.wins}
                         podiums={careerStats.podiums}

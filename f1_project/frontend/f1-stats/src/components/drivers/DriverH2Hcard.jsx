@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { fetchH2HData } from '@/service/apiService.ts';
+import { getDriverImageKey, useDriverImageMap } from '@/service/driverImages.js';
 import { X, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -17,6 +18,7 @@ export default function DriverH2Hcard({ drivers = [], year, onRemove }) {
     const [h2hData, setH2hData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [imageFallbacks, setImageFallbacks] = useState({});
+    const driverImages = useDriverImageMap(year);
 
     const [d1, d2] = [drivers[0] || null, drivers[1] || null];
     const sameYear = d1 && d2 && d1.year === d2.year;
@@ -96,7 +98,8 @@ export default function DriverH2Hcard({ drivers = [], year, onRemove }) {
 
     const renderDriverPortrait = (driver) => {
         const surname = getDriverSurname(driver.driverLabel || '');
-        const imageUrl = buildImageUrl(driver.year, surname);
+        const imageUrl =
+            driverImages[getDriverImageKey(driver.driverLabel)] || buildImageUrl(driver.year, surname);
         const fallback = imageFallbacks[driver.driverValue];
         const color = driver.team_color ? `#${driver.team_color}` : '#dc2626';
 

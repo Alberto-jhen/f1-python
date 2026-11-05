@@ -2,16 +2,27 @@ import { RatingSelection } from "../components/ratings/RatingSelection";
 import { CustomCard } from "../components/custom/CustomCard";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Eye, X, Users, Flag } from "lucide-react";
+import { Eye, X, Users, Flag, ArrowUpRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export function Ratings() {
     const [raceSelection, setRaceSelection] = useState(null);
     const [driverSelection, setDriverSelection] = useState(null);
+    const navigate = useNavigate();
+    const { user } = useAuth();
 
     const handleBack = () => {
         setRaceSelection(null);
         setDriverSelection(null);
     };
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/', { replace: true });
+        }
+    }, [navigate, user]);
 
     const isDriverSelected = !!driverSelection;
     const isRaceSelected = !!raceSelection;
@@ -38,14 +49,6 @@ export function Ratings() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <Link
-                        to="/ratings/community"
-                        aria-label="Ver valoraciones de la comunidad"
-                        className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-300 hover:text-white transition-all bg-zinc-900/60 px-4 py-2.5 rounded-lg border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800"
-                    >
-                        <Eye className="size-4" aria-hidden="true" />
-                        Ver valoraciones
-                    </Link>
                     {isAnySelected && (
                         <button
                             type="button"
@@ -77,6 +80,25 @@ export function Ratings() {
                 />
             </div>
 
+            {!isAnySelected && (
+                <div className="w-full -mt-3 animate-in fade-in slide-in-from-top-2 duration-500">
+                    <Link
+                        to="/ratings/community"
+                        aria-label="Ver valoraciones de la comunidad"
+                        className="group relative inline-flex w-full items-center justify-center gap-3 overflow-hidden rounded-xl border border-white/85 bg-white/85 px-6 py-3.5 text-sm font-black uppercase tracking-widest text-zinc-950 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-red-600/98 hover:bg-red-600/98 hover:text-white hover:shadow-md active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                    >
+                        <Eye
+                            className="size-4 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-12"
+                            aria-hidden="true"
+                        />
+                        <span>Ver valoraciones</span>
+                        <ArrowUpRight
+                            className="size-4 opacity-60 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
+                            aria-hidden="true"
+                        />
+                    </Link>
+                </div>
+            )}
             {/* Contenedor del contenido desplegado */}
             <div className={`transition-all duration-700 ease-out origin-top ${isAnySelected ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 hidden'}`}>
                 {isDriverSelected && (

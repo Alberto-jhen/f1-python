@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Search, Check, X, User, Filter } from 'lucide-react';
 import { GenericCombobox } from '@/components/GenericComobobox';
 import { getInitials } from '@/lib/utils.js';
+import { getDriverImageKey, useDriverImageMap } from '@/service/driverImages.js';
 
 function buildDriverImageUrl(year, surname) {
   const surnameNorm = surname
@@ -29,6 +30,7 @@ export default function DriverGridSelector({
   const [search, setSearch] = useState('');
   const [teamFilter, setTeamFilter] = useState('all');
   const [imageFallbacks, setImageFallbacks] = useState({});
+  const driverImages = useDriverImageMap(year);
 
   const teamOptions = useMemo(() => {
     const map = new Map();
@@ -123,13 +125,13 @@ export default function DriverGridSelector({
       </div>
 
       {/* Grid */}
-      <div className="min-h-[200px]">
+      <div className="min-h-50">
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4">
             {Array.from({ length: 12 }).map((_, i) => (
               <div
                 key={i}
-                className="aspect-[4/5] h-auto w-full bg-slate-900/40 rounded-xl animate-pulse"
+                className="aspect-4/5 h-auto w-full bg-slate-900/40 rounded-xl animate-pulse"
               />
             ))}
           </div>
@@ -145,7 +147,8 @@ export default function DriverGridSelector({
               const order = selectionOrder(driver);
               const teamColor = driver.team_color ? `#${driver.team_color}` : '#dc2626';
               const surname = getDriverSurname(driver.label || '');
-              const imageUrl = buildDriverImageUrl(year, surname);
+              const imageUrl =
+                driverImages[getDriverImageKey(driver.label)] || buildDriverImageUrl(year, surname);
               const fallback = imageFallbacks[driver.value];
 
               return (
@@ -153,7 +156,7 @@ export default function DriverGridSelector({
                   key={driver.value}
                   onClick={() => handleCardClick(driver)}
                   disabled={mode === 'h2h' && !selected && comparisonList.length >= 2}
-                  className={`group relative w-full h-auto aspect-[4/5] rounded-xl overflow-hidden text-left transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`group relative w-full h-auto aspect-4/5 rounded-xl overflow-hidden text-left transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed ${
                     selected
                       ? 'ring-2 ring-white/30 scale-[1.02]'
                       : 'hover:ring-1 hover:ring-slate-700/50 hover:scale-[1.01]'
@@ -161,7 +164,7 @@ export default function DriverGridSelector({
                 >
                   {/* Team accent background */}
                   <div
-                    className="absolute inset-0 opacity-10 transition-opacity group-hover:opacity-20"
+                    className="absolute inset-0 transition-opacity group-hover:opacity-20"
                     style={{ background: `linear-gradient(135deg, ${teamColor}, transparent 80%)` }}
                   />
                   <div className="absolute inset-0 bg-slate-900/50" />
@@ -171,6 +174,8 @@ export default function DriverGridSelector({
                     <img
                       src={imageUrl}
                       alt={driver.label}
+                      crossOrigin="anonymous"
+                      referrerPolicy="no-referrer"
                       onError={() => handleImageError(driver.value)}
                       className="absolute inset-0 w-full h-full object-cover object-top opacity-70 group-hover:opacity-90 transition-opacity"
                       loading="lazy"
