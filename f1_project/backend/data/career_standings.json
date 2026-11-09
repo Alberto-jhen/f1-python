@@ -8,7 +8,7 @@
     "Max Verstappen": {
       "titulos": 4,
       "victorias": 75,
-      "podios": 135
+      "podios": 136
     },
     "Sebastian Vettel": {
       "titulos": 4,
@@ -52,8 +52,8 @@
     },
     "Lando Norris": {
       "titulos": 1,
-      "victorias": 15,
-      "podios": 49
+      "victorias": 16,
+      "podios": 50
     },
     "Carlos Sainz": {
       "titulos": 0,
@@ -123,7 +123,7 @@
     "Isack Hadjar": {
       "titulos": 0,
       "victorias": 0,
-      "podios": 2
+      "podios": 3
     },
     "Logan Sargeant": {
       "titulos": 0,
@@ -231,6 +231,11 @@
       "podios": 0
     },
     "Ryo Hirakawa": {
+      "titulos": 0,
+      "victorias": 0,
+      "podios": 0
+    },
+    "Rafael Camara": {
       "titulos": 0,
       "victorias": 0,
       "podios": 0
