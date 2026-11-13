@@ -58,7 +58,7 @@ export const Header = ({ variant = "solid" }) => {
                 <Links user={user}/>
             </nav>
             
-            <div className='z-10 flex items-center justify-end gap-4 shrink-0 min-w-[150px]'>
+            <div className='z-10 flex items-center justify-end gap-4 shrink-0 min-w-37.5'>
                 {loading ? (
                     <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse" />
                 ) : isLoggedIn ? (
@@ -72,13 +72,13 @@ export const Header = ({ variant = "solid" }) => {
                     <>
                         <Link
                             to='/register'
-                            className='text-zinc-400 text-xs font-semibold uppercase tracking-widest hover:text-white transition-colors duration-300 px-3 py-2 border border-zinc-700 rounded-md hover:border-zinc-500 hover:bg-zinc-800/50'
+                            className='text-zinc-300 text-xs font-semibold uppercase tracking-widest hover:text-white transition-colors duration-300 px-3 py-2 border border-zinc-700 rounded-md hover:border-zinc-500 hover:bg-zinc-800/50'
                         >
                             Registrarse
                         </Link>
                         <Link
                             to='/login'
-                            className='text-zinc-400 text-xs font-semibold uppercase tracking-widest hover:text-white transition-colors duration-300 px-3 py-2 border border-zinc-700 rounded-md hover:border-zinc-500 hover:bg-zinc-800/50'
+                            className='text-zinc-300 text-xs font-semibold uppercase tracking-widest hover:text-white transition-colors duration-300 px-3 py-2 border border-zinc-700 rounded-md hover:border-zinc-500 hover:bg-zinc-800/50'
                         >
                             Acceder
                         </Link>

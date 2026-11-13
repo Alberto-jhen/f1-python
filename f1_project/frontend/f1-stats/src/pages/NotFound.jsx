@@ -1,8 +1,20 @@
 import { ArrowLeft, Flag } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 export default function NotFound() {
     return (
         <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4 py-10 text-white sm:px-6">
+            <Helmet>
+                <title>F1 Insights - Página no encontrada (404)</title>
+                <meta name="description" content="No encontramos la página que buscas. Vuelve a F1 Insights para continuar explorando estadísticas y contenido de Fórmula 1." />
+                <meta name="robots" content="noindex, nofollow" />
+                <meta name="theme-color" content="#030617" />
+                <meta name="keywords" content="F1 Insights, error 404, página no encontrada, Fórmula 1" />
+
+                <meta name="og-type" content="website" />
+                <meta name="og-title" content="F1 Insights - Página no encontrada (404)" />
+                <meta name="og-description" content="No encontramos la página que buscas. Vuelve a F1 Insights para continuar explorando estadísticas y contenido de Fórmula 1." />
+            </Helmet>
 
             <section
                 aria-labelledby="not-found-title"

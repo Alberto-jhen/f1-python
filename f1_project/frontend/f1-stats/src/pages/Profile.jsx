@@ -17,6 +17,7 @@ import { RatingItem } from '@/components/ratings/RatingItem';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserRatings } from '@/hooks/useRatings';
 import { getTeamLogo, getTeamColor } from '@/lib/teamLogos'; 
+import { Helmet } from 'react-helmet-async';
 
 function formatRatingDate(value) {
   if (!value) return '';
@@ -62,103 +63,116 @@ export function Profile() {
   }
 
   return (
-    <div className='min-h-screen bg-[#050505] pb-16'>
-      <ProfileHeader
-        user={profile}
-        userId={user?.id}
-        editable
-        onProfileUpdated={(updates) => setProfile((prev) => ({ ...prev, ...updates }))}
-      />
+    <>
+      <Helmet>
+        <title>F1 Insights - Perfil</title>
+        <meta name="description" content="Configura tu perfil de usuario dentro de la página F1 Insights."></meta>
+        <meta name="robots" content="index, unfollow" />
+        <meta name="theme-color" content="#050505" />
+        <meta name="keywords" content="Perfil, usuario, favoritos, foto de perfil, descripción, valoraciones, editar" />
 
-      <div className='max-w-6xl mx-auto px-6 mt-10'>
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-          {/* Columna principal */}
-          <div className='lg:col-span-2 space-y-6'>
-            <ProfileSection title='Favoritos' icon={HeartIcon}>
-              <div className='flex justify-end mb-3'>
-                <button
-                  type='button'
-                  onClick={() => setFavoritesModalOpen(true)}
-                  className='flex items-center gap-2 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer'
-                >
-                  <PencilIcon className='size-3' />
-                  <span>Editar favoritos</span>
-                </button>
-              </div>
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                <FavoriteCard
-                  title='Piloto favorito'
-                  name={favoriteDriver || 'Sin seleccionar'}
-                  subtitle={
-                    favoriteDriver ? 'Tu piloto favorito' : 'Haz clic para elegir tu piloto favorito'
-                  }
-                  color={favoriteDriver ? '#dc2626' : 'gray'}
-                  onClick={() => setFavoritesModalOpen(true)}
-                />
-                <FavoriteCard
-                  title='Equipo favorito'
-                  name={favoriteTeam || 'Sin seleccionar'}
-                  subtitle={
-                    favoriteTeam ? 'Tu escudería favorita' : 'Haz clic para elegir tu equipo favorito'
-                  }
-                  image={getTeamLogo(favoriteTeam)}
-                  color={getTeamColor(favoriteTeam) || 'gray'}
-                  onClick={() => setFavoritesModalOpen(true)}
-                />
-              </div>
-            </ProfileSection>
+        <meta name="og-title" content="F1 Insights - Perfil" />
+        <meta name="og-description" content="Configura tu perfil de usuario dentro de la página F1 Insights."></meta>
+        <meta name="og-type" content="website"></meta>
+      </Helmet>
+      <div className='min-h-screen bg-[#050505] pb-16'>
+        <ProfileHeader
+          user={profile}
+          userId={user?.id}
+          editable
+          onProfileUpdated={(updates) => setProfile((prev) => ({ ...prev, ...updates }))}
+        />
 
-            <ProfileSection title='Últimas valoraciones' icon={StarIcon}>
-              {loadingRatings && (
-                <p className='text-sm text-zinc-500 py-4'>Cargando valoraciones...</p>
-              )}
-              {!loadingRatings && latestRatings.length === 0 && (
-                <p className='text-sm text-zinc-500 py-4'>
-                  Aún no hay valoraciones publicadas.
-                </p>
-              )}
-              {!loadingRatings &&
-                latestRatings.map((rating) => {
-                  const race = rating.race || {};
-                  const driverId = rating.driver_id;
-                  return (
-                    <RatingItem
-                      key={rating.id}
-                      title={race.circuit_name || 'Gran Premio'}
-                      category={driverId ? 'Piloto' : 'Carrera'}
-                      rating={rating.rating}
-                      date={formatRatingDate(rating.created_at)}
-                      comment={rating.comment}
-                    />
-                  );
-                })}
-              {!loadingRatings && latestRatings.length > 0 && user?.id && (
-                <Link
-                  to={`/profile/${user.id}/ratings`}
-                  className='group flex items-center justify-center gap-2 mt-4 py-2 rounded-xl border border-zinc-800 bg-zinc-950/50 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-red-900/50 hover:bg-red-950/20 transition-all'
-                >
-                  Ver todas mis valoraciones
-                  <ArrowRightIcon className='size-4 group-hover:translate-x-1 transition-transform' />
-                </Link>
-              )}
-            </ProfileSection>
-          </div>
+        <div className='max-w-6xl mx-auto px-6 mt-10'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+            {/* Columna principal */}
+            <div className='lg:col-span-2 space-y-6'>
+              <ProfileSection title='Favoritos' icon={HeartIcon}>
+                <div className='flex justify-end mb-3'>
+                  <button
+                    type='button'
+                    onClick={() => setFavoritesModalOpen(true)}
+                    className='flex items-center gap-2 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer'
+                  >
+                    <PencilIcon className='size-3' />
+                    <span>Editar favoritos</span>
+                  </button>
+                </div>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                  <FavoriteCard
+                    title='Piloto favorito'
+                    name={favoriteDriver || 'Sin seleccionar'}
+                    subtitle={
+                      favoriteDriver ? 'Tu piloto favorito' : 'Haz clic para elegir tu piloto favorito'
+                    }
+                    color={favoriteDriver ? '#dc2626' : 'gray'}
+                    onClick={() => setFavoritesModalOpen(true)}
+                  />
+                  <FavoriteCard
+                    title='Equipo favorito'
+                    name={favoriteTeam || 'Sin seleccionar'}
+                    subtitle={
+                      favoriteTeam ? 'Tu escudería favorita' : 'Haz clic para elegir tu equipo favorito'
+                    }
+                    image={getTeamLogo(favoriteTeam)}
+                    color={getTeamColor(favoriteTeam) || 'gray'}
+                    onClick={() => setFavoritesModalOpen(true)}
+                  />
+                </div>
+              </ProfileSection>
 
-          {/* Columna lateral */}
-          <div className='space-y-6'>
-            <RatingStats ratings={ratings} loading={loadingRatings} error={ratingsError} />
+              <ProfileSection title='Últimas valoraciones' icon={StarIcon}>
+                {loadingRatings && (
+                  <p className='text-sm text-zinc-500 py-4'>Cargando valoraciones...</p>
+                )}
+                {!loadingRatings && latestRatings.length === 0 && (
+                  <p className='text-sm text-zinc-500 py-4'>
+                    Aún no hay valoraciones publicadas.
+                  </p>
+                )}
+                {!loadingRatings &&
+                  latestRatings.map((rating) => {
+                    const race = rating.race || {};
+                    const driverId = rating.driver_id;
+                    return (
+                      <RatingItem
+                        key={rating.id}
+                        title={race.circuit_name || 'Gran Premio'}
+                        category={driverId ? 'Piloto' : 'Carrera'}
+                        rating={rating.rating}
+                        date={formatRatingDate(rating.created_at)}
+                        comment={rating.comment}
+                      />
+                    );
+                  })}
+                {!loadingRatings && latestRatings.length > 0 && user?.id && (
+                  <Link
+                    to={`/profile/${user.id}/ratings`}
+                    className='group flex items-center justify-center gap-2 mt-4 py-2 rounded-xl border border-zinc-800 bg-zinc-950/50 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:border-red-900/50 hover:bg-red-950/20 transition-all'
+                  >
+                    Ver todas mis valoraciones
+                    <ArrowRightIcon className='size-4 group-hover:translate-x-1 transition-transform' />
+                  </Link>
+                )}
+              </ProfileSection>
+            </div>
+
+            {/* Columna lateral */}
+            <div className='space-y-6'>
+              <RatingStats ratings={ratings} loading={loadingRatings} error={ratingsError} />
+            </div>
           </div>
         </div>
-      </div>
 
-      <FavoritesModal
-        open={favoritesModalOpen}
-        onClose={() => setFavoritesModalOpen(false)}
-        onSaved={handleFavoritesSaved}
-        userId={user?.id}
-        favoriteDriver={favoriteDriver}
-        favoriteTeam={favoriteTeam}
-      />
-    </div>
+        <FavoritesModal
+          open={favoritesModalOpen}
+          onClose={() => setFavoritesModalOpen(false)}
+          onSaved={handleFavoritesSaved}
+          userId={user?.id}
+          favoriteDriver={favoriteDriver}
+          favoriteTeam={favoriteTeam}
+        />
+      </div>
+    </>
   );
 }

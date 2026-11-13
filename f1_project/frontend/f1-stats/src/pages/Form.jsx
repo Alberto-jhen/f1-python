@@ -1,9 +1,21 @@
 import formBg from '../assets/form-bg.svg';
 import { useState } from 'react'
+import { Helmet } from 'react-helmet-async';
 
 export const Form = () => {
     return (
         <div className="flex min-h-screen bg-slate-950">
+            <Helmet>
+                <title>F1 Insights - Contacto</title>
+                <meta name="description" content="Contacta con F1 Insights para compartir tus dudas, sugerencias o consultas sobre el proyecto de analítica de Fórmula 1." />
+                <meta name="robots" content="index, follow" />
+                <meta name="theme-color" content="#030617" />
+                <meta name="keywords" content="contacto, F1 Insights, formulario, dudas, sugerencias, Fórmula 1" />
+
+                <meta name="og-type" content="website" />
+                <meta name="og-title" content="F1 Insights - Contacto" />
+                <meta name="og-description" content="Contacta con F1 Insights para compartir tus dudas, sugerencias o consultas sobre el proyecto de analítica de Fórmula 1." />
+            </Helmet>
             <div 
                 style={{ backgroundImage: `url(${formBg})` }} 
                 className="hidden lg:flex w-1/2 items-center z-0 justify-center border-r border-slate-800 bg-cover bg-center"

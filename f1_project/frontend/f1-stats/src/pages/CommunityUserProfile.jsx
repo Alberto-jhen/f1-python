@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, HeartIcon, StarIcon } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 import { FavoriteCard } from '@/components/profile/FavoriteCard';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
@@ -109,12 +110,35 @@ export function CommunityUserProfile() {
         username: displayedProfile.username || 'usuario',
       }
     : null;
+  const seoTitle = profileUser
+    ? `F1 Insights - Perfil de ${profileUser.full_name}`
+    : 'F1 Insights - Perfil de la comunidad';
+  const seoDescription = profileUser
+    ? `Consulta el perfil de ${profileUser.full_name}, sus pilotos y equipos favoritos y sus valoraciones en la comunidad de F1 Insights.`
+    : 'Descubre perfiles públicos, pilotos favoritos y valoraciones de la comunidad de F1 Insights.';
+  const seoMetadata = (
+    <Helmet>
+      <title>{seoTitle}</title>
+      <meta name="description" content={seoDescription} />
+      <meta name="robots" content={profileUser ? 'index, follow' : 'noindex, nofollow'} />
+      <meta name="theme-color" content="#050505" />
+      <meta
+        name="keywords"
+        content="perfil público, comunidad, usuarios, favoritos, valoraciones, Fórmula 1"
+      />
+
+      <meta name="og-type" content="website" />
+      <meta name="og-title" content={seoTitle} />
+      <meta name="og-description" content={seoDescription} />
+    </Helmet>
+  );
   const favoriteDriver = profileUser?.favorite_driver || null;
   const favoriteTeam = profileUser?.favorite_team || null;
 
   if (isLoading) {
     return (
       <div className='min-h-screen bg-[#050505] flex items-center justify-center'>
+        {seoMetadata}
         <p className='text-zinc-400'>Cargando perfil...</p>
       </div>
     );
@@ -123,6 +147,7 @@ export function CommunityUserProfile() {
   if (!profileUser) {
     return (
       <div className='min-h-screen bg-[#050505] pb-16'>
+        {seoMetadata}
         <div className='max-w-6xl mx-auto px-6 py-20 flex flex-col items-center gap-5 text-center'>
           <p className='text-zinc-400'>
             {profileError || ratingsError
@@ -143,6 +168,7 @@ export function CommunityUserProfile() {
 
   return (
     <div className='min-h-screen bg-[#050505] pb-16'>
+      {seoMetadata}
       <ProfileHeader
         key={targetProfileId}
         user={profileUser}

@@ -5,6 +5,7 @@ import DriverH2Hcard from '@/components/drivers/DriverH2Hcard';
 import DriverGridSelector from '@/components/drivers/DriverGridSelector.jsx';
 import { fetchDriversFullNamesByYear } from '@/service/apiService.ts';
 import { Users } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 function normalizeDriver(driver, year, mode) {
     return {
@@ -90,72 +91,85 @@ export default function Drivers() {
     };
 
     return (
-        <div className="min-h-screen w-full bg-slate-950 font-sans">
+        <>
+            <Helmet>
+                <title>F1 Insights - Pilotos</title>
+                <meta name="description" content="Visualiza estadísticas de los pilotos de Fórmula 1, compara rendimientos y analiza resultados históricos." />
+                <meta name="robots" content="index, follow" />
+                <meta name="keywords" content="Pilotos, Fórmula 1, estadísticas, resultados, temporadas" />
+                <meta name="theme-color" content="#030617" />
+
+                <meta name="og-type" content="website" />
+                <meta name="og-title" content="F1 Insights - Pilotos" />
+                <meta name="og-description" content="Visualiza estadísticas de los pilotos de Fórmula 1, compara rendimientos y analiza resultados históricos." />
+            </Helmet>
+            <div className="min-h-screen w-full bg-slate-950 font-sans">
             {/* Hero header */}
-            <div className="relative overflow-hidden border-b border-slate-800">
-                <div className="relative px-4 md:px-8 lg:px-12 py-8 md:py-10">
-                    <div className="max-w-[1600px] mx-auto">
-                        <div className="border-l-4 border-red-600 pl-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="w-2 h-2 rounded-full bg-red-600" />
-                                <span className="text-red-600 text-[12px] font-bold uppercase tracking-[0.3em]">Centro de pilotos</span>
+                <div className="relative overflow-hidden">
+                    <div className="relative px-4 md:px-8 lg:px-12 py-8 md:py-10">
+                        <div className="max-w-400 mx-auto">
+                            <div className="border-l-4 border-red-600 pl-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-2 h-2 rounded-full bg-red-600" />
+                                    <span className="text-red-600 text-[12px] font-bold uppercase tracking-[0.3em]">Centro de pilotos</span>
+                                </div>
+                                <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-white italic leading-none">
+                                    Elige tu <span className="text-red-600">piloto</span>
+                                </h1>
+                                <p className="text-slate-400 text-[14px] md:text-[16px] mt-4 font-medium max-w-xl leading-relaxed">
+                                    Analiza el rendimiento en pista, visualiza datos históricos o compara frente a frente a dos corredores de la misma temporada.
+                                </p>
                             </div>
-                            <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white italic leading-none">
-                                Elige tu <span className="text-red-600">piloto</span>
-                            </h1>
-                            <p className="text-slate-400 text-base md:text-lg mt-4 font-medium max-w-xl leading-relaxed">
-                                Analiza el rendimiento en pista, visualiza datos históricos o compara frente a frente a dos corredores de la misma temporada.
-                            </p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Main layout: selectors + card + grid */}
-            <div className="px-4 md:px-8 lg:px-12 py-6 md:py-8 pb-8">
-                <div className="max-w-[1600px] mx-auto flex flex-col gap-6 md:gap-8">
-                    <DriverInfoSelector
-                        year={year}
-                        mode={mode}
-                        onYearChange={setYear}
-                        onModeChange={handleModeChange}
-                        selectedDriver={selectedDriver}
-                        comparisonList={comparisonList}
-                    />
-
-                    {mode === 'individual' && selectedDriver && (
-                        <DriverProfileCard data={selectedDriver} />
-                    )}
-
-                    {mode === 'h2h' && (
-                        <DriverH2Hcard
-                            drivers={comparisonList}
+                {/* Main layout: selectors + card + grid */}
+                <div className="px-4 md:px-8 lg:px-12 py-6 md:py-8 pb-8">
+                    <div className="max-w-400 mx-auto flex flex-col gap-6 md:gap-8">
+                        <DriverInfoSelector
                             year={year}
-                            onRemove={handleH2HRemove}
+                            mode={mode}
+                            onYearChange={setYear}
+                            onModeChange={handleModeChange}
+                            selectedDriver={selectedDriver}
+                            comparisonList={comparisonList}
                         />
-                    )}
 
-                    {!selectedDriver && mode === 'individual' && (
-                        <div className="min-h-[400px] flex flex-col items-center justify-center gap-4 text-slate-500 border border-dashed border-slate-800 rounded-3xl bg-slate-950/50">
-                            <Users className="size-16 opacity-30" />
-                            <p className="text-lg font-black uppercase tracking-widest text-slate-400">Selecciona un piloto</p>
-                            <p className="text-sm text-slate-500 text-center max-w-xs">Haz clic en cualquier tarjeta de la izquierda para ver su perfil completo.</p>
-                        </div>
-                    )}
+                        {mode === 'individual' && selectedDriver && (
+                            <DriverProfileCard data={selectedDriver} />
+                        )}
 
-                    <DriverGridSelector
-                        key={`${year}-${mode}`}
-                        drivers={driverOptions}
-                        year={year}
-                        mode={mode}
-                        selectedDriver={selectedDriver}
-                        comparisonList={comparisonList}
-                        onSelect={handleGridSelect}
-                        onRemove={handleGridRemove}
-                        loading={loadingDrivers}
-                    />
+                        {mode === 'h2h' && (
+                            <DriverH2Hcard
+                                drivers={comparisonList}
+                                year={year}
+                                onRemove={handleH2HRemove}
+                            />
+                        )}
+
+                        {!selectedDriver && mode === 'individual' && (
+                            <div className="min-h-100 flex flex-col items-center justify-center gap-4 text-slate-500 border border-dashed border-slate-800 rounded-3xl bg-slate-950/50">
+                                <Users className="size-16 opacity-30" />
+                                <p className="text-lg font-black uppercase tracking-widest text-slate-400">Selecciona un piloto</p>
+                                <p className="text-sm text-slate-500 text-center max-w-xs">Haz clic en cualquier tarjeta de la izquierda para ver su perfil completo.</p>
+                            </div>
+                        )}
+
+                        <DriverGridSelector
+                            key={`${year}-${mode}`}
+                            drivers={driverOptions}
+                            year={year}
+                            mode={mode}
+                            selectedDriver={selectedDriver}
+                            comparisonList={comparisonList}
+                            onSelect={handleGridSelect}
+                            onRemove={handleGridRemove}
+                            loading={loadingDrivers}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

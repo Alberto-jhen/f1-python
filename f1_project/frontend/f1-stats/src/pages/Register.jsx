@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { isUsernameConflictError, normalizeUsername } from '@/lib/utils';
 import { checkUsernameAvailability } from '@/service/usernameService';
+import { Helmet } from 'react-helmet-async';
 
 export function Register() {
   const navigate = useNavigate();
@@ -66,6 +67,17 @@ export function Register() {
 
   return (
     <>
+      <Helmet>
+        <title>F1 Insights - Registro</title>
+        <meta name="description" content="Regístrate y accede a todo el contenido dentro de F1 Insights."></meta>
+        <meta name="robots" content="index, follow"></meta>
+        <meta name="theme-color" content="#050505"></meta>
+        <meta name="keywords" content="F1 Insights, registro, crear cuenta, acceso, formulario"></meta>
+
+        <meta name="og-title" content="F1 Insights - Registro"></meta>
+        <meta name="og-description" content="Regístrate y accede a todo el contenido dentro de F1 Insights."></meta>
+        <meta name="og-type" content="website"></meta>
+      </Helmet>
       <Header />
       <div className='fixed inset-0 bg-slate-950 z-0' />
       <WavyBackground

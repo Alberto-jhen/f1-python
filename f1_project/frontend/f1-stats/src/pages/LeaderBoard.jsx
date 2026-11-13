@@ -10,6 +10,7 @@ import StandingsTable from '@/components/leaderboard/StandingsTable';
 import PredictionMode from '@/components/leaderboard/PredictionMode';
 import { ClockAlert } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Helmet } from 'react-helmet-async';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -187,133 +188,146 @@ export default function LeaderBoard() {
     ];
 
     return (
-        <div className="p-6 md:p-12 w-full max-w-7xl mx-auto font-sans relative">
-            {/* Decorative background */}
-            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" />
+        <>
+            <Helmet>
+                <title>F1 Insights - Clasificación</title>
+                <meta name="description" content="Visualiza la clasificación en tiempo real del campeonato del mundo. haz predicciones manuales o revisa la predicción con IA."></meta>
+                <meta name="robots" content="index, follow"></meta>
+                <meta name="theme-color" content="#030617" />
+                <meta name="keywords" content="clasificación, pilotos, puntos, predicción, inteligencia artificial, estadísticas, calendario, grandes premios, equipos"></meta>
 
-            {/* Next race subtle banner */}
-            {nextRace && (
-                <div className="mb-6 flex items-center gap-3 bg-zinc-900/60 border border-zinc-800 rounded-lg px-4 py-2.5 w-fit">
-                    <span className="bg-red-600 w-2 h-2 rounded-full animate-pulse shrink-0"></span>
-                    <span className="text-[11px] text-zinc-400 font-bold uppercase tracking-widest">
-                        Próxima carrera
-                    </span>
-                    <span className="text-sm text-white font-black italic uppercase tracking-tight">
-                        {nextRace.name}
-                    </span>
-                    <span className="text-[11px] text-zinc-500 font-medium">
-                        {nextRace.date.toLocaleString(undefined, {
-                            day: 'numeric', month: 'short',
-                            hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
-                        })}
-                    </span>
-                </div>
-            )}
+                <meta name="og-title" content="F1 Insights - Clasificación"></meta>
+                <meta name="og-description" content="Visualiza la clasificación en tiempo real del campeonato del mundo. haz predicciones manuales o revisa la predicción con IA."></meta>
+                <meta name="og-type" content="website"></meta>
+            </Helmet>
+            <div className="p-6 md:p-12 w-full max-w-7xl mx-auto font-sans relative">
+                {/* Decorative background */}
+                <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Header + tab toggle */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
-                <div className="border-l-4 border-red-600 pl-4">
-                    <h1 className="text-3xl font-black uppercase tracking-tighter text-white italic">
-                        Clasificación <span className="text-red-600">Mundial</span>
-                    </h1>
-                    <p className="text-zinc-400 text-sm mt-1 font-medium">
-                        Visualiza la evolución y haz tu propia predicción del campeonato.
-                    </p>
-                </div>
+                {/* Next race subtle banner */}
+                {nextRace && (
+                    <div className="mb-6 flex items-center gap-3 bg-zinc-900/60 border border-zinc-800 rounded-lg px-4 py-2.5 w-fit">
+                        <span className="bg-red-600 w-2 h-2 rounded-full animate-pulse shrink-0"></span>
+                        <span className="text-[11px] text-zinc-400 font-bold uppercase tracking-widest">
+                            Próxima carrera
+                        </span>
+                        <span className="text-sm text-white font-black italic uppercase tracking-tight">
+                            {nextRace.name}
+                        </span>
+                        <span className="text-[11px] text-zinc-500 font-medium">
+                            {nextRace.date.toLocaleString(undefined, {
+                                day: 'numeric', month: 'short',
+                                hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
+                            })}
+                        </span>
+                    </div>
+                )}
 
-                <div className="flex bg-zinc-900 rounded-lg p-1 border border-zinc-800 shrink-0">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.key}
-                            onClick={() => setActiveTab(tab.key)}
-                            className={`px-6 py-2 rounded-md font-black uppercase tracking-widest text-xs transition-all ${
-                                activeTab === tab.key
-                                    ? 'bg-white text-black shadow-sm'
-                                    : 'bg-transparent text-zinc-500 hover:text-white'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Clasificación tab */}
-            {activeTab === 'clasificacion' && (
-                <div className="space-y-6">
-                    <RaceTimeline
-                        raceCalendar={raceCalendar}
-                        raceDates={raceDates}
-                        selectedIndex={selectedRaceIndex}
-                        onSelect={setSelectedRaceIndex}
-                        lastCompletedIndex={lastCompletedIndex}
-                        lockedFutureRaces
-                    />
-
-                    <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800 p-6 md:p-8">
-                        
-                        <TooltipProvider delayDuration={200}>
-                            <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400 mb-1">
-                                    Clasificación de pilotos
-                                </h3>
-                                
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <button 
-                                            type="button" 
-                                            className="text-yellow-500 hover:text-white transition-all duration-300 focus:outline-none mb-0.5 cursor-help"
-                                        >
-                                            <ClockAlert className="size-4" />
-                                        </button>
-                                    </TooltipTrigger>
-                                    
-                                    <TooltipContent 
-                                        side="top" 
-                                        sideOffset={10}
-                                        className="bg-zinc-950/95 backdrop-blur-xl border border-red-900/30 text-zinc-300 max-w-[280px] p-4 shadow-2xl rounded-xl z-50"
-                                    >
-                                        <div className="flex flex-col gap-2.5">
-                                            <div className="flex items-center gap-2 text-white font-bold uppercase tracking-widest text-[13px]">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
-                                                Aviso sobre Sprints
-                                            </div>
-                                            <p className="text-[14px] leading-relaxed text-zinc-400">
-                                                Los puntos de las <span className="text-zinc-200 font-semibold">carreras sprint</span> se actualizan junto con los resultados de la carrera principal del fin de semana.
-                                            </p>
-                                        </div>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </div>
-                        </TooltipProvider>
-
-                        <p className="text-[13px] text-zinc-600 mb-6">
-                            Temporada {CURRENT_YEAR}
-                            {selectedRaceIndex >= 0 && raceCalendar[selectedRaceIndex]
-                                ? ` — Acumulado hasta ${raceCalendar[selectedRaceIndex].value} (R${selectedRaceIndex + 1})`
-                                : ''}
+                {/* Header + tab toggle */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+                    <div className="border-l-4 border-red-600 pl-4">
+                        <h1 className="text-3xl font-black uppercase tracking-tighter text-white italic">
+                            Clasificación <span className="text-red-600">Mundial</span>
+                        </h1>
+                        <p className="text-zinc-400 text-sm mt-1 font-medium">
+                            Visualiza la evolución y haz tu propia predicción del campeonato.
                         </p>
+                    </div>
 
-                        <StandingsTable
-                            standings={standingsWithRacePoints}
-                            loading={loadingStandings}
-                            showRacePoints={showRacePoints}
-                        />
+                    <div className="flex bg-zinc-900 rounded-lg p-1 border border-zinc-800 shrink-0">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key)}
+                                className={`px-6 py-2 rounded-md font-black uppercase tracking-widest text-xs transition-all ${
+                                    activeTab === tab.key
+                                        ? 'bg-white text-black shadow-sm'
+                                        : 'bg-transparent text-zinc-500 hover:text-white'
+                                }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
-            )}
 
-            {/* Predicción tab */}
-            {activeTab === 'prediccion' && (
-                <PredictionMode
-                    year={CURRENT_YEAR}
-                    currentStandings={standings}
-                    raceCalendar={raceCalendar}
-                    raceDates={raceDates}
-                    lastCompletedIndex={lastCompletedIndex}
-                    sprintEvents={sprintEvents}
-                />
-            )}
-        </div>
+                {/* Clasificación tab */}
+                {activeTab === 'clasificacion' && (
+                    <div className="space-y-6">
+                        <RaceTimeline
+                            raceCalendar={raceCalendar}
+                            raceDates={raceDates}
+                            selectedIndex={selectedRaceIndex}
+                            onSelect={setSelectedRaceIndex}
+                            lastCompletedIndex={lastCompletedIndex}
+                            lockedFutureRaces
+                        />
+
+                        <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800 p-6 md:p-8">
+                            
+                            <TooltipProvider delayDuration={200}>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400 mb-1">
+                                        Clasificación de pilotos
+                                    </h3>
+                                    
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <button 
+                                                type="button" 
+                                                className="text-yellow-500 hover:text-white transition-all duration-300 focus:outline-none mb-0.5 cursor-help"
+                                            >
+                                                <ClockAlert className="size-4" />
+                                            </button>
+                                        </TooltipTrigger>
+                                        
+                                        <TooltipContent 
+                                            side="top" 
+                                            sideOffset={10}
+                                            className="bg-zinc-950/95 backdrop-blur-xl border border-red-900/30 text-zinc-300 max-w-[280px] p-4 shadow-2xl rounded-xl z-50"
+                                        >
+                                            <div className="flex flex-col gap-2.5">
+                                                <div className="flex items-center gap-2 text-white font-bold uppercase tracking-widest text-[13px]">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+                                                    Aviso sobre Sprints
+                                                </div>
+                                                <p className="text-[14px] leading-relaxed text-zinc-400">
+                                                    Los puntos de las <span className="text-zinc-200 font-semibold">carreras sprint</span> se actualizan junto con los resultados de la carrera principal del fin de semana.
+                                                </p>
+                                            </div>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
+                            </TooltipProvider>
+
+                            <p className="text-[13px] text-zinc-600 mb-6">
+                                Temporada {CURRENT_YEAR}
+                                {selectedRaceIndex >= 0 && raceCalendar[selectedRaceIndex]
+                                    ? ` — Acumulado hasta ${raceCalendar[selectedRaceIndex].value} (R${selectedRaceIndex + 1})`
+                                    : ''}
+                            </p>
+
+                            <StandingsTable
+                                standings={standingsWithRacePoints}
+                                loading={loadingStandings}
+                                showRacePoints={showRacePoints}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Predicción tab */}
+                {activeTab === 'prediccion' && (
+                    <PredictionMode
+                        year={CURRENT_YEAR}
+                        currentStandings={standings}
+                        raceCalendar={raceCalendar}
+                        raceDates={raceDates}
+                        lastCompletedIndex={lastCompletedIndex}
+                        sprintEvents={sprintEvents}
+                    />
+                )}
+            </div>
+        </>
     );
 }

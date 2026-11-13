@@ -10,6 +10,7 @@ import { fetchDriverLaps, fetchDriverLapsImage,
     fetchSeasonHeatmapData, fetchSeasonHeatmapImage } from '../service/apiService.js'
 import { ImagePreview } from '../components/ImagePreview.jsx'
 import { SeasonPointsHeatmap } from '../components/graphics/SeasonPointsHeatmap.jsx';
+import { Helmet } from 'react-helmet-async';
 
 const GraphCard = ({ title, children, onSettingsClick, onExportPython, hasParams, isSettingsOpen, loading }) => {
     return (
@@ -160,137 +161,150 @@ export const GraphicsDashboard = () => {
     };
 
     return (
-        <div className="min-h-screen p-6 md:p-12 relative">
-            {/* Decorative background */}
-            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" />
+        <>
+            <Helmet>
+                <title>F1 Insights - Gráficas</title>
+                <meta name="description" content="Configura y visualiza gráficas de rendimiento, tiempos de vuelta, resultados de clasificación y mucho más."></meta>
+                <meta name="robots" content="index, follow"></meta>
+                <meta name="theme-color" content="#030617"></meta>
+                <meta name="keywords" content="Fórmula 1, gráficas, resultados, tiempos, rendimiento, análisis de ritmo, datos, análisis"></meta>
 
-            <div className="max-w-7xl mx-auto relative">
-                <div className="mb-10 border-l-4 border-red-600 pl-4">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-                        <span className="text-red-600 text-[10px] font-bold uppercase tracking-[0.3em]">Telemetría en vivo</span>
+                <meta name="og-type" content="website"></meta>
+                <meta name="og-title" content="F1 Insights - Gráficas"></meta>
+                <meta name="og-description" content="Configura y visualiza gráficas de rendimiento, tiempos de vuelta, resultados de clasificación y mucho más."></meta>
+            </Helmet>
+            <div className="min-h-screen p-6 md:p-12 relative">
+                {/* Decorative background */}
+                <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="max-w-7xl mx-auto relative">
+                    <div className="mb-10 border-l-4 border-red-600 pl-4">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                            <span className="text-red-600 text-[10px] font-bold uppercase tracking-[0.3em]">Telemetría en vivo</span>
+                        </div>
+                        <h2 className="text-white text-4xl font-black italic uppercase tracking-tighter">
+                            Análisis de <span className="text-red-600">Datos</span>
+                        </h2>
+                        <p className="text-slate-500 text-sm mt-2 max-w-lg">
+                            Genera gráficos interactivos o exporta reportes oficiales en Python con datos reales de FastF1.
+                        </p>
                     </div>
-                    <h2 className="text-white text-4xl font-black italic uppercase tracking-tighter">
-                        Análisis de <span className="text-red-600">Datos</span>
-                    </h2>
-                    <p className="text-slate-500 text-sm mt-2 max-w-lg">
-                        Genera gráficos interactivos o exporta reportes oficiales en Python con datos reales de FastF1.
-                    </p>
+
+                    <div className="flex border-b border-slate-800 mb-10 gap-8">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat.id}
+                                onClick={() => setActiveTab(cat.id)}
+                                className={`pb-4 cursor-pointer text-sm font-bold uppercase tracking-widest transition-all relative ${
+                                    activeTab === cat.id ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+                                }`}
+                            >
+                                {cat.label}
+                                {activeTab === cat.id && (
+                                    <div className="absolute bottom-0 left-0 w-full h-1 bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="animate-fadeIn">
+                        {activeTab === 'lapTimes' && (
+                            <div className="grid grid-cols-1 gap-8">
+                                <GraphCard 
+                                    title="Análisis de ritmo (Individual)"
+                                    onSettingsClick={() => openFilters('Análisis de ritmo (Individual)', ['year', 'track', 'session', 'driver'], fetchDriverLaps)}
+                                    onExportPython = {() => handleExportPython(fetchDriverLapsImage, 'Análisis de ritmo (Individual)')}
+                                    hasParams={!!savedParams['Análisis de ritmo (Individual)']}
+                                    isSettingsOpen={isModalOpen && modalConfig.title === 'Análisis de ritmo (Individual)'}
+                                    loading={loading === 'Análisis de ritmo (Individual)'}
+                                >
+                                    {graphsData['Análisis de ritmo (Individual)'] ? (
+                                        <ScatterPlotLaps data={graphsData['Análisis de ritmo (Individual)']} driverId={savedParams['Análisis de ritmo (Individual)'].driver} />
+                                    ) : (
+                                        <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
+                                            {getGraphPlaceholder('Análisis de ritmo (Individual)', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
+                                        </p>
+                                    )}
+                                </GraphCard>
+
+                                <GraphCard
+                                    title="Distribución de tiempos por vuelta"
+                                    onSettingsClick={() => openFilters('Distribución de tiempos por vuelta', ['year', 'track', 'session', 'num_drivers'], fetchDriversLapsViolin)}
+                                    onExportPython={() => handleExportPython(fetchDriversLapsViolinImage, 'Distribución de tiempos por vuelta')}
+                                    hasParams={!!savedParams['Distribución de tiempos por vuelta']}
+                                    isSettingsOpen={isModalOpen && modalConfig.title === 'Distribución de tiempos por vuelta'}
+                                    loading={loading === 'Distribución de tiempos por vuelta'}
+                                >
+                                    {graphsData['Distribución de tiempos por vuelta'] ? (
+                                        <ViolinPlotLaps data={graphsData['Distribución de tiempos por vuelta']} />
+                                    ) : (
+                                        <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
+                                            {getGraphPlaceholder('Distribución de tiempos por vuelta', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
+                                        </p>
+                                    )}
+                                </GraphCard>
+                            </div>
+                        )} {activeTab === 'resultsAnalysis' && (
+                            <div className="grid grid-cols-1 gap-8">
+                                <GraphCard 
+                                    title="Resultados de clasificación"
+                                    onSettingsClick={() => openFilters('Resultados de clasificación', ['year', 'track'], fetchQualyOverviewData)}
+                                    onExportPython={() => handleExportPython(fetchQualyOverviewImage, 'Resultados de clasificación')}
+                                    hasParams={!!savedParams['Resultados de clasificación']}
+                                    isSettingsOpen={isModalOpen && modalConfig.title === 'Resultados de clasificación'}
+                                    loading={loading === 'Resultados de clasificación'}
+                                >
+                                    {graphsData['Resultados de clasificación'] ? (
+                                        <QualyOverview data={graphsData['Resultados de clasificación']} />
+                                    ) : (
+                                        <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
+                                            {getGraphPlaceholder('Resultados de clasificación', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
+                                        </p>
+                                    )}
+                                </GraphCard>
+                                <GraphCard
+                                    title="Mapa de calor de puntos"
+                                    onSettingsClick={() => openFilters('Mapa de calor de puntos', ['year'], fetchSeasonHeatmapData)}
+                                    onExportPython={() => handleExportPython(fetchSeasonHeatmapImage, 'Mapa de calor de puntos')}
+                                    hasParams={!!savedParams['Mapa de calor de puntos']}
+                                    isSettingsOpen={isModalOpen && modalConfig.title === 'Mapa de calor de puntos'}
+                                    loading={loading === 'Mapa de calor de puntos'}
+                                >
+                                    {graphsData['Mapa de calor de puntos'] ? (
+                                        <SeasonPointsHeatmap data={graphsData['Mapa de calor de puntos']} />
+                                    ) : (
+                                        <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
+                                            {getGraphPlaceholder('Mapa de calor de puntos', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
+                                        </p>
+                                    )}
+                                </GraphCard>
+
+                            </div>
+                        )}
+
+
+                    </div>
                 </div>
 
-                <div className="flex border-b border-slate-800 mb-10 gap-8">
-                    {categories.map((cat) => (
-                        <button
-                            key={cat.id}
-                            onClick={() => setActiveTab(cat.id)}
-                            className={`pb-4 cursor-pointer text-sm font-bold uppercase tracking-widest transition-all relative ${
-                                activeTab === cat.id ? 'text-white' : 'text-slate-500 hover:text-slate-300'
-                            }`}
-                        >
-                            {cat.label}
-                            {activeTab === cat.id && (
-                                <div className="absolute bottom-0 left-0 w-full h-1 bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" />
-                            )}
-                        </button>
-                    ))}
-                </div>
+                <ParametersFilter 
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    config={modalConfig}
+                    tempParams={tempParams}
+                    onInputChange={(name, val) => setTempParams(prev => ({ ...prev, [name]: val }))}
+                    onSave={handleSaveConfig}
+                />
 
-                <div className="animate-fadeIn">
-                    {activeTab === 'lapTimes' && (
-                        <div className="grid grid-cols-1 gap-8">
-                            <GraphCard 
-                                title="Análisis de ritmo (Individual)"
-                                onSettingsClick={() => openFilters('Análisis de ritmo (Individual)', ['year', 'track', 'session', 'driver'], fetchDriverLaps)}
-                                onExportPython = {() => handleExportPython(fetchDriverLapsImage, 'Análisis de ritmo (Individual)')}
-                                hasParams={!!savedParams['Análisis de ritmo (Individual)']}
-                                isSettingsOpen={isModalOpen && modalConfig.title === 'Análisis de ritmo (Individual)'}
-                                loading={loading === 'Análisis de ritmo (Individual)'}
-                            >
-                                {graphsData['Análisis de ritmo (Individual)'] ? (
-                                    <ScatterPlotLaps data={graphsData['Análisis de ritmo (Individual)']} driverId={savedParams['Análisis de ritmo (Individual)'].driver} />
-                                ) : (
-                                    <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
-                                        {getGraphPlaceholder('Análisis de ritmo (Individual)', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
-                                    </p>
-                                )}
-                            </GraphCard>
-
-                            <GraphCard
-                                title="Distribución de tiempos por vuelta"
-                                onSettingsClick={() => openFilters('Distribución de tiempos por vuelta', ['year', 'track', 'session', 'num_drivers'], fetchDriversLapsViolin)}
-                                onExportPython={() => handleExportPython(fetchDriversLapsViolinImage, 'Distribución de tiempos por vuelta')}
-                                hasParams={!!savedParams['Distribución de tiempos por vuelta']}
-                                isSettingsOpen={isModalOpen && modalConfig.title === 'Distribución de tiempos por vuelta'}
-                                loading={loading === 'Distribución de tiempos por vuelta'}
-                            >
-                                {graphsData['Distribución de tiempos por vuelta'] ? (
-                                    <ViolinPlotLaps data={graphsData['Distribución de tiempos por vuelta']} />
-                                ) : (
-                                    <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
-                                        {getGraphPlaceholder('Distribución de tiempos por vuelta', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
-                                    </p>
-                                )}
-                            </GraphCard>
-                        </div>
-                    )} {activeTab === 'resultsAnalysis' && (
-                        <div className="grid grid-cols-1 gap-8">
-                            <GraphCard 
-                                title="Resultados de clasificación"
-                                onSettingsClick={() => openFilters('Resultados de clasificación', ['year', 'track'], fetchQualyOverviewData)}
-                                onExportPython={() => handleExportPython(fetchQualyOverviewImage, 'Resultados de clasificación')}
-                                hasParams={!!savedParams['Resultados de clasificación']}
-                                isSettingsOpen={isModalOpen && modalConfig.title === 'Resultados de clasificación'}
-                                loading={loading === 'Resultados de clasificación'}
-                            >
-                                {graphsData['Resultados de clasificación'] ? (
-                                    <QualyOverview data={graphsData['Resultados de clasificación']} />
-                                ) : (
-                                    <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
-                                        {getGraphPlaceholder('Resultados de clasificación', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
-                                    </p>
-                                )}
-                            </GraphCard>
-                            <GraphCard
-                                title="Mapa de calor de puntos"
-                                onSettingsClick={() => openFilters('Mapa de calor de puntos', ['year'], fetchSeasonHeatmapData)}
-                                onExportPython={() => handleExportPython(fetchSeasonHeatmapImage, 'Mapa de calor de puntos')}
-                                hasParams={!!savedParams['Mapa de calor de puntos']}
-                                isSettingsOpen={isModalOpen && modalConfig.title === 'Mapa de calor de puntos'}
-                                loading={loading === 'Mapa de calor de puntos'}
-                            >
-                                {graphsData['Mapa de calor de puntos'] ? (
-                                    <SeasonPointsHeatmap data={graphsData['Mapa de calor de puntos']} />
-                                ) : (
-                                    <p className="text-slate-600 text-sm italic text-center" aria-live="polite">
-                                        {getGraphPlaceholder('Mapa de calor de puntos', 'Para empezar, pulsa «Configurar» en la cabecera de esta tarjeta.')}
-                                    </p>
-                                )}
-                            </GraphCard>
-
-                        </div>
-                    )}
-
-
-                </div>
+                <ImagePreview 
+                    isOpen={imageShown}
+                    onClose={handleClosePreview}
+                    imageSrc={pythonImage}
+                    fileName={`f1_stats_report_${previewTitle}`}
+                    title={previewTitle}
+                />
             </div>
-
-            <ParametersFilter 
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                config={modalConfig}
-                tempParams={tempParams}
-                onInputChange={(name, val) => setTempParams(prev => ({ ...prev, [name]: val }))}
-                onSave={handleSaveConfig}
-            />
-
-            <ImagePreview 
-                isOpen={imageShown}
-                onClose={handleClosePreview}
-                imageSrc={pythonImage}
-                fileName={`f1_stats_report_${previewTitle}`}
-                title={previewTitle}
-            />
-        </div>
+        </>
     );
 };
