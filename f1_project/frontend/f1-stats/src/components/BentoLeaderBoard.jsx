@@ -37,15 +37,15 @@ export default function BentoLeaderboard() {
     }, []);
 
     return (
-        <div className="bg-[#050505] px-6 py-20 pb-32">
+        <div className="bg-transparent px-6 py-20 pb-32">
             <div className="max-w-7xl mx-auto">
-                <div className="flex items-end justify-between mb-10 border-b border-zinc-800/50 pb-6">
+                <div className="flex items-end justify-between mb-10 border-b border-[#f2efe8]/20 pb-6">
                     <div>
                         <h3 className="text-3xl font-black italic uppercase tracking-tighter text-white flex items-center gap-4">
                             <span className="w-2 h-8 bg-red-600 block"></span>
                             Clasificación mundial de pilotos
                         </h3>
-                        <p className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mt-2 ml-6">Top 3 pilotos</p>
+                        <p className="inline-flex rounded-full bg-[#f2efe8] px-3 py-1 text-zinc-950 text-[10px] font-bold uppercase tracking-[0.2em] mt-3 ml-6">Top 3 pilotos</p>
                     </div>
 
                     <Link to="/leaderboard">
@@ -58,7 +58,7 @@ export default function BentoLeaderboard() {
                 {isLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-40 bg-zinc-900/50 rounded-2xl border border-zinc-800 animate-pulse"></div>
+                            <div key={i} className="h-40 bg-[#f2efe8]/5 rounded-2xl border border-[#f2efe8]/15 animate-pulse"></div>
                         ))}
                     </div>
                 ) : (
@@ -79,7 +79,7 @@ export default function BentoLeaderboard() {
                                     </div>
                                     <div className="relative z-10 flex justify-between items-start">
                                         <div className="flex flex-col">
-                                            <span className="text-white/40 font-mono font-bold text-sm mb-2">{posString}</span>
+                                            <span className="text-[#f2efe8]/60 font-mono font-bold text-sm mb-2">{posString}</span>
                                             <h4 className={`text-xl font-black uppercase italic text-white transition-colors ${teamStyle.textHover}`}>
                                                 {driver.driver || driver.name}
                                             </h4>
@@ -91,7 +91,7 @@ export default function BentoLeaderboard() {
                                             <span className="text-3xl font-black italic text-white block leading-none">
                                                 {Math.round(driver.points)}
                                             </span>
-                                            <span className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Puntos</span>
+                                            <span className="text-[#c9c1b5] text-[9px] font-bold uppercase tracking-widest">Puntos</span>
                                         </div>
                                     </div>
                                 </Motion.div>
