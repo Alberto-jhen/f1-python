@@ -5,6 +5,7 @@ import { Header } from '@/components/Layout/Header.jsx';
 import { supabase } from '@/lib/supabase.js';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 export function Login() {
   const navigate = useNavigate();
@@ -31,6 +32,17 @@ export function Login() {
 
   return (
     <>
+      <Helmet>
+        <title>F1 Insights - Login</title>
+        <meta name="description" content="Inicia sesión en F1 Insights con tu cuenta"></meta>
+        <meta name="theme-color" content="#050505"></meta>
+        <meta name="robots" content="index, follow"></meta>
+        <meta name="keywords" content="Inicio sesión, cuenta, login, formulario"></meta>
+
+        <meta name="og-type" content="website"></meta>
+        <meta name="og-title" content="F1 Insights - Login"></meta>
+        <meta name="og-description" content="Inicia sesión en F1 Insights con tu cuenta"></meta>
+      </Helmet>
       <Header />
       <div className='fixed inset-0 bg-slate-950 z-0' />
       <WavyBackground
