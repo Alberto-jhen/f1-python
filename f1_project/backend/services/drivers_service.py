@@ -6,19 +6,6 @@ from datetime import datetime
 
 openF1_url = os.getenv("OPENF1_URL")
 
-def _normalize_team_name(team_name):
-    if not team_name:
-        return None
-
-    normalized = " ".join(str(team_name).casefold().split())
-    aliases = {
-        "red bull": "red bull racing",
-        "alpine f1 team": "alpine",
-        "rb f1 team": "racing bulls",
-        "cadillac f1 team": "cadillac",
-    }
-    return aliases.get(normalized, normalized)
-
 
 def _normalize_team_color(team_color):
     if team_color is None:
@@ -29,32 +16,6 @@ def _normalize_team_color(team_color):
         return None
     return normalized.upper()
 
-
-def _get_openf1_latest_team_colors():
-    base_url = (openF1_url or "https://api.openf1.org/v1").rstrip("/")
-    response = requests.get(
-        f"{base_url}/drivers",
-        params={"session_key": "latest"},
-        timeout=5,
-    )
-    response.raise_for_status()
-
-    team_colors = {"by_driver_number": {}, "by_team": {}}
-    for driver in response.json():
-        color = _normalize_team_color(driver.get("team_colour"))
-        if color is None:
-            continue
-        team_name = _normalize_team_name(driver.get("team_name"))
-        if team_name:
-            team_colors["by_team"].setdefault(team_name, color)
-
-        try:
-            driver_number = int(driver["driver_number"])
-        except (KeyError, TypeError, ValueError):
-            continue
-        team_colors["by_driver_number"][driver_number] = color
-
-    return team_colors
 
 
 def _resolve_latest_event(year: int):
@@ -134,15 +95,6 @@ def get_season_driver_full_names(year: int, event_name: str, session_type: str):
             'FullName', 'Abbreviation', 'DriverNumber', 
             'TeamName', 'TeamColor', 'CountryCode', 'Points'
         ]].drop_duplicates('FullName')
-        openf1_team_colors = {}
-        if year == 2026 and any(
-            _normalize_team_color(team_color) is None
-            for team_color in results['TeamColor']
-        ):
-            try:
-                openf1_team_colors = _get_openf1_latest_team_colors()
-            except Exception as e:
-                print(f"Error obteniendo colores de equipo desde OpenF1: {e}")
 
         drivers_list = []
         for _, row in results.iterrows():
@@ -150,11 +102,6 @@ def get_season_driver_full_names(year: int, event_name: str, session_type: str):
             raw_country = row['CountryCode']
             driver_number = int(row['DriverNumber'])
             team_color = _normalize_team_color(row['TeamColor'])
-            if team_color is None and year == 2026:
-                team_color = (
-                    openf1_team_colors.get("by_driver_number", {}).get(driver_number)
-                    or openf1_team_colors.get("by_team", {}).get(_normalize_team_name(row['TeamName']))
-                )
 
             if not raw_country or str(raw_country).strip() == "" or str(raw_country).lower() == 'nan':
                 country = COUNTRY_FIX.get(abbr, 'N/A')

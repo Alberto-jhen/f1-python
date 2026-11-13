@@ -3,18 +3,7 @@ import pandas as pd
 from services import drivers_service
 
 
-class FakeResponse:
-    def __init__(self, data):
-        self.data = data
-
-    def raise_for_status(self):
-        pass
-
-    def json(self):
-        return self.data
-
-
-def test_uses_openf1_team_colors_when_fastf1_colors_are_missing(monkeypatch):
+def test_missing_fastf1_team_colors_do_not_trigger_openf1_lookup(monkeypatch):
     results = pd.DataFrame([
         {
             "FullName": "Lando Norris",
@@ -52,6 +41,9 @@ def test_uses_openf1_team_colors_when_fastf1_colors_are_missing(monkeypatch):
         def load(self, **kwargs):
             pass
 
+    def fail_if_openf1_is_called(*_args, **_kwargs):
+        raise AssertionError("Driver list fallback must not call OpenF1")
+
     monkeypatch.setattr(
         drivers_service.fastf1,
         "get_session",
@@ -60,16 +52,11 @@ def test_uses_openf1_team_colors_when_fastf1_colors_are_missing(monkeypatch):
     monkeypatch.setattr(
         drivers_service.requests,
         "get",
-        lambda *_args, **_kwargs: FakeResponse([
-            {"driver_number": 1, "team_name": "McLaren", "team_colour": "F47600"},
-            {"driver_number": 44, "team_name": "Ferrari", "team_colour": "FFFFFF"},
-            {"driver_number": 87, "team_name": "Haas F1 Team", "team_colour": "9C9FA2"},
-            {"driver_number": 50, "team_name": None, "team_colour": None},
-        ]),
+        fail_if_openf1_is_called,
     )
 
     drivers = drivers_service.get_season_driver_full_names(2026, "Australian Grand Prix", "R")
 
-    assert drivers[0]["team_color"] == "F47600"
+    assert drivers[0]["team_color"] == ""
     assert drivers[1]["team_color"] == "DC0000"
-    assert drivers[2]["team_color"] == "9C9FA2"
+    assert drivers[2]["team_color"] == ""
